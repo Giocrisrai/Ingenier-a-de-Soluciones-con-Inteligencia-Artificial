@@ -58,4 +58,5 @@ agente = initialize_agent(
 
 if __name__ == "__main__":
     print("Planificación y ejecución con LangChain:")
- 
+    resultado = agente.run("¿Cuánto es 25 + 17?")
+    print(resultado)
