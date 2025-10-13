@@ -42,7 +42,7 @@ class Plan:
     """Plan completo"""
     goal: str
     steps: List[PlanStep]
-    created_at: float
+    created_at: float = None
     estimated_total_duration: float = 0.0
     status: str = "created"
     

@@ -49,10 +49,12 @@ redactor = Agent(
 # Tareas
 tarea_investigar = Task(
     description="Busca cuál es la capital de Francia",
+    expected_output="El nombre de la capital de Francia",
     agent=investigador
 )
 tarea_redactar = Task(
     description="Redacta una respuesta usando la información encontrada",
+    expected_output="Una respuesta clara y breve sobre la capital de Francia",
     agent=redactor,
     context=[tarea_investigar]
 )
