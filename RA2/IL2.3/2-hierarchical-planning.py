@@ -19,8 +19,8 @@ se divide en: diseñar, implementar, probar, desplegar.
 
 # Requiere: pip install langchain langchain-openai openai python-dotenv
 from langchain_openai import ChatOpenAI
-from langchain.agents import initialize_agent, Tool, AgentType
-from langchain.prompts import PromptTemplate
+from langchain.agents import create_react_agent, AgentExecutor, Tool
+from langchain import hub
 from typing import List, Dict, Any
 import os
 import json
@@ -103,7 +103,11 @@ class HierarchicalPlanner:
         
         try:
             response = self.llm.invoke(decomposition_prompt)
-            hierarchy = json.loads(response.content)
+            import re as _re
+            _raw = response.content.strip()
+            _match = _re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', _raw)
+            _cleaned = _match.group(1) if _match else _raw
+            hierarchy = json.loads(_cleaned)
             
             # Mostrar la jerarquía
             for level in self.levels:
@@ -265,16 +269,13 @@ def demo_with_agent():
     )
     
     # Crear agente
-    agent = initialize_agent(
-        tools=[planning_tool],
-        llm=llm,
-        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-        verbose=True
-    )
-    
+    prompt = hub.pull("hwchase17/react")
+    agent = create_react_agent(llm, tools=[planning_tool], prompt=prompt)
+    agent_executor = AgentExecutor(agent=agent, tools=[planning_tool], verbose=True)
+
     # Ejecutar agente
     print("\n🤖 Agente trabajando en planificación...\n")
-    resultado = agent.run("Crea un plan jerárquico para organizar un evento académico de IA")
+    resultado = agent_executor.invoke({"input": "Crea un plan jerárquico para organizar un evento académico de IA"})["output"]
     print(f"\n📋 Resultado del Agente:\n{resultado}")
 
 

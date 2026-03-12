@@ -26,7 +26,7 @@ import os
 try:
     from dotenv import load_dotenv
     load_dotenv()
-except:
+except ImportError:
     pass
 
 print("✅ Módulo de negociación cargado\n")

@@ -6,7 +6,8 @@ Ejemplo de cómo un agente LangChain puede planificar y ejecutar pasos simples u
 
 # Requiere: pip install langchain langchain-openai openai python-dotenv
 from langchain_openai import ChatOpenAI
-from langchain.agents import initialize_agent, Tool, AgentType
+from langchain.agents import create_react_agent, AgentExecutor, Tool
+from langchain import hub
 import os
 
 # Load environment variables from .env file
@@ -47,13 +48,10 @@ herramienta_cafe = Tool(
 )
 
 # Inicializa el agente
-agente = initialize_agent(
-    tools=[herramienta_cafe],
-    llm=llm,
-    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    verbose=True
-)
+prompt = hub.pull("hwchase17/react")
+agent = create_react_agent(llm, tools=[herramienta_cafe], prompt=prompt)
+agente = AgentExecutor(agent=agent, tools=[herramienta_cafe], verbose=True)
 
 if __name__ == "__main__":
     print("Planificación con LangChain:")
-    print(agente.run("¿Cuáles son los pasos para preparar café?")) 
+    print(agente.invoke({"input": "¿Cuáles son los pasos para preparar café?"})["output"])

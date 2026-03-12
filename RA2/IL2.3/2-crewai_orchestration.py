@@ -27,7 +27,7 @@ if not github_token:
 
 # Configurar variables de entorno para CrewAI (usa formato OpenAI)
 os.environ["OPENAI_API_KEY"] = github_token
-os.environ["OPENAI_API_BASE"] = github_base_url
+os.environ["OPENAI_BASE_URL"] = github_base_url
 os.environ["OPENAI_MODEL_NAME"] = "gpt-4o"
 
 print("✅ Variables de entorno configuradas para CrewAI")

@@ -28,7 +28,7 @@ from collections import defaultdict
 try:
     from dotenv import load_dotenv
     load_dotenv()
-except:
+except ImportError:
     pass
 
 print("✅ Módulo de coordinación multi-agente cargado\n")

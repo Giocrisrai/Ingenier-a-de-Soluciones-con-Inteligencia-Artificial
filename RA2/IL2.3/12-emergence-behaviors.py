@@ -27,7 +27,7 @@ import time
 try:
     from dotenv import load_dotenv
     load_dotenv()
-except:
+except ImportError:
     pass
 
 print("✅ Módulo de comportamientos emergentes cargado\n")
@@ -411,7 +411,7 @@ def demo_ant_foraging():
         simulation.run_iteration()
         
         if i % 5 == 0:
-            analysis = simulation.analyze_foraging_behavior()
+            analysis = simulation.analyze_emergence()
             print(f"\nIteración {i+1}:")
             print(f"   Hormigas con comida: {analysis['ants_with_food']}")
             print(f"   Rastros de feromona: {analysis['pheromone_trails']}")

@@ -30,7 +30,7 @@ github_base_url = os.getenv("GITHUB_BASE_URL", "https://models.inference.ai.azur
 
 if github_token:
     os.environ["OPENAI_API_KEY"] = github_token
-    os.environ["OPENAI_API_BASE"] = github_base_url
+    os.environ["OPENAI_BASE_URL"] = github_base_url
 else:
     st.error("❌ GITHUB_TOKEN environment variable is not set. Please check your .env file.")
     st.info("💡 Make sure your .env file contains: GITHUB_TOKEN=your_token_here")

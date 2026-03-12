@@ -44,15 +44,16 @@ if not github_token:
     print("💡 Tu archivo .env debe contener: GITHUB_TOKEN=tu_token_aqui")
     exit(1)
 
-# Configurar LLM
-llm = ChatOpenAI(
-    model="gpt-4o",
-    base_url=github_base_url,
-    api_key=github_token,
-    temperature=0.5
-)
+# Nota: El LLM se configura como referencia para extensiones futuras,
+# pero no se usa en esta demostración standalone de gestión de workflows.
+# llm = ChatOpenAI(
+#     model="gpt-4o",
+#     base_url=github_base_url,
+#     api_key=github_token,
+#     temperature=0.5
+# )
 
-print("✅ LLM configurado correctamente\n")
+print("✅ Módulo de gestión de workflows cargado\n")
 
 
 class TaskStatus(Enum):

@@ -41,15 +41,16 @@ if not github_token:
     print("💡 Tu archivo .env debe contener: GITHUB_TOKEN=tu_token_aqui")
     exit(1)
 
-# Configurar LLM
-llm = ChatOpenAI(
-    model="gpt-4o",
-    base_url=github_base_url,
-    api_key=github_token,
-    temperature=0.7
-)
+# Nota: El LLM se configura como referencia para extensiones futuras,
+# pero no se usa en esta demostración standalone de planificación reactiva.
+# llm = ChatOpenAI(
+#     model="gpt-4o",
+#     base_url=github_base_url,
+#     api_key=github_token,
+#     temperature=0.7
+# )
 
-print("✅ LLM configurado correctamente")
+print("✅ Módulo de planificación reactiva cargado")
 
 
 class ReactiveAgent:

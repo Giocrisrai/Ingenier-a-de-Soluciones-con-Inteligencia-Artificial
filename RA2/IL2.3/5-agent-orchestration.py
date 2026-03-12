@@ -19,7 +19,6 @@ para ventas, otro para soporte técnico, otro para análisis de datos.
 
 # Requiere: pip install langchain langchain-openai openai python-dotenv
 from langchain_openai import ChatOpenAI
-from langchain.agents import Tool, AgentType, initialize_agent
 from langchain.prompts import PromptTemplate
 from typing import Dict, List, Any
 import os
