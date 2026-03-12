@@ -2,13 +2,9 @@
 
 Este repositorio contiene todos los materiales, ejemplos y prácticas del curso **Ingeniería de Soluciones con Inteligencia Artificial**. El curso está organizado en tres grandes módulos (RA), cada uno con submódulos (IL) y ejemplos prácticos en Python y Jupyter.
 
-# IMPORTANTE
-Langchain liberó su versión 1.0 oficialmente (Link: https://github.com/davila7/Ingenier-a-de-Soluciones-con-Inteligencia-Artificial) 
-Posiblemente algunos bloques de código queden deprecados. Se estará haciendo la mantención del código, pero te recomiendo que revises que las nuevas características de la librería estén utilizando la versión correspondiente.
-
 ---
 
-## 📚 Descripción General
+## Descripción General
 
 El curso cubre desde los fundamentos de la IA generativa y el prompt engineering, hasta el desarrollo de agentes inteligentes y las mejores prácticas para llevar soluciones a producción, incluyendo observabilidad, seguridad y ética.
 
@@ -18,96 +14,182 @@ El curso cubre desde los fundamentos de la IA generativa y el prompt engineering
 
 ---
 
-## 🏗️ Estructura del Proyecto
+## Inicio Rápido (Setup para Estudiantes)
+
+### 1. Hacer Fork y Clonar
+
+```bash
+# 1. Hacer fork desde GitHub (botón "Fork" en la esquina superior derecha)
+# 2. Clonar tu fork
+git clone https://github.com/TU-USUARIO/Ingenier-a-de-Soluciones-con-Inteligencia-Artificial.git
+cd Ingenier-a-de-Soluciones-con-Inteligencia-Artificial
+```
+
+### 2. Crear Entorno Virtual
+
+```bash
+# Crear entorno virtual
+python3 -m venv .venv
+
+# Activar entorno virtual
+# macOS/Linux:
+source .venv/bin/activate
+# Windows:
+.venv\Scripts\activate
+```
+
+### 3. Instalar Dependencias
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configurar Variables de Entorno
+
+```bash
+# Copiar el archivo de ejemplo
+cp .env.example .env
+```
+
+Edita el archivo `.env` con tus credenciales:
+
+```env
+OPENAI_BASE_URL="https://models.inference.ai.azure.com"
+GITHUB_BASE_URL="https://models.inference.ai.azure.com"
+OPENAI_EMBEDDINGS_URL="https://models.github.ai/inference"
+GITHUB_TOKEN="tu_github_token_aqui"
+LANGSMITH_TRACING="true"
+LANGSMITH_API_KEY="tu_langsmith_api_key_aqui"
+LANGSMITH_PROJECT="ingenieria_soluciones_con_ia"
+```
+
+**Cómo obtener tus tokens:**
+- **GITHUB_TOKEN**: Ve a [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens) y crea un token con permisos de lectura. Asegúrate de tener acceso a [GitHub Models](https://github.com/marketplace/models).
+- **LANGSMITH_API_KEY**: Crea una cuenta en [LangSmith](https://smith.langchain.com/) y genera una API key desde Settings.
+
+> **IMPORTANTE:** Nunca subas tu archivo `.env` al repositorio. Ya está incluido en `.gitignore`.
+
+### 5. Ejecutar Jupyter
+
+```bash
+jupyter lab
+```
+
+---
+
+## Estructura del Proyecto
 
 ```
 RA1/  # Fundamentos de IA Generativa y Prompt Engineering
-  IL1.1/  # Introducción a LLMs y APIs
-  IL1.2/  # Técnicas de prompting
-  IL1.3/  # Infraestructura RAG
-  IL1.4/  # Evaluación y optimización
+  IL1.1/  # Introducción a LLMs y conexión con APIs
+  IL1.2/  # Técnicas de prompting (zero-shot, few-shot, chain-of-thought)
+  IL1.3/  # Infraestructura RAG (Retrieval-Augmented Generation)
+  IL1.4/  # Evaluación y optimización de LLMs
 
-RA2/  # Desarrollo de Agentes Inteligentes
+RA2/  # Desarrollo de Agentes Inteligentes con LLM
   IL2.1/  # Arquitectura y frameworks (LangChain, CrewAI)
-  IL2.2/  # Memoria y herramientas externas
-  IL2.3/  # Planificación y orquestación
-  IL2.4/  # Documentación técnica y arquitectura
+  IL2.2/  # Memoria y herramientas externas (MCP)
+  IL2.3/  # Planificación y orquestación de agentes
+  IL2.4/  # Documentación técnica y diseño de arquitectura
 
-RA3/  # Observabilidad, Seguridad y Ética
-  IL3.1/  # Observabilidad y métricas
-  IL3.2/  # Trazabilidad y logs
-  IL3.3/  # Seguridad y ética
+RA3/  # Observabilidad, Seguridad y Ética en Agentes IA
+  IL3.1/  # Herramientas de observabilidad y métricas
+  IL3.2/  # Trazabilidad y procesamiento de logs
+  IL3.3/  # Protocolos de seguridad y ética
   IL3.4/  # Escalabilidad y sostenibilidad
 ```
 
-Cada subcarpeta IL contiene ejemplos en Python (`.py`), notebooks (`.ipynb`) o guías (`.md`).
+Cada subcarpeta IL contiene:
+- **Notebooks (`.ipynb`)**: Prácticas guiadas paso a paso
+- **Scripts Python (`.py`)**: Ejemplos ejecutables
+- **Guías (`.md`)**: Teoría, patrones y mejores prácticas
+- **README.md**: Objetivo y contexto de cada módulo
 
 ---
 
-## 🚦 ¿Cómo usar este repositorio?
+## Tecnologías y Librerías Principales
 
-1. **Lee los README.md** de cada carpeta para entender el objetivo de cada módulo.
-2. **Ejecuta los ejemplos Python** en tu entorno local (requiere Python 3.8+ y, para algunos ejemplos, instalar dependencias como `langchain`, `crewai`, `openai`).
-3. **Configura tus variables de entorno** si usas APIs (ver sección de variables en este README).
-4. **Explora los notebooks** para prácticas guiadas y experimentos.
-5. **Consulta los archivos `.md`** para teoría, mejores prácticas y requisitos de cada entrega.
-
----
-
-## ⚙️ Requisitos y dependencias
-
-- Python 3.8+
-- Jupyter Notebook (opcional, para `.ipynb`)
-- Instalar dependencias según el módulo:
-  - `pip install langchain openai crewai` (para agentes y ejemplos avanzados)
-  - Otros: `pandas`, `requests`, etc.
-
-### Variables de entorno recomendadas
-- `OPENAI_API_KEY` (para ejemplos con OpenAI/LangChain)
-- `GITHUB_TOKEN` (para ejemplos con GitHub API)
+| Librería | Uso |
+|----------|-----|
+| `openai` | Cliente para APIs de modelos de lenguaje |
+| `langchain` | Framework para construir aplicaciones con LLMs |
+| `langchain-openai` | Integración LangChain con OpenAI |
+| `langgraph` | Grafos de estado para agentes |
+| `crewai` | Orquestación de sistemas multi-agente |
+| `faiss-cpu` | Base de datos vectorial para RAG |
+| `langsmith` | Observabilidad y evaluación de LLMs |
+| `streamlit` | Interfaces web para demos |
+| `pandas` / `numpy` | Procesamiento y análisis de datos |
+| `matplotlib` / `plotly` | Visualización de datos |
 
 ---
 
-## 🎥 Videotutoriales del Curso
+## Navegación Recomendada
 
-Para un aprendizaje más visual, puedes seguir la lista de reproducción completa del curso en YouTube:
+1. **Empieza por RA1** si eres nuevo en IA generativa y prompting
+2. **RA2** para aprender a construir agentes inteligentes
+3. **RA3** para llevar tus agentes a producción
 
-- [**Ver la lista de reproducción completa en YouTube**](https://www.youtube.com/playlist?list=PL2gz3vdpKdfVHQqH39oPu4mxLrmAUd2eX)
-
----
-
-## 🧭 Navegación recomendada
-
-- **Empieza por RA1** si eres nuevo en IA generativa y prompting.
-- **RA2** es ideal para aprender a construir agentes inteligentes y documentar soluciones.
-- **RA3** te prepara para llevar tus agentes a producción, monitorear, asegurar y escalar.
-- Cada IL tiene ejemplos autocontenidos y README propio.
+Cada IL tiene ejemplos autocontenidos y README propio con explicaciones detalladas.
 
 ---
 
-## 📑 Evaluaciones y entregables
+## Videotutoriales del Curso
 
-- Quizzes teóricos en cada RA
-- Proyectos prácticos y presentaciones
-- Proyecto final transversal (40% de la nota)
+Para un aprendizaje más visual, sigue la lista de reproducción completa:
+
+[**Ver playlist en YouTube**](https://www.youtube.com/playlist?list=PL2gz3vdpKdfVHQqH39oPu4mxLrmAUd2eX)
 
 ---
 
-## 📖 Recursos adicionales
+## Evaluaciones y Entregables
+
+| Tipo | Descripción | Peso |
+|------|-------------|------|
+| Quizzes | Evaluaciones formativas teóricas (1 por RA) | Variable |
+| Proyectos Parciales | Proyectos prácticos con presentación (1 por RA) | Variable |
+| Proyecto Final | Evaluación transversal integrando los 3 RA | 40% |
+
+Los proyectos se desarrollan en parejas con presentación individual.
+
+---
+
+## Solución de Problemas Comunes
+
+### Error de importación de módulos
+```bash
+# Asegúrate de tener el entorno virtual activado
+source .venv/bin/activate  # macOS/Linux
+pip install -r requirements.txt
+```
+
+### Error de API key
+```bash
+# Verifica que tu .env tenga las credenciales correctas
+cat .env  # revisa que no estén vacías
+```
+
+### Problemas con Jupyter kernel
+```bash
+# Registrar el kernel del entorno virtual
+python -m ipykernel install --user --name=curso-ia --display-name="Curso IA"
+```
+
+---
+
+## Recursos Adicionales
 
 - [LangChain Docs](https://python.langchain.com/)
 - [CrewAI Docs](https://docs.crewai.com/)
 - [OpenAI API](https://platform.openai.com/docs/)
+- [LangSmith Docs](https://docs.smith.langchain.com/)
+- [GitHub Models](https://github.com/marketplace/models)
 - [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 
 ---
 
-## 📝 Sobre este repositorio
+## Contribuciones
 
-- Inspirado en buenas prácticas de ingeniería y educación en IA.
-- Estructura y progresión pensadas para aprendizaje autónomo y colaborativo.
-- Para dudas, sugerencias o mejoras, abre un issue o pull request.
+Para dudas, sugerencias o mejoras, abre un issue o pull request.
 
----
-
-¡Explora, experimenta y aprende a construir soluciones de IA listas para producción!
+Repositorio original del curso: [davila7/Ingenier-a-de-Soluciones-con-Inteligencia-Artificial](https://github.com/davila7/Ingenier-a-de-Soluciones-con-Inteligencia-Artificial)
