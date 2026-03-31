@@ -1,5 +1,6 @@
 # Ingeniería de Soluciones con Inteligencia Artificial
-# Dependencias del curso
+# Dependencias del curso (mismas restricciones que pyproject.toml).
+# Instalación reproducible con versiones fijadas: usar `uv sync` (ver README).
 
 # --- LLMs y APIs ---
 openai>=1.0.0

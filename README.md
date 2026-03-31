@@ -25,26 +25,32 @@ git clone https://github.com/TU-USUARIO/Ingenier-a-de-Soluciones-con-Inteligenci
 cd Ingenier-a-de-Soluciones-con-Inteligencia-Artificial
 ```
 
-### 2. Crear Entorno Virtual
+### 2. Entorno virtual e instalar dependencias
+
+Las dependencias están declaradas en `pyproject.toml`. El archivo `uv.lock` fija versiones reproducibles cuando usas **uv**.
+
+#### Opción recomendada: [uv](https://docs.astral.sh/uv/)
+
+Instala uv si aún no lo tienes (por ejemplo en macOS/Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`).
 
 ```bash
-# Crear entorno virtual
-python3 -m venv .venv
-
-# Activar entorno virtual
-# macOS/Linux:
+uv sync
 source .venv/bin/activate
-# Windows:
-.venv\Scripts\activate
+# Windows: .venv\Scripts\activate
 ```
 
-### 3. Instalar Dependencias
+`uv sync` crea el entorno `.venv` e instala todo según el lockfile. Para añadir una dependencia más adelante: `uv add nombre-paquete` y vuelve a commitear `pyproject.toml` y `uv.lock`.
+
+#### Opción clásica: venv y pip
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
+# Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Configurar Variables de Entorno
+### 3. Configurar Variables de Entorno
 
 ```bash
 # Copiar el archivo de ejemplo
@@ -69,7 +75,7 @@ LANGSMITH_PROJECT="ingenieria_soluciones_con_ia"
 
 > **IMPORTANTE:** Nunca subas tu archivo `.env` al repositorio. Ya está incluido en `.gitignore`.
 
-### 5. Ejecutar Jupyter
+### 4. Ejecutar Jupyter
 
 ```bash
 jupyter lab
