@@ -39,7 +39,13 @@ source .venv/bin/activate
 # Windows: .venv\Scripts\activate
 ```
 
-`uv sync` crea el entorno `.venv` e instala todo según el lockfile. Para añadir una dependencia más adelante: `uv add nombre-paquete` y vuelve a commitear `pyproject.toml` y `uv.lock`.
+`uv sync` crea el entorno `.venv` e instala todo según el lockfile. Para comprobar que las librerías importan bien:
+
+```bash
+uv run python scripts/verify_env.py
+```
+
+Para añadir una dependencia más adelante: `uv add nombre-paquete` y vuelve a commitear `pyproject.toml` y `uv.lock`.
 
 #### Opción clásica: venv y pip
 
@@ -77,8 +83,22 @@ LANGSMITH_PROJECT="ingenieria_soluciones_con_ia"
 
 ### 4. Ejecutar Jupyter
 
+Con el entorno activado:
+
 ```bash
 jupyter lab
+```
+
+O sin activar el entorno (usa el `.venv` del proyecto):
+
+```bash
+uv run jupyter lab
+```
+
+Opcional: registrar el kernel de este entorno en Jupyter para elegirlo en la interfaz:
+
+```bash
+uv run python -m ipykernel install --user --name ingenieria-soluciones-ia --display-name "Python (ingenieria-soluciones-ia)"
 ```
 
 ---
