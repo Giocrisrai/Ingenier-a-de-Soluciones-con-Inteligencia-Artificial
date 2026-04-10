@@ -169,7 +169,7 @@ Sirve si prefieres **no instalar Python ni uv en tu máquina** o quieres un ento
    ```bash
    docker compose up --build
    ```
-3. En la consola aparecerá una URL con token para **Jupyter Lab**, normalmente `http://127.0.0.1:8888/lab?token=...`.
+3. Abre **Jupyter Lab** en el navegador: `http://127.0.0.1:8888/lab` (sin token; el contenedor está configurado solo para desarrollo local).
 
 **Detalle importante:** el `docker-compose.yml` guarda el virtualenv del contenedor en un **volumen nombrado** (`ingenieria-ia-venv`), no dentro de tu carpeta del proyecto. Así se evita mezclar un `.venv` compilado en Linux con herramientas nativas de Windows o macOS.
 
