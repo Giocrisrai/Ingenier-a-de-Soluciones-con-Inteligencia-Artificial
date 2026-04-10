@@ -12,6 +12,10 @@ El curso cubre desde los fundamentos de la IA generativa y el prompt engineering
 - **Modalidad:** Práctica y conceptual
 - **Requisitos:** Python básico, interés en IA
 
+### Herramienta de entorno: [uv](https://docs.astral.sh/uv/) (Astral)
+
+En este curso el flujo **recomendado y el que mejor evita dolores de cabeza** es **[uv](https://docs.astral.sh/uv/)**: instala dependencias muy rápido, usa el **`uv.lock`** para que todos tengan **las mismas versiones** (Windows, macOS o Linux), y gestiona la versión de Python del proyecto sin pelearte con el Python del sistema. No es obligatorio, pero es la opción más moderna y alineada con cómo se trabaja hoy en proyectos Python serios.
+
 ---
 
 ## Inicio Rápido (Setup para Estudiantes)
@@ -27,31 +31,79 @@ cd Ingenier-a-de-Soluciones-con-Inteligencia-Artificial
 
 ### 2. Entorno virtual e instalar dependencias
 
-Las dependencias están declaradas en `pyproject.toml`. El archivo `uv.lock` fija versiones reproducibles cuando usas **uv**.
+Las dependencias están declaradas en `pyproject.toml`. Con **uv**, el archivo **`uv.lock`** fija versiones exactas para que el curso sea **reproducible** en cualquier máquina. El proyecto pide **Python 3.11 o superior** (`requires-python` en `pyproject.toml`).
 
-#### Opción recomendada: [uv](https://docs.astral.sh/uv/)
+#### Opción recomendada: [uv](https://docs.astral.sh/uv/) (Astral)
 
-Instala uv si aún no lo tienes (por ejemplo en macOS/Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`).
+**1. Instalar uv** (la guía oficial y más opciones: [Installing uv](https://docs.astral.sh/uv/getting-started/installation/)).
+
+**macOS / Linux:**
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+**Windows (PowerShell como administrador o usuario normal):**
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+Tras instalar, cierra y abre la terminal (o reinicia el IDE) para que `uv` quede en el `PATH`.
+
+**2. Sincronizar el proyecto** (crea `.venv` e instala todo según el lockfile):
 
 ```bash
 uv sync
-source .venv/bin/activate
-# Windows: .venv\Scripts\activate
 ```
 
-`uv sync` crea el entorno `.venv` e instala todo según el lockfile. Para comprobar que las librerías importan bien:
+**3. Activar el entorno** (opcional si vas a usar solo `uv run …`):
+
+```bash
+# macOS / Linux
+source .venv/bin/activate
+
+# Windows (cmd)
+.venv\Scripts\activate.bat
+
+# Windows (PowerShell)
+.venv\Scripts\Activate.ps1
+```
+
+Si PowerShell bloquea scripts, ejecuta una vez: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` (solo en tu usuario).
+
+**4. Comprobar que todo importa bien:**
 
 ```bash
 uv run python scripts/verify_env.py
 ```
 
-Para añadir una dependencia más adelante: `uv add nombre-paquete` y vuelve a commitear `pyproject.toml` y `uv.lock`.
+**Comandos útiles con uv (sin activar el venv):** muchas veces puedes evitar `activate` y usar:
 
-#### Opción clásica: venv y pip
+```bash
+uv run jupyter lab
+uv run pytest
+uv run python ruta/al/script.py
+```
+
+**Añadir una dependencia** (mantiene el lock actualizado): `uv add nombre-paquete` y vuelve a commitear `pyproject.toml` y `uv.lock`.
+
+**Python no instalado en tu máquina:** uv puede instalar una versión compatible para el proyecto, por ejemplo:
+
+```bash
+uv python install 3.11
+uv sync
+```
+
+(Consulta [Python versions](https://docs.astral.sh/uv/concepts/python-versions/) en la documentación de uv.)
+
+#### Opción alternativa: venv y pip
+
+Si no puedes usar uv, puedes reproducir un entorno parecido con pip (versiones **no** fijadas por `uv.lock`):
 
 ```bash
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate   # macOS / Linux
 # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
@@ -59,9 +111,11 @@ pip install -r requirements.txt
 ### 3. Configurar Variables de Entorno
 
 ```bash
-# Copiar el archivo de ejemplo
+# Copiar el archivo de ejemplo (macOS / Linux)
 cp .env.example .env
 ```
+
+En **Windows** (cmd): `copy .env.example .env` — en PowerShell: `Copy-Item .env.example .env`
 
 Edita el archivo `.env` con tus credenciales:
 
@@ -99,6 +153,32 @@ Opcional: registrar el kernel de este entorno en Jupyter para elegirlo en la int
 
 ```bash
 uv run python -m ipykernel install --user --name ingenieria-soluciones-ia --display-name "Python (ingenieria-soluciones-ia)"
+```
+
+### 5. Opcional: Docker (Jupyter Lab con uv en Linux)
+
+Sirve si prefieres **no instalar Python ni uv en tu máquina** o quieres un entorno idéntico al de otros compañeros. Sigue usando **`uv.lock`** dentro del contenedor.
+
+**Requisitos:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows y macOS; en Windows activa el backend **WSL2**) o **Docker Engine + Docker Compose** en Linux.
+
+1. Clona el repo y asegúrate de tener un archivo **`.env`** en la raíz (Docker Compose lo exige aunque esté incompleto). Si aún no lo tienes:
+   ```bash
+   cp .env.example .env
+   ```
+2. En la raíz del repositorio (si tu instalación no tiene el plugin `docker compose`, prueba `docker-compose up --build`):
+   ```bash
+   docker compose up --build
+   ```
+3. En la consola aparecerá una URL con token para **Jupyter Lab**, normalmente `http://127.0.0.1:8888/lab?token=...`.
+
+**Detalle importante:** el `docker-compose.yml` guarda el virtualenv del contenedor en un **volumen nombrado** (`ingenieria-ia-venv`), no dentro de tu carpeta del proyecto. Así se evita mezclar un `.venv` compilado en Linux con herramientas nativas de Windows o macOS.
+
+Comandos útiles:
+
+```bash
+docker compose down   # detiene el servicio
+# Comprobar imports (contenedor ya en marcha con `docker compose up`):
+docker compose exec jupyter uv run python scripts/verify_env.py
 ```
 
 ---
@@ -141,7 +221,7 @@ Cada subcarpeta IL contiene:
 | `langchain` | Framework para construir aplicaciones con LLMs |
 | `langchain-openai` | Integración LangChain con OpenAI |
 | `langgraph` | Grafos de estado para agentes |
-| `crewai` | Orquestación de sistemas multi-agente |
+| `crewai` / `crewai_tools` | Orquestación multi-agente y herramientas CrewAI |
 | `faiss-cpu` | Base de datos vectorial para RAG |
 | `langsmith` | Observabilidad y evaluación de LLMs |
 | `streamlit` | Interfaces web para demos |
@@ -182,24 +262,57 @@ Los proyectos se desarrollan en parejas con presentación individual.
 
 ## Solución de Problemas Comunes
 
-### Error de importación de módulos
+### Error de importación de módulos o versiones distintas entre compañeros
+
+Con **uv** (recomendado): vuelve a alinear el entorno con el lock del repo:
+
 ```bash
-# Asegúrate de tener el entorno virtual activado
-source .venv/bin/activate  # macOS/Linux
-pip install -r requirements.txt
+uv sync
+uv run python scripts/verify_env.py
 ```
+
+Si usas **pip**: activa `.venv` e instala de nuevo: `pip install -r requirements.txt`.
+
+### `uv` no se reconoce como comando
+
+Reinstala uv con los comandos de instalación de la sección 2, reinicia la terminal y comprueba `uv --version`. En Windows, instala también las [actualizaciones de Visual C++ Redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist) si el instalador falla.
 
 ### Error de API key
 ```bash
 # Verifica que tu .env tenga las credenciales correctas
-cat .env  # revisa que no estén vacías
+cat .env  # macOS / Linux; en Windows: type .env
 ```
 
 ### Problemas con Jupyter kernel
+
+Con **uv**:
+
 ```bash
-# Registrar el kernel del entorno virtual
-python -m ipykernel install --user --name=curso-ia --display-name="Curso IA"
+uv run python -m ipykernel install --user --name ingenieria-soluciones-ia --display-name "Python (ingenieria-soluciones-ia)"
 ```
+
+En Jupyter, elige el kernel **Python (ingenieria-soluciones-ia)**. Sin uv (venv clásico): `python -m ipykernel install --user --name=curso-ia --display-name="Curso IA"`.
+
+### Docker Compose: «couldn't find env file» o error al levantar
+
+Crea el archivo antes de `docker compose up`:
+
+```bash
+cp .env.example .env
+```
+
+En **Windows** también vale `copy .env.example .env`. Si el puerto **8888** está ocupado, edita `docker-compose.yml` y cambia `"8888:8888"` por otro puerto libre, por ejemplo `"8889:8888"`.
+
+### Matplotlib avisa que no puede escribir caché (sandbox / permisos)
+
+En entornos restringidos puedes fijar un directorio temporal:
+
+```bash
+export MPLCONFIGDIR=/tmp/matplotlib
+uv run python scripts/verify_env.py
+```
+
+En Docker esto ya va configurado en la imagen (`MPLCONFIGDIR=/tmp/matplotlib`).
 
 ---
 

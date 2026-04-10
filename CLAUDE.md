@@ -55,8 +55,9 @@ Based on notebook imports and course materials:
 - Standard Python libraries: `os`, `pandas`, `requests`
 
 ### Development Workflow
-- Environment setup with Python and Jupyter Notebook
-- API configuration with authentication keys
+- **Recommended:** [uv](https://docs.astral.sh/uv/) (`uv sync`, `uv run …`) with `uv.lock` for reproducible installs across Windows, macOS, and Linux (see root `README.md`).
+- **Optional:** Docker Compose (`docker compose up --build`) runs Jupyter Lab with the same uv-based environment inside Linux; the compose file uses a named volume for `.venv` so the container venv is not mixed with a host virtualenv.
+- API configuration with authentication keys (`.env` from `.env.example`)
 - Progressive implementation from basic API calls to complex agent systems
 - Documentation requirements include README.md files for agent implementations
 

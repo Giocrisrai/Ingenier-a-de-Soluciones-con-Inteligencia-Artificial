@@ -1,5 +1,5 @@
 # Proyecto de dependencias para notebooks y prácticas del curso (no es un paquete instalable).
-# Uso: uv sync && source .venv/bin/activate
+# Uso recomendado: uv sync  →  (opcional) source .venv/bin/activate  →  uv run jupyter lab
 
 [project]
 name = "ingenieria-soluciones-con-ia"

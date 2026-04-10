@@ -48,11 +48,13 @@ def main() -> None:
         ("ipykernel", None),
         ("pytest", None),
         ("wikipedia", None),
+        ("lxml", None),
         ("IPython", None),
     ]
     heavy: Iterable[tuple[str, str | None]] = [
         ("streamlit", None),
         ("crewai", None),
+        ("crewai_tools", None),
     ]
 
     print(f"Python {sys.version.split()[0]} — verificando imports…\n")
