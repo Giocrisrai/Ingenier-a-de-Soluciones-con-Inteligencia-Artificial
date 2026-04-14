@@ -161,25 +161,54 @@ Sirve si prefieres **no instalar Python ni uv en tu máquina** o quieres un ento
 
 **Requisitos:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows y macOS; en Windows activa el backend **WSL2**) o **Docker Engine + Docker Compose** en Linux.
 
-1. Clona el repo y asegúrate de tener un archivo **`.env`** en la raíz (Docker Compose lo exige aunque esté incompleto). Si aún no lo tienes:
+#### Variables de entorno (cross‑platform)
+
+El contenedor carga variables desde el archivo **`.env`** (en la raíz del repo) vía `env_file` en `docker-compose.yml`. Esto funciona igual en **Windows/macOS/Linux**.
+
+- **Crea `.env` desde el ejemplo** (si solo vas a abrir Jupyter, puede tener valores vacíos):
    ```bash
    cp .env.example .env
    ```
-2. En la raíz del repositorio (si tu instalación no tiene el plugin `docker compose`, prueba `docker-compose up --build`):
-   ```bash
-   docker compose up --build
-   ```
-3. Abre **Jupyter Lab** en el navegador: `http://127.0.0.1:8888/lab` (sin token; el contenedor está configurado solo para desarrollo local).
+
+- **No subas `.env` al repo**: contiene credenciales.
+- **Evita imprimir secretos en consola**: comandos como `docker compose config` / `docker-compose config` pueden mostrar variables de `.env` en texto plano.
+
+#### Levantar el contenedor
+
+En la raíz del repositorio:
+
+**Opción A (recomendada, Docker Compose v2):**
+
+```bash
+docker compose up --build
+```
+
+**Opción B (fallback, Docker Compose v1):**
+
+```bash
+docker-compose up --build
+```
+
+Abre **Jupyter Lab** en el navegador: `http://127.0.0.1:8888/lab` (sin token; el contenedor está configurado solo para desarrollo local).
 
 **Detalle importante:** el `docker-compose.yml` guarda el virtualenv del contenedor en un **volumen nombrado** (`ingenieria-ia-venv`), no dentro de tu carpeta del proyecto. Así se evita mezclar un `.venv` compilado en Linux con herramientas nativas de Windows o macOS.
 
 Comandos útiles:
 
 ```bash
-docker compose down   # detiene el servicio
-# Comprobar imports (contenedor ya en marcha con `docker compose up`):
+docker compose down   # detiene el servicio (v2)
+docker-compose down   # detiene el servicio (v1)
+
+# Comprobar imports (contenedor ya en marcha con up):
 docker compose exec jupyter uv run python scripts/verify_env.py
+docker-compose exec jupyter uv run python scripts/verify_env.py
 ```
+
+#### Troubleshooting rápido
+
+- **Puerto 8888 ocupado**: cambia el mapeo en `docker-compose.yml` de `"8888:8888"` a `"8889:8888"` (u otro puerto libre).
+- **Windows: errores con volúmenes / permisos**: usa Docker Desktop con **WSL2** y asegúrate de que la carpeta del repo esté compartida/visible para Docker.
+- **Warning sobre buildx con `docker-compose`**: si tu instalación usa Compose v1, puede aparecer un aviso de buildx. Lo más robusto es usar **Compose v2** (`docker compose …`) cuando esté disponible.
 
 ---
 
