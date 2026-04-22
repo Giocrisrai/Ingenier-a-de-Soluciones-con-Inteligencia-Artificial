@@ -1,20 +1,26 @@
 # File: RA1/IL1.4/1-evaluation-rag.py
 import streamlit as st
 import os
+import re
 import json
+import sys
+import logging
 import time
 import uuid
 from datetime import datetime
+from pathlib import Path
 import pandas as pd
 import numpy as np
 from openai import OpenAI
 from sklearn.metrics.pairwise import cosine_similarity
 import plotly.express as px
-import plotly.graph_objects as go
 
 # LangChain imports
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
+
+# Streamlit: set_page_config debe ser la primera llamada st.*
+st.set_page_config(page_title="RAG Evaluation", page_icon="📊", layout="wide")
 
 # Load environment variables from .env file
 try:
@@ -23,51 +29,117 @@ try:
 except ImportError:
     st.warning("⚠️ python-dotenv no está instalado. Instálalo con: pip install python-dotenv")
 
-# --- Configuración del Cliente y Modelos de LangChain ---
-# Only set environment variables if they exist
+# -----------------------------------------------------------------------------
+# Configuración didáctica — modelos y URL (para que vean cómo se nombran en código)
+# GitHub Models suele usar los mismos identificadores que la API de OpenAI.
+# Cambien estos strings si el proveedor o el catálogo usan otros nombres.
+# -----------------------------------------------------------------------------
+API_BASE_URL_PREDETERMINADA = "https://models.inference.ai.azure.com"
+
+# Modelo para chat / evaluaciones (client.chat.completions)
+MODELO_CHAT = "gpt-4o"
+# Alternativas frecuentes en catálogos compatibles: "gpt-4o-mini", "o1", etc.
+
+# Modelo para embeddings (OpenAIEmbeddings de LangChain)
+MODELO_EMBEDDINGS = "text-embedding-3-small"
+# Otras opciones típicas: "text-embedding-3-large", "text-embedding-ada-002"
+
+# Nombres usados en el resto del archivo (alias claros para el curso)
+CHAT_MODEL = MODELO_CHAT
+EMBEDDING_MODEL = MODELO_EMBEDDINGS
+
+# Credenciales y host: desde .env (igual que en los notebooks IL1.2 / IL1.3)
 github_token = os.getenv("GITHUB_TOKEN")
-github_base_url = os.getenv("GITHUB_BASE_URL", "https://models.inference.ai.azure.com")
+github_base_url = (
+    os.getenv("OPENAI_BASE_URL")
+    or os.getenv("GITHUB_BASE_URL")
+    or API_BASE_URL_PREDETERMINADA
+)
 
 if github_token:
     os.environ["OPENAI_API_KEY"] = github_token
     os.environ["OPENAI_BASE_URL"] = github_base_url
-else:
-    st.error("❌ GITHUB_TOKEN environment variable is not set. Please check your .env file.")
-    st.info("💡 Make sure your .env file contains: GITHUB_TOKEN=your_token_here")
-    st.stop()
+# Sin token: no usar st.stop() aquí — impediría definir funciones; main() muestra el aviso.
 
-st.set_page_config(page_title="RAG Evaluation", page_icon="📊", layout="wide")
+logger = logging.getLogger("evaluation_rag")
+_LOG_FILE = Path(__file__).resolve().parent / "1-evaluation-rag.run.log"
+
+
+def configure_logging():
+    """Consola (INFO+) y archivo (DEBUG+) en RA1/IL1.4/1-evaluation-rag.run.log"""
+    if logger.handlers:
+        return
+    logger.setLevel(logging.DEBUG)
+    fmt = logging.Formatter(
+        "%(asctime)s | %(levelname)-5s | %(message)s",
+        datefmt="%H:%M:%S",
+    )
+    sh = logging.StreamHandler(sys.stderr)
+    sh.setLevel(logging.INFO)
+    sh.setFormatter(fmt)
+    logger.addHandler(sh)
+    fh = logging.FileHandler(_LOG_FILE, mode="a", encoding="utf-8")
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(fmt)
+    logger.addHandler(fh)
+    logger.info("Logging activo → consola + %s", _LOG_FILE)
+
 
 def initialize_client():
     if not github_token:
-        st.error("❌ GitHub token not available")
+        logger.warning("initialize_client: sin GITHUB_TOKEN")
+        st.error("❌ No hay token de GitHub disponible.")
         return None
     
+    logger.debug("OpenAI client base_url=%s", github_base_url)
     client = OpenAI(
         base_url=github_base_url,
         api_key=github_token
     )
+    logger.info("Cliente OpenAI inicializado")
     return client
 
 def initialize_embeddings():
     """Initialize LangChain embeddings model"""
     if not github_token:
-        st.error("❌ GitHub token not available for embeddings")
+        logger.warning("initialize_embeddings: sin token")
+        st.error("❌ Se necesita GITHUB_TOKEN para inicializar embeddings.")
         return None
     
     try:
-        # Modelo de embeddings (compatible con la API de OpenAI)
-        embeddings = OpenAIEmbeddings(
-            model="text-embedding-3-small"
-        )
+        logger.info("Inicializando OpenAIEmbeddings model=%s", EMBEDDING_MODEL)
+        t0 = time.monotonic()
+        embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
+        logger.info("OpenAIEmbeddings listo en %.2fs", time.monotonic() - t0)
         return embeddings
     except Exception as e:
-        st.error(f"Error initializing embeddings: {str(e)}")
+        logger.exception("Fallo al inicializar embeddings: %s", e)
+        st.error(f"Error al inicializar embeddings: {e}")
         return None
+
+def _parse_score_1_to_10(text):
+    """Extrae el primer número 1–10 del texto del modelo (evita fallos si añade texto)."""
+    if not text:
+        return None
+    m = re.search(r"\b(10|[1-9])\b", text.strip())
+    if m:
+        return float(m.group(1))
+    try:
+        return float(text.strip().split()[0])
+    except (ValueError, IndexError):
+        return None
+
 
 def get_embeddings_langchain(embeddings_model, texts):
     """Get embeddings using LangChain"""
     try:
+        if not texts:
+            logger.warning("embed_documents: lista vacía")
+            st.error("No hay textos para embedir.")
+            return None
+        n = len(texts)
+        logger.info("embed_documents: inicio (%d fragmentos)", n)
+        t0 = time.monotonic()
         # Convert texts to LangChain Document objects if needed
         if isinstance(texts[0], str):
             documents = [Document(page_content=text) for text in texts]
@@ -76,18 +148,27 @@ def get_embeddings_langchain(embeddings_model, texts):
         
         # Get embeddings using LangChain
         embeddings = embeddings_model.embed_documents([doc.page_content for doc in documents])
-        return np.array(embeddings)
+        dt = time.monotonic() - t0
+        arr = np.array(embeddings)
+        logger.info("embed_documents: OK shape=%s en %.2fs", arr.shape, dt)
+        return arr
     except Exception as e:
-        st.error(f"Error getting embeddings: {str(e)}")
+        logger.exception("embed_documents: error %s", e)
+        st.error(f"Error al obtener embeddings: {e}")
         return None
 
 def get_query_embedding_langchain(embeddings_model, query):
     """Get query embedding using LangChain"""
     try:
+        qprev = (query[:120] + "…") if len(query) > 120 else query
+        logger.debug("embed_query: %r", qprev)
+        t0 = time.monotonic()
         embedding = embeddings_model.embed_query(query)
+        logger.debug("embed_query: OK en %.2fs", time.monotonic() - t0)
         return np.array(embedding)
     except Exception as e:
-        st.error(f"Error getting query embedding: {str(e)}")
+        logger.exception("embed_query: error %s", e)
+        st.error(f"Error al obtener embedding de la consulta: {e}")
         return None
 
 def evaluate_faithfulness(client, query, context, response):
@@ -113,14 +194,21 @@ Responde con un número del 1-10 donde:
 Responde SOLO con el número:"""
 
     try:
+        logger.debug("evaluate_faithfulness: llamada API chat model=%s", CHAT_MODEL)
+        t0 = time.monotonic()
         result = client.chat.completions.create(
-            model="gpt-4o",
+            model=CHAT_MODEL,
             messages=[{"role": "user", "content": eval_prompt}],
             temperature=0.1,
-            max_tokens=10
+            max_tokens=10,
         )
-        return float(result.choices[0].message.content.strip())
-    except:
+        raw = result.choices[0].message.content or ""
+        parsed = _parse_score_1_to_10(raw)
+        score = parsed if parsed is not None else 5.0
+        logger.info("evaluate_faithfulness: score=%.1f (raw=%r) en %.2fs", score, raw[:80], time.monotonic() - t0)
+        return score
+    except Exception as e:
+        logger.warning("evaluate_faithfulness: fallo API → default 5.0 (%s)", e)
         return 5.0
 
 def evaluate_relevance(client, query, response):
@@ -142,14 +230,21 @@ Responde con un número del 1-10 donde:
 Responde SOLO con el número:"""
 
     try:
+        logger.debug("evaluate_relevance: llamada API")
+        t0 = time.monotonic()
         result = client.chat.completions.create(
-            model="gpt-4o",
+            model=CHAT_MODEL,
             messages=[{"role": "user", "content": eval_prompt}],
             temperature=0.1,
-            max_tokens=10
+            max_tokens=10,
         )
-        return float(result.choices[0].message.content.strip())
-    except:
+        raw = result.choices[0].message.content or ""
+        parsed = _parse_score_1_to_10(raw)
+        score = parsed if parsed is not None else 5.0
+        logger.info("evaluate_relevance: score=%.1f en %.2fs", score, time.monotonic() - t0)
+        return score
+    except Exception as e:
+        logger.warning("evaluate_relevance: fallo → 5.0 (%s)", e)
         return 5.0
 
 def evaluate_context_precision(client, query, retrieved_docs):
@@ -157,7 +252,8 @@ def evaluate_context_precision(client, query, retrieved_docs):
         return 0.0
     
     relevant_count = 0
-    for doc in retrieved_docs:
+    logger.info("evaluate_context_precision: %d documentos (1 llamada API c/u)", len(retrieved_docs))
+    for di, doc in enumerate(retrieved_docs):
         eval_prompt = f"""¿Este documento es relevante para responder la consulta?
 
 Consulta: {query}
@@ -167,28 +263,63 @@ Documento: {doc['document'][:300]}...
 Responde SOLO 'SI' o 'NO':"""
         
         try:
+            t0 = time.monotonic()
             result = client.chat.completions.create(
-                model="gpt-4o",
+                model=CHAT_MODEL,
                 messages=[{"role": "user", "content": eval_prompt}],
                 temperature=0.1,
-                max_tokens=5
+                max_tokens=5,
             )
-            if result.choices[0].message.content.strip().upper() == 'SI':
+            raw_ans = (result.choices[0].message.content or "").strip()
+            ok = bool(re.match(r"^(sí|si)\b", raw_ans, re.IGNORECASE))
+            if ok:
                 relevant_count += 1
-        except:
-            pass
+            logger.debug(
+                "context_precision doc %d/%d: %s (resp=%r, %.2fs)",
+                di + 1,
+                len(retrieved_docs),
+                "SI" if ok else "NO",
+                raw_ans[:40],
+                time.monotonic() - t0,
+            )
+        except Exception as ex:
+            logger.debug("context_precision doc %d: error %s", di, ex)
     
-    return relevant_count / len(retrieved_docs)
+    ratio = relevant_count / len(retrieved_docs)
+    logger.info("evaluate_context_precision: resultado=%.2f (%d relevantes)", ratio, relevant_count)
+    return ratio
 
-def hybrid_search_with_metrics(query, documents, embeddings, embeddings_model, client, top_k=5):
+def hybrid_search_with_metrics(query, documents, embeddings, embeddings_model, top_k=5):
     start_time = time.time()
+    qprev = (str(query)[:80] + "…") if len(str(query)) > 80 else str(query)
+    logger.info("hybrid_search: inicio query=%r top_k=%d docs=%d", qprev, top_k, len(documents))
+
+    if not query or not str(query).strip():
+        logger.warning("hybrid_search: consulta vacía")
+        return [], 0.0
+    if not documents:
+        logger.warning("hybrid_search: sin documentos")
+        return [], 0.0
+    emb_matrix = np.asarray(embeddings)
+    if emb_matrix.ndim != 2 or emb_matrix.shape[0] != len(documents):
+        logger.error(
+            "hybrid_search: shape embeddings %s != %d documentos",
+            emb_matrix.shape,
+            len(documents),
+        )
+        st.error(
+            "Los embeddings no coinciden con la lista de documentos. "
+            "Genera de nuevo los embeddings en la pestaña Consulta."
+        )
+        return [], 0.0
     
     # Use LangChain for query embedding
     query_embedding = get_query_embedding_langchain(embeddings_model, query)
     if query_embedding is None:
+        logger.error("hybrid_search: falló embedding de consulta")
         return [], 0.0
     
-    semantic_similarities = cosine_similarity([query_embedding], embeddings)[0]
+    semantic_similarities = cosine_similarity([query_embedding], emb_matrix)[0]
     
     keyword_scores = []
     query_words = set(query.lower().split())
@@ -198,7 +329,8 @@ def hybrid_search_with_metrics(query, documents, embeddings, embeddings_model, c
         keyword_scores.append(overlap / max(len(query_words), 1))
     
     combined_scores = 0.7 * semantic_similarities + 0.3 * np.array(keyword_scores)
-    top_indices = np.argsort(combined_scores)[::-1][:top_k]
+    k = min(top_k, len(documents))
+    top_indices = np.argsort(combined_scores)[::-1][:k]
     
     results = []
     for idx in top_indices:
@@ -211,12 +343,17 @@ def hybrid_search_with_metrics(query, documents, embeddings, embeddings_model, c
         })
     
     retrieval_time = time.time() - start_time
-    
+    logger.info(
+        "hybrid_search: OK %d resultados índices=%s en %.2fs",
+        len(results),
+        [r["index"] for r in results],
+        retrieval_time,
+    )
     return results, retrieval_time
 
 def generate_response_with_metrics(client, query, context_docs):
     if not client:
-        return "Error: Cliente no disponible", 0.0
+        return "Error: cliente no disponible.", 0.0
         
     start_time = time.time()
     
@@ -231,19 +368,31 @@ Pregunta: {query}
 Responde basándote únicamente en el contexto proporcionado."""
 
     try:
+        logger.info(
+            "generate_response: chat model=%s context_chars=%d",
+            CHAT_MODEL,
+            len(context),
+        )
+        t_api = time.monotonic()
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model=CHAT_MODEL,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
-            max_tokens=600
+            max_tokens=600,
         )
         
         generation_time = time.time() - start_time
-        response_text = response.choices[0].message.content
-        
+        response_text = response.choices[0].message.content or ""
+        logger.info(
+            "generate_response: OK %d chars (API %.2fs, total %.2fs)",
+            len(response_text),
+            time.monotonic() - t_api,
+            generation_time,
+        )
         return response_text, generation_time
     except Exception as e:
-        return f"Error generating response: {str(e)}", time.time() - start_time
+        logger.exception("generate_response: error %s", e)
+        return f"Error al generar respuesta: {e}", time.time() - start_time
 
 def create_evaluation_dataset():
     return [
@@ -296,14 +445,37 @@ def export_langsmith_format(logs):
         })
     return langsmith_data
 
+
+def _truncate_for_csv(text: str, limit: int = 100) -> str:
+    if len(text) <= limit:
+        return text
+    return text[:limit] + "..."
+
+
 def main():
+    configure_logging()
+    logger.info("======== main() ejecución Streamlit ========")
+
     st.title("📊 RAG con Evaluación y Monitoreo (LangChain)")
-    st.write("Sistema RAG con métricas detalladas usando LangChain para embeddings")
+    st.caption(
+        f"Modelos (editar arriba en el script: `MODELO_CHAT`, `MODELO_EMBEDDINGS`): "
+        f"chat `{CHAT_MODEL}` · embeddings `{EMBEDDING_MODEL}` · API `{github_base_url}`"
+    )
+    st.write("Sistema RAG con métricas detalladas usando LangChain para embeddings.")
+
+    with st.sidebar:
+        st.header("📋 Monitoreo")
+        st.caption(
+            "Los eventos se escriben en la **consola** donde corre Streamlit "
+            "y en el archivo de registro (nivel DEBUG en archivo)."
+        )
+        st.code(str(_LOG_FILE), language="text")
+        if _LOG_FILE.exists():
+            st.caption(f"Tamaño log: {_LOG_FILE.stat().st_size / 1024:.1f} KB")
     
-    # Check if GitHub token is available
     if not github_token:
-        st.error("❌ Please check your .env file and make sure GITHUB_TOKEN is set.")
-        st.info("💡 Your .env file should contain: GITHUB_TOKEN=your_token_here")
+        st.error("❌ Falta GITHUB_TOKEN. Revisa tu archivo `.env` en la raíz del proyecto.")
+        st.info("💡 Copia `.env.example` a `.env` y define `GITHUB_TOKEN` con tu token de GitHub Models.")
         return
     
     if "eval_rag" not in st.session_state:
@@ -328,7 +500,7 @@ def main():
     
     client = initialize_client()
     if not client:
-        st.error("❌ Failed to initialize OpenAI client")
+        st.error("❌ No se pudo inicializar el cliente OpenAI (revisa token y URL base).")
         return
     
     # Initialize LangChain embeddings model
@@ -342,6 +514,11 @@ def main():
     
     with tab1:
         st.header("💬 Consulta con Monitoreo (LangChain)")
+        st.info(
+            "Al **consultar** o **evaluar** verás un panel de progreso por pasos. "
+            "Si activas *Evaluación automática*, el paso final hace varias llamadas al modelo "
+            "y puede tardar más; la app sigue trabajando (revisa el panel o la terminal)."
+        )
         
         col1, col2 = st.columns([3, 1])
         
@@ -358,66 +535,136 @@ def main():
         
         with col2:
             if st.button("🔄 Generar Embeddings (LangChain)"):
+                logger.info("UI: clic Generar Embeddings")
                 if st.session_state.eval_rag['documents'] and st.session_state.eval_rag['embeddings_model']:
-                    with st.spinner("Generando embeddings con LangChain..."):
+                    nd = len(st.session_state.eval_rag['documents'])
+                    with st.status(
+                        f"⏳ Generando embeddings ({nd} textos)…",
+                        expanded=True,
+                    ) as emb_status:
+                        st.markdown(
+                            f"Enviando **{nd}** fragmentos al modelo **`{EMBEDDING_MODEL}`** "
+                            "(una petición por lote a la API). Esto puede tardar decenas de segundos."
+                        )
                         embeddings = get_embeddings_langchain(
                             st.session_state.eval_rag['embeddings_model'],
-                            st.session_state.eval_rag['documents']
+                            st.session_state.eval_rag['documents'],
                         )
                         if embeddings is not None:
                             st.session_state.eval_rag['embeddings'] = embeddings
-                            st.success("✅ Embeddings listos con LangChain")
+                            st.markdown(f"✅ Vector listo: forma **{embeddings.shape}**")
+                            emb_status.update(
+                                label="✅ Embeddings generados",
+                                state="complete",
+                                expanded=False,
+                            )
+                            st.toast("Embeddings listos. Ya puedes consultar.", icon="✅")
                         else:
+                            emb_status.update(
+                                label="❌ Error al generar embeddings",
+                                state="error",
+                                expanded=True,
+                            )
                             st.error("❌ Error generando embeddings")
                 else:
                     st.warning("Modelo de embeddings no disponible")
         
         if st.button("🚀 Consultar con Métricas") and query:
+            logger.info("UI: clic Consultar con Métricas eval=%s", eval_enabled)
             if st.session_state.eval_rag['embeddings'] is None:
+                logger.warning("UI: consulta sin embeddings previos")
                 st.warning("Genera embeddings primero")
             elif st.session_state.eval_rag['embeddings_model'] is None:
+                logger.warning("UI: embeddings_model es None")
                 st.warning("Modelo de embeddings no inicializado")
             else:
-                with st.spinner("Procesando con métricas..."):
+                results = None
+                response = None
+                metrics = None
+
+                with st.status(
+                    "⏳ Procesando tu consulta…",
+                    expanded=True,
+                ) as run_status:
+                    st.caption("No cierres la pestaña: cada paso llama a la API y puede demorar.")
+
+                    st.markdown("**Paso 1/3 — Recuperación** · Embedding de tu pregunta y ranking híbrido…")
                     results, retrieval_time = hybrid_search_with_metrics(
-                        query, 
+                        query,
                         st.session_state.eval_rag['documents'],
                         st.session_state.eval_rag['embeddings'],
                         st.session_state.eval_rag['embeddings_model'],
-                        client,
-                        top_k
+                        top_k,
                     )
-                    
+
                     if not results:
-                        st.error("Error en la búsqueda")
-                        return
-                    
-                    response, generation_time = generate_response_with_metrics(client, query, results)
-                    
-                    metrics = {
-                        'retrieval_time': retrieval_time,
-                        'generation_time': generation_time,
-                        'total_time': retrieval_time + generation_time,
-                        'docs_retrieved': len(results),
-                        'avg_relevance_score': np.mean([r['combined_score'] for r in results])
-                    }
-                    
-                    if eval_enabled:
-                        context_text = "".join([r['document'] for r in results])
-                        
-                        with st.spinner("Evaluando calidad..."):
-                            metrics['faithfulness'] = evaluate_faithfulness(client, query, context_text, response)
+                        logger.error("UI: hybrid_search devolvió 0 resultados")
+                        run_status.update(
+                            label="❌ Sin documentos recuperados",
+                            state="error",
+                            expanded=True,
+                        )
+                        st.error("No se pudo recuperar documentos (revisa embeddings o la consulta).")
+                    else:
+                        st.markdown(
+                            f"✅ **{len(results)}** documentos en **{retrieval_time:.2f}s**"
+                        )
+
+                        st.markdown(
+                            f"**Paso 2/3 — Generación** · Modelo **`{CHAT_MODEL}`** con el contexto recuperado…"
+                        )
+                        logger.info("UI: generando respuesta (%d docs contexto)", len(results))
+                        response, generation_time = generate_response_with_metrics(client, query, results)
+
+                        metrics = {
+                            'retrieval_time': retrieval_time,
+                            'generation_time': generation_time,
+                            'total_time': retrieval_time + generation_time,
+                            'docs_retrieved': len(results),
+                            'avg_relevance_score': np.mean([r['combined_score'] for r in results]),
+                        }
+                        st.markdown(f"✅ Respuesta en **{generation_time:.2f}s**")
+
+                        if eval_enabled:
+                            context_text = "".join([r['document'] for r in results])
+                            n_extra = 2 + len(results)
+                            st.markdown(
+                                f"**Paso 3/3 — Evaluación de calidad** · "
+                                f"≈ **{n_extra}** llamadas al chat (fidelidad, relevancia y "
+                                f"{len(results)} juicios Sí/No por documento). **Puede tardar.**"
+                            )
+                            logger.info("UI: inicio evaluación automática (métricas LLM)")
+                            metrics['faithfulness'] = evaluate_faithfulness(
+                                client, query, context_text, response
+                            )
                             metrics['relevance'] = evaluate_relevance(client, query, response)
-                            metrics['context_precision'] = evaluate_context_precision(client, query, results)
-                    
+                            metrics['context_precision'] = evaluate_context_precision(
+                                client, query, results
+                            )
+                            logger.info("UI: fin evaluación automática")
+                            st.markdown(
+                                f"✅ Métricas listas (fidelidad **{metrics['faithfulness']:.1f}**, "
+                                f"relevancia **{metrics['relevance']:.1f}**)"
+                            )
+                        else:
+                            st.markdown("*Evaluación automática desactivada — se omitió el paso 3.*")
+
+                        run_status.update(
+                            label="✅ Consulta completada — resultado abajo",
+                            state="complete",
+                            expanded=False,
+                        )
+                        st.toast("Listo: revisa documentos y respuesta debajo.", icon="✅")
+
+                if results and metrics is not None:
                     st.subheader("📋 Documentos Recuperados")
                     for i, result in enumerate(results):
                         with st.expander(f"Doc {i+1} - Score: {result['combined_score']:.3f}"):
                             st.write(result['document'])
-                    
+
                     st.subheader("🤖 Respuesta")
                     st.write(response)
-                    
+
                     st.subheader("⏱️ Métricas de Rendimiento")
                     col1, col2, col3, col4 = st.columns(4)
                     with col1:
@@ -428,7 +675,7 @@ def main():
                         st.metric("Generación", f"{metrics['generation_time']:.2f}s")
                     with col4:
                         st.metric("Docs recuperados", metrics['docs_retrieved'])
-                    
+
                     if eval_enabled:
                         st.subheader("🎯 Métricas de Calidad")
                         col1, col2, col3 = st.columns(3)
@@ -438,9 +685,10 @@ def main():
                             st.metric("Relevancia", f"{metrics['relevance']:.1f}/10")
                         with col3:
                             st.metric("Precisión contexto", f"{metrics['context_precision']:.2f}")
-                    
+
                     if st.session_state.eval_rag['enable_logging']:
                         log_interaction(query, response, metrics, results)
+                        logger.info("UI: interacción guardada en session logs")
     
     with tab2:
         st.header("📄 Gestión de Documentos")
@@ -464,11 +712,11 @@ def main():
                     
                     col_edit, col_delete = st.columns(2)
                     with col_edit:
-                        if st.button(f"✏️ Editar", key=f"edit_{i}"):
+                        if st.button("✏️ Editar", key=f"edit_{i}"):
                             st.session_state[f'editing_doc_{i}'] = True
                     
                     with col_delete:
-                        if st.button(f"🗑️ Eliminar", key=f"delete_{i}"):
+                        if st.button("🗑️ Eliminar", key=f"delete_{i}"):
                             st.session_state.eval_rag['documents'].pop(i)
                             # Reset embeddings when documents change
                             st.session_state.eval_rag['embeddings'] = None
@@ -485,7 +733,7 @@ def main():
                         
                         col_save, col_cancel = st.columns(2)
                         with col_save:
-                            if st.button(f"💾 Guardar", key=f"save_{i}"):
+                            if st.button("💾 Guardar", key=f"save_{i}"):
                                 st.session_state.eval_rag['documents'][i] = new_content
                                 st.session_state[f'editing_doc_{i}'] = False
                                 # Reset embeddings when documents change
@@ -494,7 +742,7 @@ def main():
                                 st.rerun()
                         
                         with col_cancel:
-                            if st.button(f"❌ Cancelar", key=f"cancel_{i}"):
+                            if st.button("❌ Cancelar", key=f"cancel_{i}"):
                                 st.session_state[f'editing_doc_{i}'] = False
                                 st.rerun()
         
@@ -579,46 +827,51 @@ def main():
             col1, col2 = st.columns(2)
             
             with col1:
-                st.subheader("Response Time")
-                fig = px.line(df, x='timestamp', y='total_time', title="Total Time per Query")
-                st.plotly_chart(fig, use_container_width=True)
+                st.subheader("Tiempo de respuesta")
+                fig = px.line(df, x='timestamp', y='total_time', title="Tiempo total por consulta")
+                st.plotly_chart(fig, width="stretch")
                 
                 if 'faithfulness' in df.columns:
-                    st.subheader("Faithfulness Distribution")
-                    fig = px.histogram(df, x='faithfulness', title="Faithfulness Scores Distribution")
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.subheader("Distribución de fidelidad")
+                    fig = px.histogram(df, x='faithfulness', title="Puntuaciones de fidelidad")
+                    st.plotly_chart(fig, width="stretch")
             
             with col2:
-                st.subheader("Retrieval Metrics")
+                st.subheader("Métricas de recuperación")
                 fig = px.scatter(df, x='retrieval_time', y='generation_time', 
-                               size='docs_retrieved', title="Retrieval vs Generation Time")
-                st.plotly_chart(fig, use_container_width=True)
+                               size='docs_retrieved', title="Recuperación vs generación (tiempo)")
+                st.plotly_chart(fig, width="stretch")
                 
                 if 'relevance' in df.columns and 'context_precision' in df.columns:
-                    st.subheader("Quality vs Precision")
+                    st.subheader("Calidad vs precisión")
                     fig = px.scatter(df, x='context_precision', y='relevance', 
-                                   title="Context Precision vs Relevance")
-                    st.plotly_chart(fig, use_container_width=True)
+                                   title="Precisión de contexto vs relevancia")
+                    st.plotly_chart(fig, width="stretch")
             
-            st.subheader("📈 General Statistics")
+            st.subheader("📈 Estadísticas generales")
             col1, col2, col3, col4 = st.columns(4)
             with col1:
-                st.metric("Total Queries", len(df))
+                st.metric("Consultas totales", len(df))
             with col2:
-                st.metric("Average Time", f"{df['total_time'].mean():.2f}s")
+                st.metric("Tiempo promedio", f"{df['total_time'].mean():.2f}s")
             with col3:
                 if 'faithfulness' in df.columns:
-                    st.metric("Average Faithfulness", f"{df['faithfulness'].mean():.1f}/10")
+                    st.metric("Fidelidad promedio", f"{df['faithfulness'].mean():.1f}/10")
             with col4:
                 if 'relevance' in df.columns:
-                    st.metric("Average Relevance", f"{df['relevance'].mean():.1f}/10")
+                    st.metric("Relevancia promedio", f"{df['relevance'].mean():.1f}/10")
         else:
             st.info("No hay datos de interacciones aún. Realiza algunas consultas primero.")
     
     with tab4:
         st.header("🧪 Evaluación Sistemática")
+        st.info(
+            "Cada caso ejecuta recuperación, generación y **varias** llamadas de evaluación. "
+            "Usa la **barra de progreso** y el texto bajo el botón; el proceso es lento pero normal."
+        )
         
         if st.button("🧪 Ejecutar Evaluación Completa"):
+            logger.info("UI: clic Evaluación completa")
             if st.session_state.eval_rag['embeddings'] is None:
                 st.warning("Genera embeddings primero")
             elif st.session_state.eval_rag['embeddings_model'] is None:
@@ -626,43 +879,64 @@ def main():
             else:
                 eval_dataset = create_evaluation_dataset()
                 results = []
+                n_cases = len(eval_dataset)
+                prog = st.progress(0.0)
+                step_label = st.empty()
                 
-                with st.spinner("Ejecutando evaluación sistemática..."):
-                    for test_case in eval_dataset:
-                        query = test_case['query']
-                        
-                        docs, retrieval_time = hybrid_search_with_metrics(
-                            query,
-                            st.session_state.eval_rag['documents'],
-                            st.session_state.eval_rag['embeddings'],
-                            st.session_state.eval_rag['embeddings_model'],
-                            client,
-                            3
+                for ci, test_case in enumerate(eval_dataset):
+                    query = test_case['query']
+                    logger.info("EVAL sistema caso %d/%d: %s", ci + 1, n_cases, query[:80])
+                    step_label.markdown(
+                        f"**Paso {ci + 1}/{n_cases}** — `{query[:70]}{'…' if len(query) > 70 else ''}` — **recuperando**…"
+                    )
+                    prog.progress(min(1.0, (ci + 0.2) / n_cases))
+                    
+                    docs, retrieval_time = hybrid_search_with_metrics(
+                        query,
+                        st.session_state.eval_rag['documents'],
+                        st.session_state.eval_rag['embeddings'],
+                        st.session_state.eval_rag['embeddings_model'],
+                        3,
+                    )
+                    
+                    if docs:
+                        step_label.markdown(
+                            f"**Paso {ci + 1}/{n_cases}** — **generando respuesta** (puede tardar)…"
                         )
+                        prog.progress(min(1.0, (ci + 0.45) / n_cases))
+                        response, generation_time = generate_response_with_metrics(client, query, docs)
                         
-                        if docs:
-                            response, generation_time = generate_response_with_metrics(client, query, docs)
-                            
-                            context_text = "".join([d['document'] for d in docs])
-                            faithfulness = evaluate_faithfulness(client, query, context_text, response)
-                            relevance = evaluate_relevance(client, query, response)
-                            context_precision = evaluate_context_precision(client, query, docs)
-                            
-                            results.append({
-                                'query': query,
-                                'response': response,
-                                'retrieval_time': retrieval_time,
-                                'generation_time': generation_time,
-                                'faithfulness': faithfulness,
-                                'relevance': relevance,
-                                'context_precision': context_precision,
-                                'ground_truth': test_case['ground_truth']
-                            })
+                        context_text = "".join([d['document'] for d in docs])
+                        step_label.markdown(
+                            f"**Paso {ci + 1}/{n_cases}** — **métricas LLM** "
+                            f"(fidelidad + relevancia + {len(docs)}× precisión contexto)…"
+                        )
+                        prog.progress(min(1.0, (ci + 0.7) / n_cases))
+                        faithfulness = evaluate_faithfulness(client, query, context_text, response)
+                        relevance = evaluate_relevance(client, query, response)
+                        context_precision = evaluate_context_precision(client, query, docs)
+                        
+                        results.append({
+                            'query': query,
+                            'response': response,
+                            'retrieval_time': retrieval_time,
+                            'generation_time': generation_time,
+                            'faithfulness': faithfulness,
+                            'relevance': relevance,
+                            'context_precision': context_precision,
+                            'ground_truth': test_case['ground_truth']
+                        })
+                    prog.progress(min(1.0, (ci + 1) / n_cases))
+                
+                step_label.markdown("**Evaluación sistemática terminada.**")
+                prog.progress(1.0)
+                logger.info("EVAL sistema: %d casos con resultado", len(results))
                 
                 if results:
                     st.subheader("📊 Resultados de Evaluación")
                     eval_df = pd.DataFrame(results)
                     st.dataframe(eval_df)
+                    st.toast(f"Evaluación lista: {len(results)} casos.", icon="✅")
                     
                     st.subheader("📈 Métricas Promedio")
                     col1, col2, col3, col4 = st.columns(4)
@@ -686,6 +960,7 @@ def main():
             st.subheader("📤 Exportar Datos")
             
             if st.button("📊 Exportar para LangSmith"):
+                logger.info("UI: Exportar LangSmith (vista previa)")
                 if st.session_state.interaction_logs:
                     langsmith_data = export_langsmith_format(st.session_state.interaction_logs)
                     st.json(langsmith_data[:2])
@@ -701,12 +976,13 @@ def main():
                     st.info("No hay datos para exportar")
             
             if st.button("📊 Exportar CSV"):
+                logger.info("UI: Exportar CSV preparado")
                 if st.session_state.interaction_logs:
                     df = pd.DataFrame([
                         {
                             'timestamp': log['timestamp'],
                             'query': log['query'],
-                            'response': log['response'][:100] + "...",
+                            'response': _truncate_for_csv(log['response']),
                             **log['metrics']
                         }
                         for log in st.session_state.interaction_logs
@@ -716,14 +992,14 @@ def main():
                     st.download_button(
                         label="💾 Descargar CSV",
                         data=csv,
-                                                file_name=f"rag_metrics_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                        mime="text/csv"
+                        file_name=f"rag_metrics_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                        mime="text/csv",
                     )
                 else:
                     st.info("No hay datos para exportar")
         
         with col2:
-            st.subheader("📊 Document Insights")
+            st.subheader("📊 Vista del corpus")
             
             if st.session_state.eval_rag['documents']:
                 # Document statistics
@@ -732,17 +1008,18 @@ def main():
                 fig = px.bar(
                     x=list(range(1, len(doc_lengths) + 1)),
                     y=doc_lengths,
-                    title="Document Length Distribution",
-                    labels={'x': 'Document ID', 'y': 'Characters'}
+                    title="Longitud de documentos",
+                    labels={'x': 'Documento #', 'y': 'Caracteres'}
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
                 
                 # Word frequency analysis
                 all_text = " ".join(st.session_state.eval_rag['documents'])
-                words = all_text.lower().split()
+                words = re.findall(r"\w+", all_text.lower())
                 word_freq = {}
                 for word in words:
-                    word_freq[word] = word_freq.get(word, 0) + 1
+                    if len(word) > 1:
+                        word_freq[word] = word_freq.get(word, 0) + 1
                 
                 top_words = sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:10]
                 
@@ -750,11 +1027,11 @@ def main():
                     fig = px.bar(
                         x=[word[0] for word in top_words],
                         y=[word[1] for word in top_words],
-                        title="Top 10 Most Frequent Words"
+                        title="10 palabras más frecuentes",
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width="stretch")
             else:
-                st.info("No documents available for analysis")
+                st.info("No hay documentos para analizar.")
 
 if __name__ == "__main__":
     main()
