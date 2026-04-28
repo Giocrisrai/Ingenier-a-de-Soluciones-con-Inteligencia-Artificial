@@ -24,6 +24,8 @@ from typing import Set, List, Dict, Any, Tuple
 from dataclasses import dataclass
 import os
 
+from _demo_utils import pause_demo
+
 # Load environment variables from .env file
 try:
     from dotenv import load_dotenv
@@ -508,11 +510,11 @@ if __name__ == "__main__":
     demo_blocks_world()
     
     print("\n\n" + "="*70)
-    input("Presiona ENTER para ver Navegación de Robot...")
+    pause_demo("Presiona ENTER para ver Navegación de Robot...")
     demo_robot_navigation()
     
     print("\n\n" + "="*70)
-    input("Presiona ENTER para ver Automatización de Tareas...")
+    pause_demo("Presiona ENTER para ver Automatización de Tareas...")
     demo_task_automation()
     
     # Lecciones finales

@@ -23,6 +23,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 import os
 
+from _demo_utils import pause_demo
+
 # Load environment variables
 try:
     from dotenv import load_dotenv
@@ -455,7 +457,7 @@ if __name__ == "__main__":
     demo_software_team()
     
     print("\n\n" + "="*70)
-    input("Presiona ENTER para ver Centro de Atención al Cliente...")
+    pause_demo("Presiona ENTER para ver Centro de Atención al Cliente...")
     demo_customer_service()
     
     # Lecciones finales

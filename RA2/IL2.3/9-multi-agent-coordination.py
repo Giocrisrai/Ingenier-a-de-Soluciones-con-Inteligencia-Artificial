@@ -25,6 +25,8 @@ import os
 import time
 from collections import defaultdict
 
+from _demo_utils import pause_demo
+
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -454,7 +456,7 @@ if __name__ == "__main__":
     demo_collaborative_research()
     
     print("\n\n" + "="*70)
-    input("Presiona ENTER para ver Respuesta a Emergencias...")
+    pause_demo("Presiona ENTER para ver Respuesta a Emergencias...")
     demo_emergency_response()
     
     # Lecciones finales

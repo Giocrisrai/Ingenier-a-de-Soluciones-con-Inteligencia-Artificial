@@ -24,6 +24,8 @@ import os
 import random
 import time
 
+from _demo_utils import pause_demo
+
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -463,11 +465,11 @@ if __name__ == "__main__":
     demo_flocking()
     
     print("\n\n" + "="*70)
-    input("Presiona ENTER para ver Forrajeo de Hormigas...")
+    pause_demo("Presiona ENTER para ver Forrajeo de Hormigas...")
     demo_ant_foraging()
     
     print("\n\n" + "="*70)
-    input("Presiona ENTER para ver Principios de Emergencia...")
+    pause_demo("Presiona ENTER para ver Principios de Emergencia...")
     demo_pattern_formation()
     
     # Lecciones finales

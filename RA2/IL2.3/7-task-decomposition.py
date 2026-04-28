@@ -20,11 +20,12 @@ Los LLMs pueden asistir en este proceso con su comprensión del lenguaje natural
 
 # Requiere: pip install langchain langchain-openai openai python-dotenv
 from langchain_openai import ChatOpenAI
-from langchain.prompts import PromptTemplate
 from typing import List, Dict, Any
 from dataclasses import dataclass
 import os
 import json
+
+from _demo_utils import pause_demo
 
 # Load environment variables from .env file
 try:
@@ -436,11 +437,11 @@ if __name__ == "__main__":
     demo_software_project()
     
     print("\n\n" + "="*70)
-    input("Presiona ENTER para ver descomposición de Paper de Investigación...")
+    pause_demo("Presiona ENTER para ver descomposición de Paper de Investigación...")
     demo_research_paper()
     
     print("\n\n" + "="*70)
-    input("Presiona ENTER para ver descomposición de Evento Académico...")
+    pause_demo("Presiona ENTER para ver descomposición de Evento Académico...")
     demo_event_planning()
     
     # Lecciones finales

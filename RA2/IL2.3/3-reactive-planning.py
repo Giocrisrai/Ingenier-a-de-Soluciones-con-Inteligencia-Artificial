@@ -24,6 +24,8 @@ import os
 import time
 import random
 
+from _demo_utils import pause_demo
+
 # Load environment variables from .env file
 try:
     from dotenv import load_dotenv
@@ -394,11 +396,11 @@ if __name__ == "__main__":
     demo_basic_reactive()
     
     print("\n\n" + "="*70)
-    input("Presiona ENTER para continuar con Casa Inteligente...")
+    pause_demo("Presiona ENTER para continuar con Casa Inteligente...")
     demo_smart_home()
     
     print("\n\n" + "="*70)
-    input("Presiona ENTER para ver Monitoreo Continuo...")
+    pause_demo("Presiona ENTER para ver Monitoreo Continuo...")
     demo_continuous_monitoring()
     
     # Lecciones finales

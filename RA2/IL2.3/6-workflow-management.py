@@ -27,6 +27,8 @@ import os
 import time
 from datetime import datetime
 
+from _demo_utils import pause_demo
+
 # Load environment variables from .env file
 try:
     from dotenv import load_dotenv
@@ -523,11 +525,11 @@ if __name__ == "__main__":
     demo_data_pipeline()
     
     print("\n\n" + "="*70)
-    input("Presiona ENTER para ver CI/CD Pipeline...")
+    pause_demo("Presiona ENTER para ver CI/CD Pipeline...")
     demo_ci_cd_pipeline()
     
     print("\n\n" + "="*70)
-    input("Presiona ENTER para ver ML Training Pipeline...")
+    pause_demo("Presiona ENTER para ver ML Training Pipeline...")
     demo_ml_training_pipeline()
     
     # Lecciones finales

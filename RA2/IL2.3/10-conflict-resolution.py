@@ -24,6 +24,8 @@ from dataclasses import dataclass
 from enum import Enum
 import os
 
+from _demo_utils import pause_demo
+
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -479,7 +481,7 @@ if __name__ == "__main__":
     demo_resource_competition()
     
     print("\n\n" + "="*70)
-    input("Presiona ENTER para ver Comparación de Estrategias...")
+    pause_demo("Presiona ENTER para ver Comparación de Estrategias...")
     demo_different_strategies()
     
     # Lecciones finales

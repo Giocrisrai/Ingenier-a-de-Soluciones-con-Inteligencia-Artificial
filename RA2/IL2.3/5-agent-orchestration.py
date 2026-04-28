@@ -19,10 +19,11 @@ para ventas, otro para soporte técnico, otro para análisis de datos.
 
 # Requiere: pip install langchain langchain-openai openai python-dotenv
 from langchain_openai import ChatOpenAI
-from langchain.prompts import PromptTemplate
 from typing import Dict, List, Any
 import os
 import json
+
+from _demo_utils import pause_demo
 
 # Load environment variables from .env file
 try:
@@ -466,11 +467,11 @@ if __name__ == "__main__":
     demo_software_development_team()
     
     print("\n\n" + "="*70)
-    input("Presiona ENTER para ver Atención al Cliente...")
+    pause_demo("Presiona ENTER para ver Atención al Cliente...")
     demo_customer_service()
     
     print("\n\n" + "="*70)
-    input("Presiona ENTER para ver Equipo de Investigación...")
+    pause_demo("Presiona ENTER para ver Equipo de Investigación...")
     demo_research_collaboration()
     
     # Lecciones finales
