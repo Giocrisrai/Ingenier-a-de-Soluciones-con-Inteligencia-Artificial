@@ -18,39 +18,19 @@ ahí. Por ejemplo, navegación en un mapa, resolución de puzzles, o automatizac
 de tareas con pasos bien definidos.
 """
 
-# Requiere: pip install langchain langchain-openai openai python-dotenv
-from langchain_openai import ChatOpenAI
+# Opcional: .env para extensiones futuras con LLM (esta demo no llama al modelo).
 from typing import Set, List, Dict, Any, Tuple
 from dataclasses import dataclass
 import os
 
 from _demo_utils import pause_demo
 
-# Load environment variables from .env file
 try:
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
     print("⚠️ python-dotenv no está instalado. Instálalo con: pip install python-dotenv")
     exit(1)
-
-# Obtener variables de entorno
-github_token = os.getenv("GITHUB_TOKEN")
-github_base_url = os.getenv("GITHUB_BASE_URL", "https://models.inference.ai.azure.com")
-
-if not github_token:
-    print("❌ GITHUB_TOKEN no está configurado. Por favor verifica tu archivo .env")
-    print("💡 Tu archivo .env debe contener: GITHUB_TOKEN=tu_token_aqui")
-    exit(1)
-
-# Nota: El LLM se configura como referencia para extensiones futuras,
-# pero no se usa en esta demostración standalone de planificación STRIPS.
-# llm = ChatOpenAI(
-#     model="gpt-4o",
-#     base_url=github_base_url,
-#     api_key=github_token,
-#     temperature=0.3
-# )
 
 print("✅ Módulo de planificación orientada a objetivos cargado\n")
 

@@ -31,9 +31,10 @@ if not github_token:
 # Herramienta personalizada: suma
 def sumar(x):
     try:
-        # Evaluar expresion matematica de forma segura
-        tree = ast.parse(x, mode='eval')
-        result = eval(compile(tree, '<string>', 'eval'), {"__builtins__": {}})
+        # Evaluacion acotada: AST + eval del arbol compilado con builtins restringidos
+        # (solo demostracion; en produccion preferir un parser numerico dedicado).
+        tree = ast.parse(x, mode="eval")
+        result = eval(compile(tree, "<string>", "eval"), {"__builtins__": {}})
         return str(result)
     except Exception:
         return "Error en la operación"

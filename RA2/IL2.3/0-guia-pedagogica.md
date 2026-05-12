@@ -267,7 +267,7 @@ Para tu proyecto final, evalúa:
 
 ---
 
-**Última actualización**: Octubre 2024
+**Última actualización**: Mayo 2026
 **Autor**: Módulo IL2.3 - Ingeniería de Soluciones con IA
 **Versión**: 1.0
 

@@ -15,7 +15,7 @@ Modulo dedicado a las mejores practicas para documentar sistemas de agentes LLM 
 
 | Archivo | Descripcion |
 |---------|-------------|
-| [1-architecture_example.py](1-architecture_example.py) | Ejemplo practico de documentacion de arquitectura: implementa un agente simple (`MainAgent`) con una herramienta de calculo, mostrando como documentar componentes y flujos de datos. |
+| [1-architecture_example.py](1-architecture_example.py) | Ejemplo practico de arquitectura en capas: `AgenteOrquestador` enruta a herramientas registradas (`calculadora`, `buscador`, `traductor`), con separacion dominio / infraestructura / aplicacion / presentacion. |
 | [2-best_practices.py](2-best_practices.py) | Lista de buenas practicas para proyectos de agentes: nombres claros, docstrings, separacion de responsabilidades, control de versiones y ejemplos de uso. |
 | [presentacion.md](presentacion.md) | Material de presentacion con 10 slides que cubren documentacion tecnica, patrones de arquitectura, testing, deployment y gestion del ciclo de vida. |
 

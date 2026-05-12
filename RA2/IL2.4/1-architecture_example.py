@@ -2,8 +2,9 @@
 IL2.4: Ejemplo de Arquitectura Limpia para Agentes de IA
 =========================================================
 Demuestra separacion clara de capas (presentacion, aplicacion, dominio,
-infraestructura) con un agente que enruta herramientas de forma segura
-sin usar eval().
+infraestructura) con un agente que enruta herramientas de forma segura,
+evitando evaluar cadenas arbitrarias sin validacion (se valida el AST y
+luego se evalua solo el arbol compilado permitido).
 
 Ejecutar: python 1-architecture_example.py
 """

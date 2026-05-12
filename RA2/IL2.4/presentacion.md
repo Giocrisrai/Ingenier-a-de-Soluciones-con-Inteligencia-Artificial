@@ -30,33 +30,34 @@
 
 ---
 
-## Slide 3: Arquitectura Simple - Ejemplo Práctico
-**Título:** Script 1 - Documentando Arquitectura Básica
+## Slide 3: Arquitectura en capas — alineado con `1-architecture_example.py`
+**Título:** Script 1 — Documentando componentes y flujo
 
-**Arquitectura de ejemplo:**
+**Estructura (resumen del código del repositorio):**
 ```python
-class MainAgent:
-    def __init__(self, tool):
-        self.tool = tool
+# Dominio: modelo de respuesta y herramientas (p. ej. calculadora con validación AST)
+# Infraestructura: RegistroHerramientas (nombre → función + descripción)
+# Aplicación: AgenteOrquestador (clasifica intención → ejecuta herramienta)
+# Presentación: mostrar_respuesta(...)
 
-    def answer(self, question):
-        if "suma" in question:
-            return self.tool("2+2")
-        return "No sé la respuesta."
+class RegistroHerramientas:
+    def registrar(self, nombre, funcion, descripcion): ...
+    def obtener(self, nombre): ...
 
-def calculator(expression):
-    return str(eval(expression))
+class AgenteOrquestador:
+    def procesar(self, mensaje: str) -> Respuesta: ...
 ```
 
 **Documentación de componentes:**
-- **MainAgent:** Gestiona la interacción principal
-- **calculator:** Herramienta de cálculo especializada
-- **Flujo:** Usuario → MainAgent → calculator → respuesta
+- **AgenteOrquestador:** Enruta el mensaje a la herramienta registrada adecuada
+- **RegistroHerramientas:** Punto único de registro y descubrimiento de herramientas
+- **Herramientas de dominio:** Por ejemplo `calculadora` (expresiones restringidas vía AST, no `eval()` directo sobre texto arbitrario)
+- **Flujo:** Usuario → capa presentación → `AgenteOrquestador` → herramienta → `Respuesta`
 
 **Elementos clave:**
-- Separación clara de responsabilidades
-- Interfaz simple y documentada
-- Flujo de datos explícito
+- Capas explícitas (dominio / infraestructura / aplicación / presentación)
+- Contratos claros entre orquestador y herramientas
+- Código ejecutable completo en `RA2/IL2.4/1-architecture_example.py`
 
 ---
 
@@ -141,12 +142,19 @@ proyecto_agentes/
 
 **Niveles de testing:**
 
-**1. Unit Tests:**
+**1. Unit tests (alineado con `1-architecture_example.py`):**
 ```python
-def test_agent_calculator():
-    agent = MainAgent(calculator)
-    result = agent.answer("¿Cuánto es la suma de 2+2?")
-    assert "4" in result
+# Suponiendo importaciones desde 1-architecture_example.py
+
+def test_calculadora_basica():
+    assert "4" in calculadora("2 + 2")
+
+def test_orquestador_enruta_a_calculadora():
+    registro = RegistroHerramientas()
+    registro.registrar("calculadora", calculadora, "Evalua expresiones")
+    agente = AgenteOrquestador(registro)
+    r = agente.procesar("Calcula cuanto es 2 + 2")
+    assert r.exitoso and "4" in r.contenido
 ```
 
 **2. Integration Tests:**
