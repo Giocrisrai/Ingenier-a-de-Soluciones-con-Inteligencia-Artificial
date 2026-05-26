@@ -59,7 +59,7 @@ github_base_url = (
 if github_token:
     os.environ["OPENAI_API_KEY"] = github_token
     os.environ["OPENAI_BASE_URL"] = github_base_url
-# Sin token: no usar st.stop() aquí — impediría definir funciones; main() muestra el aviso.
+# Set env vars so langchain_openai.ChatOpenAI can pick up the API key
 
 logger = logging.getLogger("evaluation_rag")
 _LOG_FILE = Path(__file__).resolve().parent / "1-evaluation-rag.run.log"

@@ -20,11 +20,15 @@ Este módulo se centra en un aspecto crítico del desarrollo de sistemas de IA: 
 
 ### Archivos y Actividades Prácticas
 
-1.  **`1-evaluation-rag.py`**
+1.  **`1-evaluation-metrics.ipynb`**
+    - **Descripción**: Notebook que implementa las métricas clave de evaluación RAG: Faithfulness, Answer Relevancy y Context Precision. Incluye un dataset de evaluación con 7 ejemplos sobre tecnología.
+    - **Actividades**: Evaluar respuestas generadas vs esperadas, calcular tasas de error y analizar resultados.
+
+2.  **`1-evaluation-rag.py`**
     - **Descripción**: Una aplicación interactiva construida con **Streamlit** que permite visualizar un sistema RAG en acción. Podrás modificar documentos, realizar consultas y ver métricas de rendimiento y calidad en tiempo real.
     - **Uso**: Ejecuta este script para obtener una comprensión práctica de cómo las métricas de RAG se comportan en un entorno dinámico.
 
-2.  **`2-langsmith-evaluation.ipynb`**
+3.  **`2-langsmith-evaluation.ipynb`**
     - **Descripción**: Un Jupyter Notebook que te guía paso a paso en el uso de **LangSmith** para una evaluación más formal y sistemática.
     - **Actividades**:
         - Configurar la trazabilidad con LangSmith.
@@ -32,8 +36,8 @@ Este módulo se centra en un aspecto crítico del desarrollo de sistemas de IA: 
         - Ejecutar evaluadores automáticos para medir la calidad del sistema.
         - Analizar los resultados para identificar puntos débiles.
 
-3.  **`langsmith-evaluation.md` y `presentacion.md`**
-    - **Descripción**: Documentos de apoyo que resumen los conceptos teóricos y los pasos prácticos cubiertos en las actividades. Úsalos como guía de referencia rápida y para consolidar tu aprendizaje.
+4.  **`presentacion.md`**
+    - **Descripción**: Documento de apoyo que resume los conceptos teóricos y los pasos prácticos cubiertos en las actividades. Úsalo como guía de referencia rápida y para consolidar tu aprendizaje.
 
 ## ¿Cómo Empezar?
 

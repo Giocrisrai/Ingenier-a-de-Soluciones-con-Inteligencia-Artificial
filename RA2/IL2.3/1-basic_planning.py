@@ -28,6 +28,7 @@ if not github_token:
     exit(1)
 
 # Configurar usando variables de entorno
+os.environ["OPENAI_API_KEY"] = github_token
 llm = ChatOpenAI(
     model="gpt-4o",
     base_url=github_base_url,

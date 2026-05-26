@@ -52,18 +52,18 @@ Al completar esta unidad, serás capaz de:
 - Program-aided language models
 - Meta-prompting y prompt chaining
 
-### 3. Aplicaciones Especializadas
+### 3. Material Complementario
 
-#### Prompts para Diferentes Dominios
-**Archivo**: `5-domain-specific-prompts.ipynb`
-- Prompts técnicos (código, matemáticas)
-- Prompts creativos (escritura, arte)
-- Prompts analíticos (datos, investigación)
-- Prompts de negocio (marketing, ventas)
+#### Guía de Prompt Engineering
+**Archivo**: `prompting.md`
+- Guía teórica con técnicas avanzadas de prompting
+- Ejemplos prácticos para diferentes dominios
+- Mejores prácticas y consideraciones éticas
+- Referencia rápida para diseño de prompts
 
 #### Optimización y Evaluación
-**Archivo**: `6-prompt-optimization.ipynb`
-- Métricas de evaluación
+**Archivo**: `5-prompt-optimization.ipynb`
+- Métricas de evaluación de prompts
 - A/B testing de prompts
 - Iteración sistemática
 - Herramientas de evaluación

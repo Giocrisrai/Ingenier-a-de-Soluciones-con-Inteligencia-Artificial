@@ -46,6 +46,7 @@ herramienta_suma = Tool(
 )
 
 # Inicializa el LLM y el agente
+os.environ["OPENAI_API_KEY"] = github_token
 llm = ChatOpenAI(
     model="gpt-4o",
     base_url=github_base_url,
@@ -61,5 +62,5 @@ agente = AgentExecutor(agent=agent, tools=[herramienta_suma], verbose=True)
 
 if __name__ == "__main__":
     print("Planificación y ejecución con LangChain:")
-    resultado = agente.invoke({"input": "¿Cuánto es 55 X 100?"})["output"]
+    resultado = agente.invoke({"input": "¿Cuánto es 55 + 1020 ?"})["output"]
     print(resultado)

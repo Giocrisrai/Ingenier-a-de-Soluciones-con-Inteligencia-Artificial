@@ -43,6 +43,7 @@ if not github_token:
     exit(1)
 
 # Configurar LLM
+os.environ["OPENAI_API_KEY"] = github_token
 llm = ChatOpenAI(
     model="gpt-4o",
     base_url=github_base_url,
