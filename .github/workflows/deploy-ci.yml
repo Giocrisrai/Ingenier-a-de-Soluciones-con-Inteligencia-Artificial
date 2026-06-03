@@ -106,3 +106,61 @@ jobs:
       - name: Apagar el stack
         if: always()
         run: docker compose -f deploy/docker-compose.prod.yml down -v
+
+  trivy:
+    name: Escaneo de imágenes (Trivy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: test
+    permissions:
+      contents: read
+      security-events: write   # necesario para subir SARIF al Security tab
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Construir imagen ${{ matrix.service }}
+        uses: docker/build-push-action@v6
+        with:
+          context: deploy/${{ matrix.service }}
+          push: false
+          load: true
+          tags: isia-${{ matrix.service }}:scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Escanear la imagen con Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: isia-${{ matrix.service }}:scan
+          format: sarif
+          output: trivy-${{ matrix.service }}.sarif
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+      - name: Subir resultados al Security tab
+        # Requiere repo público o GitHub Advanced Security. No rompe la CI si no
+        # está disponible (p. ej. fork privado de un estudiante).
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-${{ matrix.service }}.sarif
+          category: trivy-${{ matrix.service }}
+
+  dependency-review:
+    name: Revisión de dependencias (solo PR)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
