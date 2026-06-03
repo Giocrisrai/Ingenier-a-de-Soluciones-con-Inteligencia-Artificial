@@ -1,4 +1,10 @@
 {$SITE_ADDRESS} {
+	# Certificado con la CA interna de Caddy (self-signed). Necesario para servir
+	# HTTPS por IP o localhost sin un dominio público (caso AWS Academy Learner Lab).
+	# Si usas un DOMINIO real, elimina esta línea: Caddy emitirá un certificado
+	# válido automáticamente con Let's Encrypt.
+	tls internal
+
 	# Reverse proxy: la raíz va al frontend Streamlit.
 	# /api/* va al backend (quitando el prefijo /api).
 	handle_path /api/* {

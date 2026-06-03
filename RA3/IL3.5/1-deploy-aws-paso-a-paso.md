@@ -51,7 +51,9 @@ bash bootstrap.sh
 ```bash
 cd ~/app/deploy
 cp .env.example .env
-nano .env            # pega tu GITHUB_TOKEN y pon SITE_ADDRESS=:443
+nano .env            # pega tu GITHUB_TOKEN y pon SITE_ADDRESS=https://<IP_PUBLICA>
+# (SITE_ADDRESS con tu IP pública hace que Caddy emita el certificado self-signed
+#  para ESA IP; sin esto el HTTPS por IP falla en el handshake TLS.)
 sudo docker compose -f docker-compose.prod.yml up --build -d
 ```
 
