@@ -1,6 +1,6 @@
-"""Cliente del agente sobre GitHub Models.
+"""Cliente del agente sobre Groq.
 
-Si no hay GITHUB_TOKEN entra en modo demo (no llama al modelo), para que la
+Si no hay GROQ_API_KEY entra en modo demo (no llama al modelo), para que la
 infraestructura y los tests funcionen sin credenciales.
 """
 import os
@@ -14,21 +14,20 @@ SYSTEM_PROMPT = (
 
 class AgentClient:
     def __init__(self) -> None:
-        self.token = os.getenv("GITHUB_TOKEN", "").strip()
-        self.base_url = os.getenv("OPENAI_BASE_URL", "https://models.inference.ai.azure.com")
-        self.modelo = os.getenv("AGENT_MODEL", "gpt-4o-mini")
-        self.modo_demo = not bool(self.token)
+        self.api_key = os.getenv("GROQ_API_KEY", "").strip()
+        self.modelo = os.getenv("AGENT_MODEL", "llama-3.1-8b-instant")
+        self.modo_demo = not bool(self.api_key)
         self._cliente = None
 
     def _get_cliente(self):
         if self._cliente is None:
-            from openai import OpenAI
-            self._cliente = OpenAI(api_key=self.token, base_url=self.base_url)
+            from groq import Groq
+            self._cliente = Groq(api_key=self.api_key)
         return self._cliente
 
     def responder(self, mensaje: str, historial: list[dict] | None = None) -> str:
         if self.modo_demo:
-            return f"[modo demo] Recibí tu mensaje: '{mensaje}'. Configura GITHUB_TOKEN para respuestas reales."
+            return f"[modo demo] Recibí tu mensaje: '{mensaje}'. Configura GROQ_API_KEY para respuestas reales."
         mensajes = [{"role": "system", "content": SYSTEM_PROMPT}]
         if historial:
             mensajes.extend(historial)

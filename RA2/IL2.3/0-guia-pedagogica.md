@@ -117,15 +117,17 @@ Todos los archivos que usan LLM requieren:
 
 ```bash
 # En tu archivo .env
-GITHUB_TOKEN=tu_token_aqui
-GITHUB_BASE_URL=https://models.inference.ai.azure.com
+GROQ_API_KEY=gsk_tu_clave_aqui
+GROQ_MODEL=llama-3.3-70b-versatile
 ```
+
+> La clave se obtiene gratis en [https://console.groq.com/](https://console.groq.com/).
 
 ### Dependencias
 
 ```bash
 # Para LangChain
-pip install langchain langchain-openai openai python-dotenv
+pip install langchain langchain-groq groq python-dotenv
 
 # Para CrewAI
 pip install crewai crewai-tools python-dotenv
@@ -253,7 +255,7 @@ Para tu proyecto final, evalúa:
 ### Documentación Oficial
 - [LangChain Docs](https://python.langchain.com/)
 - [CrewAI Docs](https://docs.crewai.com/)
-- [OpenAI API](https://platform.openai.com/docs)
+- [Groq — consola y documentación de la API](https://console.groq.com/)
 
 ### Papers Clásicos
 1. "STRIPS: A New Approach to the Application of Theorem Proving" (1971)

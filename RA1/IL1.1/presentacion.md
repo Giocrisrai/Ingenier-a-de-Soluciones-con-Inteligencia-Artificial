@@ -19,7 +19,8 @@
 - **Arquitectura:** Basados en Transformers
 - **Funcionamiento:** Predicción de tokens basada en contexto
 - **Capacidades:** Generación, comprensión y análisis de texto
-- **Proveedores principales:** OpenAI, GitHub Models, Anthropic, Google
+- **Proveedores principales:** Groq, OpenAI, Anthropic, Google
+- **Proveedor del curso:** Groq (https://console.groq.com/) con modelos Llama
 
 **Conceptos clave:**
 - Tokens, embeddings, atención
@@ -30,41 +31,48 @@
 ## Slide 3: Configuración del Entorno
 **Título:** Preparación Técnica
 
-**Variables de entorno requeridas:**
+**Paso 0 - Obtener la API key (gratis, sin tarjeta de crédito):**
+1. Entrar a https://console.groq.com/ y crear cuenta (se sugiere correo Duoc UC)
+2. Menú lateral: **API Keys → Create API Key**
+3. Copiar la key `gsk_...` (solo se muestra una vez)
+
+**Variables de entorno requeridas (`.env`):**
 ```bash
-export GITHUB_BASE_URL="https://models.inference.ai.azure.com"
-export GITHUB_TOKEN="tu_token_de_github"
-export OPENAI_BASE_URL="https://models.inference.ai.azure.com"
+GROQ_API_KEY="gsk_tu_api_key_aqui"
+GROQ_MODEL="llama-3.3-70b-versatile"
+GROQ_MODEL_FAST="llama-3.1-8b-instant"
 ```
+En Google Colab: panel 🔑 **Secrets** con el secreto `GROQ_API_KEY`.
 
 **Dependencias:**
 ```bash
-pip install openai langchain langchain-openai
+pip install groq langchain langchain-groq python-dotenv
 ```
 
 **Mejores prácticas de seguridad:**
 - Nunca hardcodear API keys
-- Usar variables de entorno
-- Implementar rate limiting
+- Usar variables de entorno (o Secrets de Colab)
+- Respetar el free tier: 30 req/min, 12.000 tokens/min y **100.000 tokens/día** en el modelo
+  grande (error `429` si se excede). El `llama-3.1-8b-instant` tiene 500.000 tokens/día.
 
 ---
 
 ## Slide 4: Conexión Directa con API
-**Título:** Notebook 1 - GitHub Models API
+**Título:** Notebook 1 - Groq API (`1-groq_model_api.ipynb`)
 
 **Pasos a seguir:**
-1. Configurar cliente OpenAI con base_url personalizada
-2. Realizar primera llamada básica al modelo
-3. Explorar parámetros: temperature, max_tokens
-4. Implementar manejo de errores
-5. Usar mensajes de sistema para definir comportamiento
+1. Crear la cuenta en Groq y generar la API key
+2. Configurar el cliente oficial `groq`
+3. Realizar primera llamada básica al modelo
+4. Explorar parámetros: temperature, max_tokens
+5. Implementar manejo de errores
+6. Usar mensajes de sistema para definir comportamiento
 
 **Código básico:**
 ```python
-client = OpenAI(
-    base_url=os.environ.get("GITHUB_BASE_URL"),
-    api_key=os.environ.get("GITHUB_TOKEN")
-)
+from groq import Groq
+
+cliente = Groq()  # lee GROQ_API_KEY del entorno
 ```
 
 ---
@@ -80,10 +88,11 @@ client = OpenAI(
 
 **Implementación:**
 ```python
-llm = ChatOpenAI(
-    base_url=os.getenv("OPENAI_BASE_URL"),
-    api_key=os.getenv("GITHUB_TOKEN"),
-    model="gpt-4o"
+from langchain_groq import ChatGroq
+
+llm = ChatGroq(
+    model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+    temperature=0.2
 )
 ```
 
@@ -173,8 +182,9 @@ for chunk in llm.stream([HumanMessage(content=prompt)]):
 **Título:** Continuando el Aprendizaje
 
 **Recursos adicionales:**
-- [Documentación OpenAI API](https://platform.openai.com/docs)
-- [GitHub Models Documentation](https://docs.github.com/en/github-models)
+- [Consola de Groq](https://console.groq.com/) (API Keys, Playground y límites)
+- [Documentación de la API de Groq](https://console.groq.com/docs/overview)
+- [Catálogo de modelos en Groq](https://console.groq.com/docs/models)
 - [LangChain Documentation](https://python.langchain.com/docs/)
 - [Transformer Architecture Paper](https://arxiv.org/abs/1706.03762)
 

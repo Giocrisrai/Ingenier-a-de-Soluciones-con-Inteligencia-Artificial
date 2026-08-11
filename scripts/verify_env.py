@@ -21,10 +21,10 @@ def _try(mod: str, label: str | None = None) -> None:
 def main() -> None:
     # Orden: livianos primero; crewai/streamlit al final (más pesados).
     core: Iterable[tuple[str, str | None]] = [
-        ("openai", None),
+        ("groq", None),
+        ("langchain_groq", "langchain_groq (ChatGroq)"),
         ("langchain", None),
         ("langchain_core", None),
-        ("langchain_openai", None),
         ("langchain_community", None),
         ("langchain_text_splitters", None),
         ("langchain_classic.chains", "langchain_classic.chains (RetrievalQA, etc.)"),
@@ -53,6 +53,8 @@ def main() -> None:
     ]
     heavy: Iterable[tuple[str, str | None]] = [
         ("streamlit", None),
+        ("langchain_huggingface", "langchain_huggingface (embeddings locales)"),
+        ("sentence_transformers", None),
         ("crewai", None),
         ("crewai_tools", None),
     ]

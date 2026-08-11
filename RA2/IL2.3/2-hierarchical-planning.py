@@ -17,8 +17,8 @@ dividirse en pasos más pequeños y manejables. Por ejemplo, "Desarrollar una ap
 se divide en: diseñar, implementar, probar, desplegar.
 """
 
-# Requiere: pip install langchain langchain-openai openai python-dotenv
-from langchain_openai import ChatOpenAI
+# Requiere: pip install langchain langchain-groq groq python-dotenv
+from langchain_groq import ChatGroq
 from langchain_classic.agents import create_react_agent, AgentExecutor, Tool
 from langchain_classic import hub
 from typing import List, Dict, Any
@@ -36,20 +36,14 @@ except ImportError:
     exit(1)
 
 # Obtener variables de entorno
-github_token = os.getenv("GITHUB_TOKEN")
-github_base_url = os.getenv("GITHUB_BASE_URL", "https://models.inference.ai.azure.com")
-
-if not github_token:
-    print("❌ GITHUB_TOKEN no está configurado. Por favor verifica tu archivo .env")
-    print("💡 Tu archivo .env debe contener: GITHUB_TOKEN=tu_token_aqui")
+if not os.getenv("GROQ_API_KEY"):
+    print("❌ GROQ_API_KEY no está configurada. Por favor verifica tu archivo .env")
+    print("💡 Tu archivo .env debe contener: GROQ_API_KEY=gsk_tu_clave_aqui")
     exit(1)
 
-# Configurar LLM
-os.environ["OPENAI_API_KEY"] = github_token
-llm = ChatOpenAI(
-    model="gpt-4o",
-    base_url=github_base_url,
-    api_key=github_token,
+# Configurar LLM (ChatGroq lee GROQ_API_KEY del entorno automáticamente)
+llm = ChatGroq(
+    model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
     temperature=0.7
 )
 

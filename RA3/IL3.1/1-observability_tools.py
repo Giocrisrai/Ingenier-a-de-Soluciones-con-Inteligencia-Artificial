@@ -51,7 +51,7 @@ class RecolectorMetricas:
         self.registros: List[RegistroMetrica] = []
 
     def registrar(self, tiempo_ms: float, tokens_in: int, tokens_out: int,
-                  exitoso: bool, modelo: str = "gpt-4o-mini"):
+                  exitoso: bool, modelo: str = "llama-3.1-8b-instant"):
         registro = RegistroMetrica(
             timestamp=datetime.now().isoformat(),
             tiempo_respuesta_ms=round(tiempo_ms, 2),

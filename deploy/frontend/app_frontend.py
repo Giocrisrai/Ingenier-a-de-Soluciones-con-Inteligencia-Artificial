@@ -1,7 +1,7 @@
 """Frontend Streamlit que consume la API del backend.
 
 No invoca el modelo directamente: toda la lógica (y la seguridad) vive en el
-backend. Esto mantiene el secreto del token fuera del navegador.
+backend. Esto mantiene la GROQ_API_KEY fuera del navegador.
 """
 import os
 import html

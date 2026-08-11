@@ -296,7 +296,7 @@ Nueva entrada: Input → ?
 **Título:** Ecosystem de Prompt Engineering
 
 **Plataformas de testing:**
-- OpenAI Playground para experimentación
+- [Groq Playground](https://console.groq.com/playground) para experimentación (el que usamos en el curso)
 - LangChain Prompt Templates para reutilización
 - PromptBase para compartir prompts efectivos
 - Custom evaluation frameworks

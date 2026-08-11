@@ -51,6 +51,33 @@
 
 ---
 
+## Slide 4b: ¿Por qué los embeddings NO los calcula Groq?
+**Título:** Un RAG con dos proveedores
+
+**El problema:**
+- Usamos **Groq** (`llama-3.3-70b-versatile`) para la generación, pero **Groq no expone un endpoint de embeddings**: su API solo ofrece chat/completions.
+- Un RAG necesita vectores sí o sí, así que hay que resolverlos por otra vía.
+
+**La solución del curso: embeddings locales**
+- Modelo `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` vía `langchain-huggingface`, ejecutado **en la máquina del alumno**.
+
+| Pieza | Dónde corre | Coste |
+|---|---|---|
+| Generación (chat) | API de Groq | API key gratuita |
+| Embeddings | Local (HuggingFace) | gratis, sin API key |
+
+**Por qué esto es buena ingeniería, no un parche:**
+- **Coste cero por token** al indexar corpus grandes.
+- **Privacidad**: los documentos nunca salen de la máquina.
+- **Sin conexión** una vez descargado el modelo.
+
+**Lo que hay que advertir a los alumnos:**
+- La **primera ejecución descarga ~470 MB** del modelo (luego queda en caché).
+- Los vectores pasan de 1536 a **384 dimensiones**: menos memoria y búsqueda más rápida, algo menos de precisión.
+- La interfaz de LangChain (`embed_documents` / `embed_query`) es la misma, por lo que **FAISS y el resto del pipeline no cambian**.
+
+---
+
 ## Slide 5: Evaluación del Módulo
 **Título:** Componentes de Evaluación
 
@@ -63,7 +90,8 @@
 
 **Ejercicios adicionales:**
 - Aplicar el sistema RAG a un nuevo documento PDF o de texto.
-- Intercambiar el modelo de embeddings y observar los cambios en la calidad de la recuperación.
+- Intercambiar el modelo de embeddings (por ejemplo `all-mpnet-base-v2`, de 768 dimensiones) y observar los cambios en la calidad de la recuperación y en el tiempo de indexación.
+- Comparar la latencia de generación entre `llama-3.3-70b-versatile` y `llama-3.1-8b-instant` en Groq.
 
 ---
 
@@ -71,6 +99,8 @@
 **Título:** Continuando el Aprendizaje
 
 **Recursos adicionales:**
+- [Consola de Groq (crear API key gratuita)](https://console.groq.com/)
+- [Modelos de sentence-transformers en HuggingFace](https://huggingface.co/sentence-transformers)
 - [LangChain RAG Documentation](https://python.langchain.com/docs/use_cases/question_answering/)
 - [Blog de Pinecone: ¿Qué es RAG?](https://www.pinecone.io/learn/retrieval-augmented-generation/)
 - [FAISS: A library for efficient similarity search](https://engineering.fb.com/2017/03/29/faiss-a-library-for-efficient-similarity-search/)

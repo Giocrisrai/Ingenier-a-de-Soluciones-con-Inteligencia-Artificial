@@ -51,11 +51,26 @@ bash bootstrap.sh
 ```bash
 cd ~/app/deploy
 cp .env.example .env
-nano .env            # pega tu GITHUB_TOKEN y pon SITE_ADDRESS=https://<IP_PUBLICA>
+nano .env            # pega tu GROQ_API_KEY y pon SITE_ADDRESS=https://<IP_PUBLICA>
 # (SITE_ADDRESS con tu IP pública hace que Caddy emita el certificado self-signed
 #  para ESA IP; sin esto el HTTPS por IP falla en el handshake TLS.)
 sudo docker compose -f docker-compose.prod.yml up --build -d
 ```
+
+Variables que debes revisar en `.env` (las define `deploy/.env.example`):
+
+| Variable | Para qué sirve | Valor típico |
+|---|---|---|
+| `GROQ_API_KEY` | Credencial de Groq (empieza por `gsk_`). Se obtiene en https://console.groq.com/keys | `gsk_...` |
+| `AGENT_MODEL` | Modelo que usa el agente | `llama-3.1-8b-instant` |
+| `LANGSMITH_TRACING` | Activa el envío de trazas a LangSmith | `true` / `false` |
+| `LANGSMITH_API_KEY` | Credencial de LangSmith (opcional, solo si trazas) | `lsv2_...` |
+| `LANGSMITH_PROJECT` | Proyecto donde se agrupan las trazas | `ingenieria_soluciones_con_ia` |
+| `BACKEND_URL` | URL interna que el frontend usa para hablar con la API | `http://backend:8000` |
+| `SITE_ADDRESS` | Dirección que Caddy sirve por HTTPS | `https://<IP_PUBLICA>` |
+
+> 🔐 La clave de Groq va **solo** en el `.env` de la instancia, nunca en git.
+> Si se filtra, revócala en https://console.groq.com/keys y genera otra.
 
 ## 8. Verifica
 - Navega a `https://<IP_PUBLICA>` (acepta el aviso de certificado self-signed).

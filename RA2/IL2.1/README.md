@@ -2,14 +2,14 @@
 
 ## 📋 Descripción General
 
-En este módulo exploramos los fundamentos de la arquitectura de agentes inteligentes basados en LLM, progresando desde implementaciones básicas hasta frameworks avanzados como LangChain y CrewAI. Incluye configuraciones específicas para integración con GitHub Models API y soluciones a problemas comunes de compatibilidad.
+En este módulo exploramos los fundamentos de la arquitectura de agentes inteligentes basados en LLM, progresando desde implementaciones básicas hasta frameworks avanzados como LangChain y CrewAI. Incluye configuraciones específicas para integración con la API de Groq y soluciones a problemas comunes de compatibilidad.
 
 ## 🎯 Objetivos de Aprendizaje
 
 - Comprender qué es un agente inteligente y sus componentes fundamentales (cerebro, memoria, herramientas, planificación)
-- Dominar el ciclo de razonamiento ReAct (Reason + Act) y el Function Calling nativo de OpenAI
+- Dominar el ciclo de razonamiento ReAct (Reason + Act) y el Function Calling (tool calling) nativo de Groq
 - Implementar agentes desde cero y usando frameworks LangChain y CrewAI
-- Configurar correctamente frameworks con GitHub Models API
+- Configurar correctamente frameworks con la API de Groq
 - Diseñar equipos de agentes colaborativos para tareas complejas
 - Entender criterios de selección entre diferentes frameworks
 
@@ -23,7 +23,7 @@ En este módulo exploramos los fundamentos de la arquitectura de agentes intelig
   - Limitaciones y motivación para frameworks
 
 ### 2. Function Calling Nativo
-- **[2-agent-function-calling.ipynb](2-agent-function-calling.ipynb)** - Mecanismo estructurado de OpenAI
+- **[2-agent-function-calling.ipynb](2-agent-function-calling.ipynb)** - Mecanismo estructurado de tool calling
   - Definición de herramientas con JSON Schema
   - Ventajas sobre parsing manual: confiabilidad, seguridad
   - Flujo de llamadas estructuradas
@@ -41,36 +41,77 @@ En este módulo exploramos los fundamentos de la arquitectura de agentes intelig
   - Conceptos: Agent, Task, Crew, Process
   - Especialización por roles: Investigador, Escritor
   - Coordinación secuencial con dependencias
-  - **🔧 CONFIGURACIÓN CRÍTICA**: Mapeo de variables para GitHub Models API
+  - **🔧 CONFIGURACIÓN CRÍTICA**: Prefijo `groq/` en el modelo (CrewAI usa LiteLLM)
 
 ## 🔧 Configuraciones Técnicas Importantes
 
 ### Variables de Entorno Requeridas
 ```bash
-export OPENAI_BASE_URL="https://models.inference.ai.azure.com"
-export GITHUB_TOKEN="tu_token_de_github"
+export GROQ_API_KEY="gsk_tu_api_key_de_groq"
+export GROQ_MODEL="llama-3.3-70b-versatile"
+export GROQ_MODEL_FAST="llama-3.1-8b-instant"
 ```
+
+Consigue tu API key gratuita en [console.groq.com](https://console.groq.com/).
+
+### ⚠️ Qué modelo usar según el tipo de agente
+
+El *tool calling* no lo resuelve la API por su cuenta: es el **modelo** el que debe generar la
+llamada a la función con el formato exacto que la API espera. Si se equivoca, Groq responde
+con un error `400` y el código `tool_use_failed`.
+
+Lo medimos con las herramientas de estos mismos notebooks, y el resultado es menos intuitivo
+de lo que parece:
+
+| Vía de código | `llama-3.3-70b-versatile` | `llama-3.1-8b-instant` |
+|---|---|---|
+| SDK crudo de Groq, esquema JSON escrito a mano, prompt en español | 7/10 | **10/10** |
+| LangChain `create_openai_tools_agent` con el prompt `hwchase17/openai-tools-agent` (en inglés) | **6/6** | 4/6 |
+
+**El "mejor modelo para herramientas" se invierte según la vía.** No hay un ganador absoluto:
+depende del prompt del sistema y de cómo se le presenten las herramientas al modelo.
+
+Por eso en este curso:
+
+- **Herramientas con el SDK crudo** → `GROQ_MODEL_FAST` (`llama-3.1-8b-instant`).
+  Notebooks `2-agent-function-calling` y, en IL2.2, `3-herramientas-externas`.
+- **Agentes de LangChain con herramientas** → `GROQ_MODEL` (`llama-3.3-70b-versatile`).
+  Notebooks `3-langchain-agent` y, en IL2.2, `1-memory-agent` y `2-memory-agent-advanced`.
+- **Agentes ReAct por prompt** (`create_react_agent`) → `GROQ_MODEL`. No les afecta, porque el
+  modelo escribe texto plano en vez de una llamada estructurada.
+
+Dos lecciones que se llevan a producción:
+
+1. **El modelo más grande no es automáticamente el mejor para un agente.** Cuando el agente
+   depende de un formato de salida exacto, la fiabilidad de ese formato pesa tanto como la
+   capacidad de razonamiento.
+2. **Hay que medirlo, no suponerlo**, y medirlo con *tu* prompt y *tus* herramientas: cambiar
+   el prompt del sistema fue suficiente para invertir qué modelo era el más fiable.
+
+Y en cualquier caso, trata `tool_use_failed` como un error **esperable**: en producción se
+maneja con reintento, no se asume que no va a ocurrir.
 
 ### Configuración para LangChain
 ```python
-# LangChain funciona directamente con las variables estándar
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
+# ChatGroq lee GROQ_API_KEY del entorno automáticamente
+from langchain_groq import ChatGroq
+llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
 ```
 
 ### Configuración para CrewAI (CRÍTICA)
 ```python
-# CrewAI requiere mapeo específico de variables
+# CrewAI enruta por LiteLLM: el prefijo "groq/" es obligatorio
 import os
-os.environ["OPENAI_API_BASE"] = os.environ.get("OPENAI_BASE_URL", "")
-os.environ["OPENAI_API_KEY"] = os.environ.get("GITHUB_TOKEN", "")
+from crewai import LLM
+llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}", temperature=0)
 ```
 
 ## ⚠️ Problemas Comunes y Soluciones
 
-### 1. Error de Autenticación en CrewAI
-**Síntoma**: `AuthenticationError: Incorrect API key provided`
-**Causa**: CrewAI utiliza LangChain internamente, espera variables específicas
-**Solución**: Mapear `GITHUB_TOKEN` → `OPENAI_API_KEY` y `OPENAI_BASE_URL` → `OPENAI_API_BASE`
+### 1. Error de Autenticación o de proveedor en CrewAI
+**Síntoma**: `AuthenticationError: Incorrect API key provided` / `LLM Provider NOT provided`
+**Causa**: Falta `GROQ_API_KEY` en el entorno, o el modelo no lleva el prefijo del proveedor
+**Solución**: Definir `GROQ_API_KEY` en `.env` (o en los Secrets de Colab) y usar `model="groq/llama-3.3-70b-versatile"`
 
 ### 2. Error de Herramientas en CrewAI
 **Síntoma**: `'Tool' object is not callable`
@@ -98,7 +139,7 @@ os.environ["OPENAI_API_KEY"] = os.environ.get("GITHUB_TOKEN", "")
 | **Especialización** | Agentes individuales complejos | Equipos colaborativos |
 | **Complejidad** | Simple a moderada | Compleja, multi-paso |
 | **Flexibilidad** | Muy alta, experimental | Estructurada, workflow-oriented |
-| **Configuración** | Directa con variables estándar | Requiere mapeo específico |
+| **Configuración** | Directa con `GROQ_API_KEY` | Requiere el prefijo `groq/` en el modelo |
 | **Curva de aprendizaje** | Moderada | Baja para equipos |
 | **Casos de uso** | Experimentación, prototipado | Workflows de producción |
 
@@ -126,7 +167,7 @@ os.environ["OPENAI_API_KEY"] = os.environ.get("GITHUB_TOKEN", "")
 ### Base Establecida
 - ✅ Fundamentos sólidos de agentes inteligentes
 - ✅ Experiencia con frameworks principales
-- ✅ Configuraciones de producción para GitHub Models API
+- ✅ Configuraciones de producción para la API de Groq
 - ✅ Patrones de colaboración entre agentes
 - ✅ Debugging y troubleshooting de sistemas complejos
 
@@ -135,11 +176,11 @@ os.environ["OPENAI_API_KEY"] = os.environ.get("GITHUB_TOKEN", "")
 ### Documentación Oficial
 - [LangChain Agents Documentation](https://python.langchain.com/docs/use_cases/autonomous_agents/)
 - [CrewAI Documentation](https://docs.crewai.com/)
-- [OpenAI Function Calling Guide](https://platform.openai.com/docs/guides/function-calling)
+- [Groq Tool Use (Function Calling)](https://console.groq.com/docs/tool-use)
 
 ### Herramientas de Desarrollo
 - [LangSmith](https://smith.langchain.com/) - Observabilidad para agentes LangChain
-- [GitHub Models](https://github.com/marketplace/models) - Acceso a modelos de IA
+- [Groq Console](https://console.groq.com/) - API keys, modelos disponibles y límites de uso
 
 ### Troubleshooting y Soporte
 - [GitHub Issues - CrewAI](https://github.com/joaomdmoura/crewAI/issues)

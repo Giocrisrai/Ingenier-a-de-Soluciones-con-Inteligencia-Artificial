@@ -18,6 +18,8 @@ build/
 
 # Variables de entorno (NUNCA subir tokens o API keys)
 .env
+.env.*
+!.env.example
 
 # Sistema operativo
 .DS_Store

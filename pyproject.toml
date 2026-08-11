@@ -8,14 +8,21 @@ description = "Materiales del curso Ingeniería de Soluciones con Inteligencia A
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "openai>=1.0.0",
+    # --- Groq: proveedor de LLMs del curso ---
+    "groq>=0.11.0",
+    "langchain-groq>=0.2.0",
+    # --- Embeddings locales (Groq no ofrece endpoint de embeddings) ---
+    "langchain-huggingface>=0.1.0",
+    "sentence-transformers>=3.0.0",
     "langchain>=1.0.0",
-    "langchain-openai>=0.3.0",
     "langchain-community>=0.3.0",
     "langchain-text-splitters>=0.3.0",
     "langsmith>=0.3.0",
     "langgraph>=0.3.0",
-    "crewai>=0.100.0",
+    # CrewAI habla con Groq a través de LiteLLM (prefijo "groq/"): desde crewai 1.x
+    # LiteLLM ya no viene incluido y Groq no es un proveedor nativo, así que el extra
+    # [litellm] es obligatorio o `LLM(model="groq/...")` falla con ImportError.
+    "crewai[litellm]>=0.100.0",
     "crewai-tools>=0.38.0",
     "faiss-cpu>=1.7.0",
     "tiktoken>=0.5.0",

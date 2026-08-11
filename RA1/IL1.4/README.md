@@ -39,9 +39,21 @@ Este módulo se centra en un aspecto crítico del desarrollo de sistemas de IA: 
 4.  **`presentacion.md`**
     - **Descripción**: Documento de apoyo que resume los conceptos teóricos y los pasos prácticos cubiertos en las actividades. Úsalo como guía de referencia rápida y para consolidar tu aprendizaje.
 
+## Proveedores usados en este módulo
+
+| Pieza | Dónde se ejecuta | Modelo |
+|---|---|---|
+| Chat / LLM-como-juez | API de **Groq** | `llama-3.3-70b-versatile` (y `llama-3.1-8b-instant` para las métricas, que hacen muchas llamadas cortas) |
+| Embeddings (`1-evaluation-rag.py`) | **Tu propia máquina** (HuggingFace) | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` |
+| Trazabilidad y experimentos | LangSmith (nube) | — |
+
+**¿Por qué los embeddings son locales?** Porque **Groq no ofrece un endpoint de embeddings**: su API solo expone chat/completions. La app de Streamlit calcula los vectores con `langchain-huggingface`, que no necesita API key y no cobra por token. La contrapartida: la **primera ejecución descarga ~470 MB** del modelo desde HuggingFace (después queda en caché) y los vectores tienen **384 dimensiones** en lugar de las 1536 de los modelos comerciales.
+
+Esto tiene un efecto directo sobre las métricas de este módulo: en el dashboard verás que el **tiempo de recuperación baja mucho** respecto a usar una API de embeddings remota (no hay latencia de red al indexar), mientras que el **tiempo de generación** sigue dependiendo de la API de Groq. Es un buen ejemplo de cómo una decisión de arquitectura se ve reflejada en la observabilidad.
+
 ## ¿Cómo Empezar?
 
-1.  **Configura tu Entorno**: Asegúrate de tener las variables de entorno necesarias en un archivo `.env`, como se describe en `1-evaluation-rag.py` y `2-langsmith-evaluation.ipynb`. Necesitarás tus claves de API para los modelos de IA y para LangSmith.
+1.  **Configura tu Entorno**: Asegúrate de tener las variables de entorno necesarias en un archivo `.env` (`GROQ_API_KEY`, `GROQ_MODEL`, `EMBEDDING_MODEL`, `LANGSMITH_API_KEY`), como se describe en `1-evaluation-rag.py` y `2-langsmith-evaluation.ipynb`. Tu API key de Groq se crea gratis en [console.groq.com](https://console.groq.com/); la de LangSmith, en [smith.langchain.com](https://smith.langchain.com).
 2.  **Explora la Aplicación Interactiva**:
     ```bash
     streamlit run RA1/IL1.4/1-evaluation-rag.py
