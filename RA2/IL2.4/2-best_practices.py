@@ -34,7 +34,7 @@ class Configuracion:
         return cls(
             api_base_url=os.getenv("API_BASE_URL", "https://api.example.com/v1"),
             api_key=api_key,
-            modelo=os.getenv("MODELO_LLM", "gpt-4o-mini"),
+            modelo=os.getenv("MODELO_LLM", "llama-3.1-8b-instant"),
             temperatura=float(os.getenv("TEMPERATURA", "0.7")),
             max_reintentos=int(os.getenv("MAX_REINTENTOS", "3")),
         )

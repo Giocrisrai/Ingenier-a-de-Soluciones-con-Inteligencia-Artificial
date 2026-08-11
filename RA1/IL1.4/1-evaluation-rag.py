@@ -11,12 +11,12 @@ from datetime import datetime
 from pathlib import Path
 import pandas as pd
 import numpy as np
-from openai import OpenAI
+from groq import Groq
 from sklearn.metrics.pairwise import cosine_similarity
 import plotly.express as px
 
 # LangChain imports
-from langchain_openai import OpenAIEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.documents import Document
 
 # Streamlit: set_page_config debe ser la primera llamada st.*
@@ -30,36 +30,31 @@ except ImportError:
     st.warning("⚠️ python-dotenv no está instalado. Instálalo con: pip install python-dotenv")
 
 # -----------------------------------------------------------------------------
-# Configuración didáctica — modelos y URL (para que vean cómo se nombran en código)
-# GitHub Models suele usar los mismos identificadores que la API de OpenAI.
-# Cambien estos strings si el proveedor o el catálogo usan otros nombres.
+# Configuración didáctica — modelos (para que vean cómo se nombran en código)
+#
+# El chat corre en Groq (https://console.groq.com/). Los embeddings NO: Groq no
+# expone un endpoint de embeddings, así que se calculan en LOCAL con un modelo de
+# sentence-transformers descargado desde HuggingFace. Es gratis y no necesita API
+# key, pero la PRIMERA ejecución descarga ~470 MB del modelo (luego queda en caché).
+# Cambien estos strings si quieren probar otros modelos del catálogo.
 # -----------------------------------------------------------------------------
-API_BASE_URL_PREDETERMINADA = "https://models.inference.ai.azure.com"
 
-# Modelo para chat / evaluaciones (client.chat.completions)
-MODELO_CHAT = "gpt-4o"
-# Alternativas frecuentes en catálogos compatibles: "gpt-4o-mini", "o1", etc.
+# Modelo para chat / evaluaciones (client.chat.completions) — servido por Groq
+MODELO_CHAT = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+# Alternativa frecuente para tareas simples / alto volumen: "llama-3.1-8b-instant"
 
-# Modelo para embeddings (OpenAIEmbeddings de LangChain)
-MODELO_EMBEDDINGS = "text-embedding-3-small"
-# Otras opciones típicas: "text-embedding-3-large", "text-embedding-ada-002"
+# Modelo para embeddings (HuggingFaceEmbeddings de LangChain) — corre en tu máquina
+MODELO_EMBEDDINGS = os.getenv("EMBEDDING_MODEL", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+# Otras opciones típicas: "sentence-transformers/all-mpnet-base-v2" (768 dims),
+# "intfloat/multilingual-e5-small" (multilingüe). paraphrase-multilingual-MiniLM-L12-v2 usa 384 dims.
 
 # Nombres usados en el resto del archivo (alias claros para el curso)
 CHAT_MODEL = MODELO_CHAT
 EMBEDDING_MODEL = MODELO_EMBEDDINGS
 
-# Credenciales y host: desde .env (igual que en los notebooks IL1.2 / IL1.3)
-github_token = os.getenv("GITHUB_TOKEN")
-github_base_url = (
-    os.getenv("OPENAI_BASE_URL")
-    or os.getenv("GITHUB_BASE_URL")
-    or API_BASE_URL_PREDETERMINADA
-)
-
-if github_token:
-    os.environ["OPENAI_API_KEY"] = github_token
-    os.environ["OPENAI_BASE_URL"] = github_base_url
-# Set env vars so langchain_openai.ChatOpenAI can pick up the API key
+# Credenciales: desde .env (igual que en los notebooks IL1.2 / IL1.3)
+# El cliente Groq() lee GROQ_API_KEY del entorno automáticamente.
+groq_api_key = os.getenv("GROQ_API_KEY")
 
 logger = logging.getLogger("evaluation_rag")
 _LOG_FILE = Path(__file__).resolve().parent / "1-evaluation-rag.run.log"
@@ -86,31 +81,31 @@ def configure_logging():
 
 
 def initialize_client():
-    if not github_token:
-        logger.warning("initialize_client: sin GITHUB_TOKEN")
-        st.error("❌ No hay token de GitHub disponible.")
+    if not groq_api_key:
+        logger.warning("initialize_client: sin GROQ_API_KEY")
+        st.error("❌ No hay GROQ_API_KEY disponible.")
         return None
-    
-    logger.debug("OpenAI client base_url=%s", github_base_url)
-    client = OpenAI(
-        base_url=github_base_url,
-        api_key=github_token
-    )
-    logger.info("Cliente OpenAI inicializado")
+
+    logger.debug("Groq client model=%s", CHAT_MODEL)
+    # Groq() toma GROQ_API_KEY del entorno; no hace falta pasar api_key ni base_url
+    client = Groq()
+    logger.info("Cliente Groq inicializado")
     return client
 
 def initialize_embeddings():
-    """Initialize LangChain embeddings model"""
-    if not github_token:
-        logger.warning("initialize_embeddings: sin token")
-        st.error("❌ Se necesita GITHUB_TOKEN para inicializar embeddings.")
-        return None
-    
+    """Inicializa el modelo de embeddings LOCAL (HuggingFace / sentence-transformers).
+
+    No requiere API key: el modelo se ejecuta en esta máquina. La primera vez
+    descarga ~470 MB desde HuggingFace y luego lo reutiliza desde la caché local.
+    """
     try:
-        logger.info("Inicializando OpenAIEmbeddings model=%s", EMBEDDING_MODEL)
+        logger.info("Inicializando HuggingFaceEmbeddings (local) model=%s", EMBEDDING_MODEL)
         t0 = time.monotonic()
-        embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
-        logger.info("OpenAIEmbeddings listo en %.2fs", time.monotonic() - t0)
+        embeddings = HuggingFaceEmbeddings(
+            model_name=EMBEDDING_MODEL,
+            encode_kwargs={"normalize_embeddings": True},
+        )
+        logger.info("HuggingFaceEmbeddings listo en %.2fs", time.monotonic() - t0)
         return embeddings
     except Exception as e:
         logger.exception("Fallo al inicializar embeddings: %s", e)
@@ -138,7 +133,7 @@ def get_embeddings_langchain(embeddings_model, texts):
             st.error("No hay textos para embedir.")
             return None
         n = len(texts)
-        logger.info("embed_documents: inicio (%d fragmentos)", n)
+        logger.info("embed_documents: inicio (%d fragmentos, cálculo local)", n)
         t0 = time.monotonic()
         # Convert texts to LangChain Document objects if needed
         if isinstance(texts[0], str):
@@ -459,9 +454,12 @@ def main():
     st.title("📊 RAG con Evaluación y Monitoreo (LangChain)")
     st.caption(
         f"Modelos (editar arriba en el script: `MODELO_CHAT`, `MODELO_EMBEDDINGS`): "
-        f"chat `{CHAT_MODEL}` · embeddings `{EMBEDDING_MODEL}` · API `{github_base_url}`"
+        f"chat `{CHAT_MODEL}` · API `Groq` · embeddings `{EMBEDDING_MODEL}` (locales, HuggingFace)"
     )
-    st.write("Sistema RAG con métricas detalladas usando LangChain para embeddings.")
+    st.write(
+        "Sistema RAG con métricas detalladas: el chat corre en Groq y los embeddings "
+        "se calculan en tu máquina (Groq no ofrece endpoint de embeddings)."
+    )
 
     with st.sidebar:
         st.header("📋 Monitoreo")
@@ -473,9 +471,9 @@ def main():
         if _LOG_FILE.exists():
             st.caption(f"Tamaño log: {_LOG_FILE.stat().st_size / 1024:.1f} KB")
     
-    if not github_token:
-        st.error("❌ Falta GITHUB_TOKEN. Revisa tu archivo `.env` en la raíz del proyecto.")
-        st.info("💡 Copia `.env.example` a `.env` y define `GITHUB_TOKEN` con tu token de GitHub Models.")
+    if not groq_api_key:
+        st.error("❌ Falta GROQ_API_KEY. Revisa tu archivo `.env` en la raíz del proyecto.")
+        st.info("💡 Copia `.env.example` a `.env` y define `GROQ_API_KEY` con tu clave de https://console.groq.com/.")
         return
     
     if "eval_rag" not in st.session_state:
@@ -500,7 +498,7 @@ def main():
     
     client = initialize_client()
     if not client:
-        st.error("❌ No se pudo inicializar el cliente OpenAI (revisa token y URL base).")
+        st.error("❌ No se pudo inicializar el cliente de Groq (revisa tu GROQ_API_KEY).")
         return
     
     # Initialize LangChain embeddings model
@@ -543,8 +541,9 @@ def main():
                         expanded=True,
                     ) as emb_status:
                         st.markdown(
-                            f"Enviando **{nd}** fragmentos al modelo **`{EMBEDDING_MODEL}`** "
-                            "(una petición por lote a la API). Esto puede tardar decenas de segundos."
+                            f"Procesando **{nd}** fragmentos con el modelo local **`{EMBEDDING_MODEL}`**. "
+                            "La primera vez se descarga el modelo (~470 MB) y puede tardar; "
+                            "después el cálculo es local y casi instantáneo."
                         )
                         embeddings = get_embeddings_langchain(
                             st.session_state.eval_rag['embeddings_model'],

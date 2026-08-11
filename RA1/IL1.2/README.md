@@ -4,6 +4,16 @@
 
 Esta unidad profundiza en las técnicas avanzadas de ingeniería de prompts que permiten maximizar el rendimiento de los LLMs en diferentes tipos de tareas. Aprenderás a diseñar prompts efectivos para casos específicos y a aplicar metodologías probadas en la industria.
 
+## Requisitos Previos
+
+Todos los notebooks de esta unidad usan **Groq** como proveedor de modelos:
+
+- Necesitas tu `GROQ_API_KEY` configurada (en local, en el archivo `.env`; en Google Colab, en el panel 🔑 **Secrets**).
+  Si aún no la tienes, revisa el "Paso 0" de `RA1/IL1.1/README.md` → https://console.groq.com/ → *API Keys → Create API Key*.
+- Dependencias: `pip install groq langchain langchain-groq python-dotenv`
+- Modelos usados: `llama-3.3-70b-versatile` (principal) y `llama-3.1-8b-instant` (rápido, para experimentos con muchas llamadas).
+- La capa gratuita permite ~30 peticiones/minuto: evita ejecutar en bucle los experimentos comparativos.
+
 ## Objetivos de Aprendizaje
 
 Al completar esta unidad, serás capaz de:
@@ -113,7 +123,7 @@ Problema + "Piensa paso a paso" → Razonamiento + Solución
 ## Herramientas y Recursos
 
 ### Plataformas de Testing
-- OpenAI Playground
+- [Groq Playground](https://console.groq.com/playground) (el que usamos en el curso)
 - LangChain Prompt Templates
 - PromptBase (comunidad)
 - Custom evaluation frameworks

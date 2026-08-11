@@ -18,7 +18,7 @@ Ver **[0-guia-pedagogica.md](0-guia-pedagogica.md)** para la secuencia por seman
 
 ## Contenido por bloque
 
-### Fundamentos y agentes con LLM (requieren `GITHUB_TOKEN` + `GITHUB_BASE_URL` en `.env`)
+### Fundamentos y agentes con LLM (requieren `GROQ_API_KEY` en `.env`)
 
 - [1-basic_planning.py](1-basic_planning.py) — Agente ReAct mínimo con una herramienta (LangChain + hub)
 - [1-langchain_planning.py](1-langchain_planning.py) — Agente con herramienta tipo calculadora (LangChain)

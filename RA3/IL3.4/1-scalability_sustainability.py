@@ -73,10 +73,17 @@ class ConfigModelo:
     capacidad_maxima_tokens: int
 
 
+# Precios y latencias REFERENCIALES de Groq (USD por 1K tokens, agosto 2026).
+# Fuente oficial y valores actualizados: https://groq.com/pricing/
+# Groq ejecuta sobre LPUs, por eso las latencias son mucho menores que en GPU
+# (~560 tokens/s en llama-3.1-8b-instant, ~280 tokens/s en llama-3.3-70b-versatile).
 MODELOS_DISPONIBLES = {
-    "rapido": ConfigModelo("gpt-4o-mini", 0.00015, 200, 4096),
-    "estandar": ConfigModelo("gpt-4o", 0.005, 800, 8192),
-    "avanzado": ConfigModelo("o1", 0.015, 2000, 16384),
+    "rapido": ConfigModelo("llama-3.1-8b-instant", 0.00005, 250, 8192),
+    "estandar": ConfigModelo("llama-3.3-70b-versatile", 0.00059, 600, 32768),
+    # Nivel avanzado: mismo modelo grande, pero con razonamiento extendido
+    # (cadena de pensamiento larga). Se estima al precio de salida y su
+    # latencia es mayor porque genera muchos mas tokens.
+    "avanzado": ConfigModelo("llama-3.3-70b-versatile", 0.00079, 1500, 32768),
 }
 
 
@@ -201,4 +208,4 @@ if __name__ == "__main__":
     for prompt in prompts_lote1:
         modelo = seleccionar_modelo(prompt)
         nivel = clasificar_complejidad(prompt)
-        print(f"  [{nivel:>9}] {modelo.nombre:>12} -> {prompt[:50]}...")
+        print(f"  [{nivel:>9}] {modelo.nombre:>24} -> {prompt[:50]}...")

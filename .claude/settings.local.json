@@ -2,7 +2,32 @@
   "permissions": {
     "allow": [
       "mcp__ide__executeCode",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(git add *)",
+      "Bash(git commit -q -m 'docs\\(RA3\\): spec de IL3.5 ciberseguridad y despliegue en AWS *)",
+      "Read(//Users/giocrisraigodoy/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0/skills/subagent-driven-development/**)",
+      "Bash(uv add *)",
+      "Bash(uv run *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git commit *)",
+      "Bash(docker build *)",
+      "Bash(docker pull *)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(bash -n \"/Users/giocrisraigodoy/Documents/DUOC/2026-1/INGENIERIA DE SOLUCIONES CON INTELIGENCIA ARTIFICIAL/Ingenier-a-de-Soluciones-con-Inteligencia-Artificial/deploy/bootstrap-ec2.sh\")",
+      "Bash(python3 -c ' *)",
+      "Bash(git checkout *)",
+      "Bash(git merge --no-ff feat/il3.5-ciberseguridad-despliegue -m 'merge: IL3.5 ciberseguridad y despliegue en AWS \\(RA3\\) *)",
+      "Bash(git branch *)",
+      "Bash(git push *)",
+      "Bash(gh run *)",
+      "Bash(cp deploy/.env.example deploy/.env)",
+      "Bash(docker compose *)",
+      "Bash(curl -sk --max-time 6 https://127.0.0.1/api/health)",
+      "Bash(echo \" [exit=$?]\")",
+      "Bash(curl -sk --max-time 6 https://localhost/api/health)",
+      "Bash(curl -vk --max-time 6 https://localhost/api/health)",
+      "Bash(curl -sk --max-time 6 https://127.0.0.1/ -o /dev/null -w \"frontend http=%{http_code}\\\\n\")",
+      "Bash(gh api *)"
     ],
     "deny": []
   }

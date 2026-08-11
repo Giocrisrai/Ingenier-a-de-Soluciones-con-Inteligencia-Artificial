@@ -94,7 +94,7 @@ class AgenteTrazable:
             traza.respuesta_final = "[ERROR] Fallo en generacion"
         else:
             traza.agregar_evento("generacion_respuesta", inicio, duracion, "ok",
-                                 f"Modelo: gpt-4o-mini, tokens_salida: {random.randint(30, 200)}")
+                                 f"Modelo: llama-3.1-8b-instant, tokens_salida: {random.randint(30, 200)}")
             traza.respuesta_final = f"Respuesta para '{mensaje}' (intencion: {intencion})"
 
         self.historial_trazas.append(traza)

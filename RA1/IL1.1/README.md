@@ -6,7 +6,7 @@ Esta unidad introduce los conceptos fundamentales de los Modelos de Lenguaje Gra
 
 ## Videos de cada archivo del curso:
 
-- **1-github_model_api.ipynb**: Conexión directa a la API de GitHub Models.
+- **1-groq_model_api.ipynb**: Conexión directa a la API de Groq.
   [![Ver Video](https://img.youtube.com/vi/oYvwSROBTl0/hqdefault.jpg)](https://www.youtube.com/watch?v=oYvwSROBTl0)
 - **2-langchain_model_api.ipynb**: Abstracción de la API con LangChain.
   [![Ver Video](https://img.youtube.com/vi/v6Dgw0CMAfs/hqdefault.jpg)](https://www.youtube.com/watch?v=v6Dgw0CMAfs)
@@ -15,6 +15,49 @@ Esta unidad introduce los conceptos fundamentales de los Modelos de Lenguaje Gra
 - **4-langchain_memory.ipynb**: Gestión de memoria en conversaciones.
   [![Ver Video](https://img.youtube.com/vi/cM_CJPaD0kQ/hqdefault.jpg)](https://www.youtube.com/watch?v=cM_CJPaD0kQ)
 
+
+## Antes de empezar: obtén tu API key de Groq
+
+Esta es la **primera** experiencia del curso y todo el material usa [Groq](https://console.groq.com/)
+como proveedor de modelos. Necesitas una API key propia (gratuita):
+
+1. Entra a **https://console.groq.com/** y crea una cuenta.
+   Se sugiere registrarse con el **correo institucional Duoc UC** (puedes usar "Continue with Google").
+2. En el menú lateral abre **API Keys → Create API Key**.
+3. Dale un nombre reconocible (por ejemplo `curso-ia-duoc`) y confirma.
+4. **Copia la key en ese momento**: empieza por `gsk_...` y solo se muestra una vez.
+   Si la pierdes, borra esa key y crea otra (toma 10 segundos).
+
+> **No se requiere tarjeta de crédito.** La capa gratuita de Groq alcanza para todo el curso.
+
+### Límites de la capa gratuita
+
+Los límites vigentes (agosto 2026) se consultan en *Settings → Limits* de la consola y en la
+[documentación oficial](https://console.groq.com/docs/rate-limits):
+
+| Modelo | Peticiones/min | Peticiones/día | Tokens/min | **Tokens/día** |
+|---|---|---|---|---|
+| `llama-3.3-70b-versatile` | 30 | 1.000 | 12.000 | **100.000** |
+| `llama-3.1-8b-instant` | 30 | 14.400 | 6.000 | **500.000** |
+
+> **El límite que se agota primero es el de tokens al día (TPD).** Con el modelo grande son
+> solo 100.000 tokens diarios: unas pocas horas de trabajo con notebooks de agentes bastan
+> para consumirlos. El modelo rápido tiene 5 veces más.
+
+Por eso conviene:
+- No ejecutar celdas en bucle sin necesidad.
+- Reutilizar respuestas ya obtenidas en lugar de repetir la misma llamada.
+- Usar `llama-3.1-8b-instant` mientras pruebas, y dejar `llama-3.3-70b-versatile` para la
+  ejecución final o las tareas que de verdad necesiten más razonamiento.
+- Si aparece un error `429`, **leer el mensaje**: indica qué límite se alcanzó y cuánto esperar.
+  Si dice `tokens per minute`, basta con esperar un minuto; si dice `tokens per day`, hay que
+  cambiar de modelo o continuar al día siguiente.
+
+### Modelos que usa el curso
+| Uso | Modelo |
+|---|---|
+| Principal (razonamiento, calidad) | `llama-3.3-70b-versatile` |
+| Rápido (tareas simples, alto volumen) | `llama-3.1-8b-instant` |
 
 ## Objetivos de Aprendizaje
 
@@ -29,28 +72,29 @@ Al completar esta unidad, serás capaz de:
 
 Este módulo está compuesto por cuatro cuadernos de Jupyter que te guiarán progresivamente desde una conexión básica hasta la creación de un chatbot con memoria.
 
-### Notebook 1: Conexión Directa con GitHub Models API (`1-github_model_api.ipynb`)
-Este cuaderno es el punto de partida. Aprenderás a realizar llamadas directas a un modelo de lenguaje utilizando la API de GitHub Models y el cliente de OpenAI.
+### Notebook 1: Conexión Directa con la API de Groq (`1-groq_model_api.ipynb`)
+Este cuaderno es el punto de partida. Aprenderás a realizar llamadas directas a un modelo de lenguaje utilizando la API de Groq y su SDK oficial.
 - **Qué aprenderás**:
-    - Configurar las variables de entorno y el cliente de `openai`.
+    - Obtener la API key en https://console.groq.com/ y configurarla de forma segura.
+    - Configurar la variable de entorno y el cliente de `groq`.
     - Realizar una llamada básica `chat.completions.create`.
     - Usar parámetros clave como `model`, `messages`, `temperature` y `max_tokens`.
     - Aplicar el rol `system` para guiar el comportamiento del modelo.
 - **Cómo usarlo**:
-    1. Asegúrate de tener las variables de entorno `GITHUB_BASE_URL` y `GITHUB_TOKEN` configuradas.
-    2. Instala la dependencia `openai`.
+    1. Asegúrate de tener la variable de entorno `GROQ_API_KEY` configurada (`.env` en local, Secrets en Colab).
+    2. Instala la dependencia `groq`.
     3. Ejecuta las celdas secuencialmente para ver cómo se establece la conexión y se interactúa con el modelo.
 
 ### Notebook 2: Abstracción con LangChain (`2-langchain_model_api.ipynb`)
 Una vez que entiendes la conexión directa, introducimos LangChain, un framework que simplifica la interacción con LLMs.
 - **Qué aprenderás**:
     - Las ventajas de usar un framework como LangChain.
-    - Configurar el objeto `ChatOpenAI` para conectarse a diferentes proveedores de modelos.
+    - Configurar el objeto `ChatGroq` para conectarse al proveedor de modelos.
     - Utilizar el método `invoke` para interactuar con el modelo.
     - Entender la estructura de mensajes de LangChain (`HumanMessage`, `AIMessage`, `SystemMessage`).
 - **Cómo usarlo**:
-    1. Instala las dependencias `langchain` y `langchain-openai`.
-    2. Las mismas variables de entorno son utilizadas por `ChatOpenAI`.
+    1. Instala las dependencias `langchain` y `langchain-groq`.
+    2. `ChatGroq` lee automáticamente la variable de entorno `GROQ_API_KEY`.
     3. Ejecuta las celdas para comparar la simplicidad del código de LangChain frente a la llamada directa.
 
 ### Notebook 3: Streaming en Tiempo Real con LangChain (`3-langchain_streaming.ipynb`)
@@ -82,42 +126,57 @@ Un LLM no tiene estado. Este cuaderno enseña cómo darle "memoria" para que pue
 
 ### Variables de Entorno Requeridas
 
+Copia `.env.example` a `.env` en la raíz del repositorio y completa:
+
 ```bash
-export GITHUB_BASE_URL="https://models.inference.ai.azure.com"
-export GITHUB_TOKEN="tu_token_de_github"
-export OPENAI_BASE_URL="https://models.inference.ai.azure.com"
+GROQ_API_KEY="gsk_tu_api_key_aqui"
+GROQ_MODEL="llama-3.3-70b-versatile"
+GROQ_MODEL_FAST="llama-3.1-8b-instant"
 ```
+
+En Google Colab, en lugar del `.env`, crea el secreto `GROQ_API_KEY` en el panel 🔑 **Secrets**.
 
 ### Dependencias
 
 ```bash
-pip install openai langchain langchain-openai
+pip install groq langchain langchain-groq python-dotenv
 ```
 
 ## Arquitectura Técnica
 
+### Carga de credenciales (Colab y local)
+
+```python
+import os
+
+try:
+    from google.colab import userdata  # type: ignore
+    os.environ["GROQ_API_KEY"] = userdata.get("GROQ_API_KEY")
+except ImportError:
+    from dotenv import load_dotenv
+    load_dotenv()
+
+MODELO = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+```
+
 ### Patrón de Conexión API
 
 ```python
-# Configuración estándar
-from openai import OpenAI
+# Configuración estándar con el SDK oficial de Groq
+from groq import Groq
 
-client = OpenAI(
-    base_url=os.environ.get("GITHUB_BASE_URL"),
-    api_key=os.environ.get("GITHUB_TOKEN")
-)
+cliente = Groq()  # lee GROQ_API_KEY del entorno
 ```
 
 ### Abstracción con LangChain
 
 ```python
 # Framework approach
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 
-llm = ChatOpenAI(
-    base_url=os.getenv("OPENAI_BASE_URL"),
-    api_key=os.getenv("GITHUB_TOKEN"),
-    model="gpt-4o"
+llm = ChatGroq(
+    model=MODELO,
+    temperature=0.2
 )
 ```
 
@@ -125,8 +184,8 @@ llm = ChatOpenAI(
 
 ### Seguridad
 - Nunca hardcodear API keys en el código
-- Usar variables de entorno para credenciales
-- Implementar rate limiting y error handling
+- Usar variables de entorno para credenciales (`.env` está en `.gitignore`)
+- Implementar rate limiting y error handling (la capa gratuita devuelve `429` al excederse)
 
 ### Performance
 - Configurar timeouts apropiados
@@ -147,8 +206,9 @@ Esta unidad incluye:
 
 ## Recursos Adicionales
 
-- [Documentación OpenAI API](https://platform.openai.com/docs)
-- [GitHub Models Documentation](https://docs.github.com/en/github-models)
+- [Consola de Groq](https://console.groq.com/) (API Keys, Playground y límites)
+- [Documentación de la API de Groq](https://console.groq.com/docs/overview)
+- [Catálogo de modelos en Groq](https://console.groq.com/docs/models)
 - [LangChain Documentation](https://python.langchain.com/docs/)
 - [Transformer Architecture Paper](https://arxiv.org/abs/1706.03762)
 

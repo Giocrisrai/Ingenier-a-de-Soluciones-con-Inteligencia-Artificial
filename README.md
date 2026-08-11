@@ -120,18 +120,59 @@ En **Windows** (cmd): `copy .env.example .env` — en PowerShell: `Copy-Item .en
 Edita el archivo `.env` con tus credenciales:
 
 ```env
-OPENAI_BASE_URL="https://models.inference.ai.azure.com"
-GITHUB_BASE_URL="https://models.inference.ai.azure.com"
-OPENAI_EMBEDDINGS_URL="https://models.github.ai/inference"
-GITHUB_TOKEN="tu_github_token_aqui"
+GROQ_API_KEY="tu_api_key_de_groq_aqui"
+GROQ_MODEL="llama-3.3-70b-versatile"
+GROQ_MODEL_FAST="llama-3.1-8b-instant"
+EMBEDDING_MODEL="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 LANGSMITH_TRACING="true"
 LANGSMITH_API_KEY="tu_langsmith_api_key_aqui"
 LANGSMITH_PROJECT="ingenieria_soluciones_con_ia"
 ```
 
-**Cómo obtener tus tokens:**
-- **GITHUB_TOKEN**: Ve a [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens) y crea un token con permisos de lectura. Asegúrate de tener acceso a [GitHub Models](https://github.com/marketplace/models).
+**Cómo obtener tus credenciales:**
+- **GROQ_API_KEY**: Entra a [console.groq.com](https://console.groq.com/), inicia sesión (se sugiere tu cuenta de Google asociada a Duoc UC) y ve a **API Keys > Create API Key**. Copia la key en ese momento: no se vuelve a mostrar. **No necesitas tarjeta de crédito.**
 - **LANGSMITH_API_KEY**: Crea una cuenta en [LangSmith](https://smith.langchain.com/) y genera una API key desde Settings.
+
+### Proveedor de modelos: Groq
+
+El curso usa [Groq](https://console.groq.com/) como proveedor de LLMs. Corre los modelos sobre
+hardware LPU, lo que lo hace muy rápido, y tiene una capa gratuita suficiente para todo el curso.
+
+| Uso | Modelo | Cuándo |
+|-----|--------|--------|
+| `GROQ_MODEL` | `llama-3.3-70b-versatile` | Por defecto. Razonamiento, agentes, function calling. |
+| `GROQ_MODEL_FAST` | `llama-3.1-8b-instant` | Tareas simples o con muchas llamadas seguidas. |
+
+**Límites de la capa gratuita** (agosto 2026 — consulta siempre [la doc oficial](https://console.groq.com/docs/rate-limits)):
+
+| Modelo | Peticiones/min | Peticiones/día | Tokens/min | **Tokens/día** |
+|---|---|---|---|---|
+| `llama-3.3-70b-versatile` | 30 | 1.000 | 12.000 | **100.000** |
+| `llama-3.1-8b-instant` | 30 | 14.400 | 6.000 | **500.000** |
+
+> **El límite que de verdad molesta es el de tokens al día (TPD), no el de peticiones.**
+> Con el modelo grande son solo 100.000 tokens diarios: se agotan tras unas cuantas horas
+> de trabajar con notebooks de agentes. El modelo rápido tiene **5 veces más** cuota diaria.
+
+Si recibes un error `429`, lee el mensaje: te dice **qué** límite alcanzaste y cuánto esperar.
+- `tokens per minute (TPM)` → espera un minuto y sigue.
+- `tokens per day (TPD)` → por hoy se acabó con ese modelo; cambia a `GROQ_MODEL_FAST`.
+
+Consejo práctico para la clase: haz las pruebas y las iteraciones con `GROQ_MODEL_FAST`
+(`llama-3.1-8b-instant`) y reserva `GROQ_MODEL` (`llama-3.3-70b-versatile`) para la ejecución
+final o para las tareas que de verdad necesiten más razonamiento. Los límites son **por
+organización**, así que cada alumno con su propia cuenta tiene su propia cuota.
+
+> **Sobre los embeddings:** Groq **no** ofrece endpoint de embeddings. Por eso los notebooks de RAG
+> (IL1.3 e IL1.4) usan un modelo local de HuggingFace (`paraphrase-multilingual-MiniLM-L12-v2`, 384 dimensiones):
+> es gratuito, no requiere API key y funciona sin conexión. La primera ejecución descarga ~470 MB
+> y los deja en caché.
+
+#### Si trabajas en Google Colab
+
+En vez de un archivo `.env`, guarda la key en **Secrets** (🔑 en la barra lateral) con el nombre
+`GROQ_API_KEY` y activa el acceso para el notebook. Los notebooks del curso detectan Colab
+automáticamente y la leen desde ahí.
 
 > **IMPORTANTE:** Nunca subas tu archivo `.env` al repositorio. Ya está incluido en `.gitignore`.
 
@@ -347,11 +388,12 @@ En Docker esto ya va configurado en la imagen (`MPLCONFIGDIR=/tmp/matplotlib`).
 
 ## Recursos Adicionales
 
+- [Groq Console](https://console.groq.com/) · [Docs](https://console.groq.com/docs/) · [Modelos disponibles](https://console.groq.com/docs/models) · [Rate limits](https://console.groq.com/docs/rate-limits)
 - [LangChain Docs](https://python.langchain.com/)
+- [langchain-groq (ChatGroq)](https://python.langchain.com/docs/integrations/chat/groq/)
 - [CrewAI Docs](https://docs.crewai.com/)
-- [OpenAI API](https://platform.openai.com/docs/)
 - [LangSmith Docs](https://docs.smith.langchain.com/)
-- [GitHub Models](https://github.com/marketplace/models)
+- [Sentence Transformers](https://www.sbert.net/)
 - [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 
 ---

@@ -25,6 +25,30 @@ Al finalizar este módulo, serás capaz de:
 -   Utilizar modelos de embeddings para convertir texto en representaciones vectoriales.
 -   Integrar una base de datos vectorial para crear un sistema RAG escalable.
 
+## Arquitectura del RAG en este módulo: dos proveedores, no uno
+
+Un detalle importante que verás en todos los notebooks: **la generación y los embeddings no vienen del mismo sitio**.
+
+| Pieza del RAG | Dónde se ejecuta | Modelo | Coste |
+|---|---|---|---|
+| Generación (chat) | API de **Groq** | `llama-3.3-70b-versatile` | API key gratuita |
+| Embeddings | **Tu propia máquina** (HuggingFace / sentence-transformers) | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` | gratis, sin API key |
+
+¿Por qué? Porque **Groq no ofrece un endpoint de embeddings**: su API solo expone chat/completions. Al construir un RAG sobre Groq hay que resolver los vectores por otra vía, y la más simple es calcularlos localmente con `langchain-huggingface`.
+
+Lejos de ser un parche, esta separación es una práctica habitual en producción:
+
+-   **Coste cero por token**: embedar un corpus grande con una API de pago es caro; en local es solo tiempo de CPU.
+-   **Privacidad**: tus documentos no salen de la máquina.
+-   **Funciona sin conexión** una vez descargado el modelo.
+
+A cambio, dos cosas que conviene saber antes de ejecutar:
+
+-   La **primera ejecución descarga ~470 MB** del modelo desde HuggingFace (después queda en caché y arranca en segundos).
+-   Los vectores tienen **384 dimensiones** en vez de las 1536 típicas de los modelos comerciales: menos memoria y búsquedas más rápidas, a cambio de algo de precisión semántica.
+
+La interfaz de LangChain es idéntica en ambos casos (`embed_documents`, `embed_query`), así que FAISS y el resto del pipeline funcionan sin cambios.
+
 ## Instrucciones
 
-Para comenzar, abre y ejecuta los cuadernos en el orden listado. Asegúrate de tener las variables de entorno (`GITHUB_BASE_URL`, `GITHUB_TOKEN`, etc.) configuradas como se describe en el `README.md` principal del repositorio.
+Para comenzar, abre y ejecuta los cuadernos en el orden listado. Asegúrate de tener las variables de entorno (`GROQ_API_KEY`, `GROQ_MODEL`, `EMBEDDING_MODEL`) configuradas como se describe en el `README.md` principal del repositorio. Puedes crear tu API key gratuita en [console.groq.com](https://console.groq.com/).

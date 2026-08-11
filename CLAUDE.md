@@ -40,19 +40,75 @@ This is an educational repository for "Ingeniería de Soluciones con Inteligenci
 
 ## Development Environment
 
+### LLM Provider: Groq
+The course uses **Groq** (https://console.groq.com/) as its only LLM provider. GitHub Models
+was dropped when its free tier ended — there must be **no** references to `GITHUB_TOKEN`,
+`GITHUB_BASE_URL`, `OPENAI_BASE_URL`, `models.inference.ai.azure.com` or `gpt-4o` anywhere in the repo.
+
 ### Required Environment Variables
-The notebooks require these environment variables for API access:
-- `GITHUB_BASE_URL`: Base URL for GitHub Models API
-- `GITHUB_TOKEN`: GitHub personal access token for model access
-- `OPENAI_BASE_URL`: Alternative base URL for OpenAI-compatible APIs
+- `GROQ_API_KEY`: Groq API key (starts with `gsk_`), from console.groq.com > API Keys
+- `GROQ_MODEL`: default chat model — `llama-3.3-70b-versatile`
+- `GROQ_MODEL_FAST`: cheap/fast model for high-volume loops — `llama-3.1-8b-instant`
+- `EMBEDDING_MODEL`: local embeddings — `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`
+- `LANGSMITH_TRACING` / `LANGSMITH_API_KEY` / `LANGSMITH_PROJECT`: observability (RA3)
 
 ### Key Dependencies
 Based on notebook imports and course materials:
-- `openai`: For direct OpenAI API calls
-- `langchain` and `langchain-openai`: For LangChain framework integration
-- Agent frameworks: LangChain, CrewAI for multi-agent systems
+- `langchain-groq` (`ChatGroq`): the default way to call an LLM in this repo
+- `groq`: official SDK, used only where a notebook teaches the raw API
+- `langchain-huggingface` + `sentence-transformers`: local embeddings for RAG
+- Agent frameworks: LangChain, CrewAI (LiteLLM — model ids need the `groq/` prefix)
 - Observability tools: LangSmith, Langfuse, Arize for monitoring
 - Standard Python libraries: `os`, `pandas`, `requests`
+
+### Canonical Code Patterns
+```python
+# LangChain chat (default)
+from langchain_groq import ChatGroq
+llm = ChatGroq(model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"), temperature=0.2)
+
+# Raw SDK (only where the notebook teaches the bare API)
+from groq import Groq
+cliente = Groq()  # reads GROQ_API_KEY from the environment
+
+# Embeddings — Groq has NO embeddings endpoint, so these run locally
+from langchain_huggingface import HuggingFaceEmbeddings
+embeddings = HuggingFaceEmbeddings(
+    model_name=os.getenv("EMBEDDING_MODEL", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"),
+    encode_kwargs={"normalize_embeddings": True},
+)
+
+# CrewAI (LiteLLM needs the groq/ prefix)
+from crewai import LLM
+llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}", temperature=0.2)
+```
+
+Notebooks load credentials in a way that works both in Google Colab (Secrets) and locally (`.env`);
+keep that dual pattern when editing them. Free-tier limits (Aug 2026): both models 30 req/min;
+`llama-3.3-70b-versatile` 12K tokens/min and **100K tokens/day**; `llama-3.1-8b-instant`
+6K tokens/min and **500K tokens/day**. The daily token cap is what actually runs out — a few
+hours of running agent notebooks exhausts the 70B. Avoid tight LLM call loops in notebooks,
+and prefer `GROQ_MODEL_FAST` for anything high-volume.
+
+### Tool calling on Groq is model-dependent — and the winner flips by code path
+Both Llama models sometimes emit a malformed function call, which Groq rejects with HTTP 400
+`tool_use_failed`. Measured on this repo's own tools:
+
+| Code path | `llama-3.3-70b-versatile` | `llama-3.1-8b-instant` |
+|---|---|---|
+| Raw `groq` SDK, hand-written JSON schema, Spanish prompt | 7/10 | **10/10** |
+| LangChain `create_openai_tools_agent` + `hwchase17/openai-tools-agent` (English prompt) | **6/6** | 4/6 |
+
+So there is no single "best tool-calling model" here — it depends on the prompt and the path:
+- **Raw SDK tool calling** → `GROQ_MODEL_FAST` (`llama-3.1-8b-instant`).
+  Used by `RA2/IL2.1/2-agent-function-calling.ipynb`, `RA2/IL2.2/3-herramientas-externas.ipynb`.
+- **LangChain tools agents** → `GROQ_MODEL` (`llama-3.3-70b-versatile`).
+  Used by `RA2/IL2.1/3-langchain-agent.ipynb`, `RA2/IL2.2/1-memory-agent.ipynb`,
+  `RA2/IL2.2/2-memory-agent-advanced.ipynb`.
+- **Prompt-based ReAct** (`create_react_agent`) is unaffected; keeps `GROQ_MODEL`.
+
+Don't "unify" these onto one model without re-measuring — each notebook's comment records why.
+Streaming was ruled out as a factor (identical pass rates with `disable_streaming` on and off).
 
 ### Development Workflow
 - **Recommended:** [uv](https://docs.astral.sh/uv/) (`uv sync`, `uv run …`) with `uv.lock` for reproducible installs across Windows, macOS, and Linux (see root `README.md`).
@@ -64,8 +120,8 @@ Based on notebook imports and course materials:
 ## Common Patterns
 
 ### API Integration
-- Uses OpenAI-compatible APIs through environment variables
-- Supports both direct OpenAI client and LangChain abstractions
+- All LLM calls go to Groq, configured through environment variables
+- Supports both the direct `groq` SDK and LangChain's `ChatGroq` abstraction
 - Temperature and token limits are commonly configured for different use cases
 
 ### Agent Development

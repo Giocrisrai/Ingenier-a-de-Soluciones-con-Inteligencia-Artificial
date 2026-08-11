@@ -3,10 +3,10 @@
 # Instalación recomendada del curso: uv + uv.lock → `uv sync` (ver README).
 # pip install -r requirements.txt es respaldo si no puedes usar uv.
 
-# --- LLMs y APIs ---
-openai>=1.0.0
+# --- LLMs y APIs (Groq) ---
+groq>=0.11.0
+langchain-groq>=0.2.0
 langchain>=1.0.0
-langchain-openai>=0.3.0
 langchain-community>=0.3.0
 langchain-text-splitters>=0.3.0
 langchain-classic>=0.3.0
@@ -14,10 +14,14 @@ langsmith>=0.3.0
 langgraph>=0.3.0
 
 # --- Agentes ---
-crewai>=0.100.0
+# El extra [litellm] es obligatorio: CrewAI llega a Groq via LiteLLM (prefijo "groq/").
+crewai[litellm]>=0.100.0
 crewai-tools>=0.38.0
 
 # --- RAG y Embeddings ---
+# Groq no ofrece endpoint de embeddings: se usa un modelo local de HuggingFace.
+langchain-huggingface>=0.1.0
+sentence-transformers>=3.0.0
 faiss-cpu>=1.7.0
 tiktoken>=0.5.0
 

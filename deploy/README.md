@@ -6,14 +6,16 @@ guardrails + proxy Caddy (HTTPS). Pensado para AWS Academy Learner Lab (1 EC2 + 
 ## Correr en local
 
 ```bash
-cp deploy/.env.example deploy/.env   # completa GITHUB_TOKEN si quieres respuestas reales
+cp deploy/.env.example deploy/.env   # completa GROQ_API_KEY si quieres respuestas reales
 docker compose -f deploy/docker-compose.prod.yml up --build
 ```
 
 - Frontend: https://localhost (Caddy, certificado self-signed → acepta el aviso)
 - Backend health: `curl -k https://localhost/api/health`
 
-Sin `GITHUB_TOKEN` el backend responde en **modo demo** (sin llamar al modelo), útil para probar la infraestructura.
+Sin `GROQ_API_KEY` el backend responde en **modo demo** (sin llamar al modelo), útil para probar la infraestructura.
+La clave se obtiene gratis en https://console.groq.com/ (formato `gsk_...`). El modelo por defecto es
+`llama-3.1-8b-instant` (variable `AGENT_MODEL`).
 
 ## Despliegue en AWS
 
@@ -29,7 +31,7 @@ Ver `RA3/IL3.5/1-deploy-aws-paso-a-paso.md`.
   de imágenes (Docker Hub). Cuando esté disponible, verifica con:
 
 ```bash
-cp deploy/.env.example deploy/.env   # sin token => modo demo
+cp deploy/.env.example deploy/.env   # sin GROQ_API_KEY => modo demo
 docker compose -f deploy/docker-compose.prod.yml up --build -d
 sleep 15
 curl -sk https://localhost/api/health                 # {"status":"ok","modo_demo":true}

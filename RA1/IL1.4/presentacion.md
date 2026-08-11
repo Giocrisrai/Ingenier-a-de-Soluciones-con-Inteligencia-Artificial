@@ -47,6 +47,19 @@ Miden la calidad de la respuesta final generada por el LLM.
   - **Medición**: Se evalúa la utilidad y pertinencia de la respuesta en relación con la consulta inicial.
   - **Objetivo**: Maximizar. Una respuesta puede ser fiel al contexto pero no ser útil para el usuario.
 
+## 2.b Nota de arquitectura: qué proveedor mide qué
+
+Antes de evaluar conviene tener claro **de dónde sale cada número**:
+
+| Pieza | Dónde se ejecuta | Modelo |
+|---|---|---|
+| Generación y LLM-como-juez | API de **Groq** | `llama-3.3-70b-versatile` / `llama-3.1-8b-instant` |
+| Embeddings del retriever | **Local**, en la máquina del alumno | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (384 dims) |
+
+**Groq no ofrece endpoint de embeddings** (solo chat/completions), así que los vectores se calculan localmente con `langchain-huggingface`: gratis, sin API key y sin que los documentos salgan de la máquina. La primera ejecución descarga ~470 MB del modelo.
+
+Esto importa al leer las métricas: el **tiempo de recuperación** ya no incluye latencia de red (los embeddings son locales), mientras que el **tiempo de generación** sí depende de la API. Separar ambos tiempos es justamente lo que permite atribuir un cuello de botella al componente correcto.
+
 ## 3. LangSmith: Una Plataforma para la Evaluación
 
 **LangSmith** es una herramienta de LangChain diseñada para la **observabilidad, monitoreo y evaluación** de aplicaciones LLM.
@@ -62,8 +75,8 @@ Para los sistemas RAG, nos ofrece:
 El notebook `2-langsmith-evaluation.ipynb` nos guía a través de un proceso práctico:
 
 ### Paso 1: Configuración e Instrumentación
-- Se instalan las librerías necesarias (`langsmith`, `langchain`, `openai`).
-- Se configuran las variables de entorno para conectar con la API de LangSmith.
+- Se instalan las librerías necesarias (`langsmith`, `langchain`, `langchain-groq`, `groq`).
+- Se configuran las variables de entorno para conectar con la API de LangSmith y con Groq (`GROQ_API_KEY`).
 - Se "instrumenta" el código del RAG usando el decorador `@traceable` para que LangSmith pueda capturar cada paso.
 
 ### Paso 2: Creación de un Dataset de Evaluación

@@ -5,7 +5,7 @@ RA3 ya cubre observabilidad y seguridad del agente. Falta: llevar la solución a
 producción de forma **segura** y **reproducible**.
 
 ## 2. Arquitectura
-Internet → Caddy (HTTPS) → Streamlit → FastAPI (agente + guardrails) → GitHub Models.
+Internet → Caddy (HTTPS) → Streamlit → FastAPI (agente + guardrails) → Groq (LPU).
 Solo el proxy se expone; el resto vive en una red interna de Docker.
 
 ## 3. Esenciales de ciberseguridad

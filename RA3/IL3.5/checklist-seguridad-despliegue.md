@@ -2,7 +2,8 @@
 
 ## Antes de desplegar
 - [ ] `.env` NO está en git (`git status` no lo muestra).
-- [ ] El token de GitHub Models tiene solo los permisos necesarios.
+- [ ] La `GROQ_API_KEY` está solo en el `.env` del servidor (nunca en git) y se
+      puede revocar desde https://console.groq.com/keys.
 - [ ] Los contenedores corren como usuario no-root.
 - [ ] Solo el proxy publica puertos; backend/frontend en red interna.
 

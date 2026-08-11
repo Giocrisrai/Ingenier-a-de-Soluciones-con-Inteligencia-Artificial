@@ -5,7 +5,7 @@
 - Dominar el ciclo de razonamiento ReAct (Reason + Act) y el Function Calling nativo.
 - Aprender a construir agentes usando frameworks LangChain y CrewAI.
 - Implementar equipos de agentes colaborativos para tareas complejas.
-- Entender las configuraciones específicas para integrar frameworks con GitHub Models API.
+- Entender las configuraciones específicas para integrar frameworks con la API de Groq.
 
 ## 1. ¿Qué es un Agente Inteligente?
 
@@ -34,7 +34,7 @@ La **analogía del becario inteligente** ilustra perfectamente el concepto: le d
 - **Limitaciones**: Frágil, propenso a errores de formato, difícil de escalar.
 
 **Function Calling Nativo**:
-- OpenAI proporciona mecanismo estructurado para llamar funciones.
+- Groq proporciona un mecanismo estructurado para llamar funciones (misma especificación de tool calling que OpenAI).
 - El LLM devuelve JSON bien formado en lugar de texto a parsear.
 - Definición de herramientas usando JSON Schema: especifica nombre, descripción y parámetros.
 - **Ventajas**: Confiable, seguro, elimina errores de parsing.
@@ -77,8 +77,8 @@ agent = initialize_agent(
 result = agent.run("¿Quién fue Marie Curie?")
 ```
 
-**Configuración Específica para GitHub Models API**:
-LangChain espera variables estándar (`OPENAI_API_KEY`, `OPENAI_API_BASE`) que se mapean automáticamente desde las variables de GitHub Models (`GITHUB_TOKEN`, `OPENAI_BASE_URL`).
+**Configuración Específica para Groq**:
+LangChain usa la integración `langchain-groq`. Basta con definir `GROQ_API_KEY` en el entorno: `ChatGroq` la lee automáticamente, sin `base_url` ni `api_key` explícitos.
 
 ## 4. CrewAI: Orquestación de Equipos de Agentes
 
@@ -126,18 +126,19 @@ crew = Crew(
 )
 ```
 
-### Configuración Crítica para GitHub Models API:
-**Problema identificado**: CrewAI utiliza LangChain internamente, requiriendo mapeo específico de variables:
+### Configuración Crítica para Groq:
+**Problema identificado**: CrewAI enruta las llamadas por LiteLLM, que necesita saber el proveedor:
 ```python
-# SOLUCIÓN: Mapear variables de entorno
-os.environ["OPENAI_API_BASE"] = os.environ.get("OPENAI_BASE_URL", "")
-os.environ["OPENAI_API_KEY"] = os.environ.get("GITHUB_TOKEN", "")
+# SOLUCIÓN: prefijar el modelo con "groq/" (la key se lee de GROQ_API_KEY)
+from crewai import LLM
+
+llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}", temperature=0)
 ```
 
 **Errores comunes corregidos**:
-1. **Herramientas**: Usar `BaseTool` de `crewai_tools`, no `@tool` de LangChain.
+1. **Herramientas**: Usar `BaseTool` de `crewai.tools`, no `@tool` de LangChain.
 2. **Parámetro verbose**: `verbose=True` (boolean), no `verbose=2` (entero).
-3. **Configuración LLM**: Usar mapeo de variables, no parámetros explícitos.
+3. **Configuración LLM**: Pasar `llm=llm` explícitamente a cada `Agent`, con el prefijo `groq/`.
 
 ## 5. Comparación y Criterios de Selección
 
@@ -164,27 +165,28 @@ os.environ["OPENAI_API_KEY"] = os.environ.get("GITHUB_TOKEN", "")
 
 **Variables de entorno requeridas**:
 ```bash
-export OPENAI_BASE_URL="https://models.inference.ai.azure.com"
-export GITHUB_TOKEN="tu_token_de_github"
+export GROQ_API_KEY="gsk_tu_api_key_de_groq"   # https://console.groq.com/
+export GROQ_MODEL="llama-3.3-70b-versatile"
 ```
 
-**Patrón de mapeo para compatibilidad**:
+**Patrón por framework**:
 ```python
 # Para LangChain directo
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
+from langchain_groq import ChatGroq
+llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
 
-# Para CrewAI (requiere mapeo)
-os.environ["OPENAI_API_BASE"] = os.environ.get("OPENAI_BASE_URL", "")
-os.environ["OPENAI_API_KEY"] = os.environ.get("GITHUB_TOKEN", "")
+# Para CrewAI (requiere el prefijo del proveedor)
+from crewai import LLM
+llm = LLM(model="groq/llama-3.3-70b-versatile", temperature=0)
 ```
 
 ## 6. Actividad Práctica y Próximos Pasos
 
 ### Implementaciones del Módulo:
 1. **Fundamentos**: Agente básico desde cero con ciclo ReAct manual.
-2. **Function Calling**: Agente usando mecanismo nativo de OpenAI con JSON Schema.
+2. **Function Calling**: Agente usando el tool calling nativo de Groq con JSON Schema.
 3. **LangChain**: Agente individual con herramientas de Wikipedia, configuración simplificada.
-4. **CrewAI**: Equipo investigador-escritor con configuración corregida para GitHub Models API.
+4. **CrewAI**: Equipo investigador-escritor con configuración corregida para Groq.
 
 ### Patrones Arquitectónicos Implementados:
 - **Monolítico**: Agente básico con toda la lógica en una función.
@@ -192,7 +194,7 @@ os.environ["OPENAI_API_KEY"] = os.environ.get("GITHUB_TOKEN", "")
 - **Colaborativo**: Múltiples agentes especializados con tareas interdependientes.
 
 ### Configuración de Troubleshooting:
-El módulo incluye documentación detallada de errores comunes y sus soluciones, especialmente para la integración de frameworks con GitHub Models API.
+El módulo incluye documentación detallada de errores comunes y sus soluciones, especialmente para la integración de frameworks con la API de Groq.
 
 ### Preparación para IL2.2:
 - **Memory Systems**: Sistemas de memoria avanzados para agentes persistentes.
