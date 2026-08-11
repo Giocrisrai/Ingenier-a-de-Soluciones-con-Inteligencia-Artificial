@@ -89,7 +89,10 @@
 **Archivos que lo usan**:
 - `2-crewai_orchestration.py`
 
-**⚠️ OPORTUNIDAD**: Deberían agregarse más ejemplos con CrewAI
+**💡 Para profundizar**: solo hay un ejemplo con CrewAI en el módulo. Si quieres llegar más
+lejos, un buen ejercicio es replicar con CrewAI alguno de los escenarios que aquí están
+resueltos con LangChain o en Python puro, y comparar cuánto código te ahorra el framework
+y cuánto control pierdes a cambio.
 
 #### Python Puro
 **Usar para**:
