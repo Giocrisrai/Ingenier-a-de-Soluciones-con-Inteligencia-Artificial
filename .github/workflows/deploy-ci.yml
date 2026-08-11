@@ -173,17 +173,21 @@ jobs:
     #
     # Mientras siga desactivado, la acción falla con "Dependency review is not
     # supported on this repository", que es un problema de configuración y no un
-    # hallazgo de seguridad. Por eso el job NO bloquea el PR: marcarlo en rojo en
+    # hallazgo de seguridad. Por eso el paso NO bloquea el PR: marcarlo en rojo en
     # cada PR entrena a ignorar los checks rojos, que es peor que no tenerlo.
-    # Una vez activado el Dependency graph, quita `continue-on-error` para que
-    # vuelva a ser bloqueante y una dependencia vulnerable frene el merge.
-    continue-on-error: true
+    # Una vez activado el Dependency graph, quita `continue-on-error` del paso para
+    # que vuelva a ser bloqueante y una dependencia vulnerable frene el merge.
+    #
+    # Nota: `continue-on-error` va en el PASO y no en el job. A nivel de job, el
+    # workflow completo sí queda en verde, pero el job sigue publicando su propio
+    # check en rojo en el PR, que es exactamente lo que queremos evitar.
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v7
 
       - name: Dependency Review
+        continue-on-error: true
         uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
