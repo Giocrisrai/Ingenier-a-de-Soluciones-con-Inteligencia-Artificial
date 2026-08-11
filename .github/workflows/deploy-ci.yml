@@ -35,9 +35,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
 
@@ -53,9 +53,9 @@ jobs:
     timeout-minutes: 20
     needs: test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
       # SITE_ADDRESS=localhost: Caddy sirve el sitio para el SNI 'localhost' y, con
       # 'tls internal' en el Caddyfile, emite un certificado self-signed para ese
@@ -129,12 +129,12 @@ jobs:
       matrix:
         service: [backend, frontend]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
       - name: Construir imagen ${{ matrix.service }}
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: deploy/${{ matrix.service }}
           push: false
@@ -156,7 +156,7 @@ jobs:
         # Requiere repo público o GitHub Advanced Security. No rompe la CI si no
         # está disponible (p. ej. fork privado de un estudiante).
         continue-on-error: true
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-${{ matrix.service }}.sarif
           category: trivy-${{ matrix.service }}
@@ -166,10 +166,28 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     if: github.event_name == 'pull_request'
+    # REQUISITO: este job necesita el "Dependency graph" del repositorio, que hoy
+    # está DESACTIVADO. Actívalo en:
+    #   Settings > Security > Code security and analysis > Dependency graph > Enable
+    # (No se puede activar por API; hay que hacerlo desde la web.)
+    #
+    # Mientras siga desactivado, la acción falla con "Dependency review is not
+    # supported on this repository", que es un problema de configuración y no un
+    # hallazgo de seguridad. Por eso el paso NO bloquea el PR: marcarlo en rojo en
+    # cada PR entrena a ignorar los checks rojos, que es peor que no tenerlo.
+    # Una vez activado el Dependency graph, quita `continue-on-error` del paso para
+    # que vuelva a ser bloqueante y una dependencia vulnerable frene el merge.
+    #
+    # Nota: `continue-on-error` va en el PASO y no en el job. A nivel de job, el
+    # workflow completo sí queda en verde, pero el job sigue publicando su propio
+    # check en rojo en el PR, que es exactamente lo que queremos evitar.
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Dependency Review
-        uses: actions/dependency-review-action@v4
+        continue-on-error: true
+        uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
