@@ -3,7 +3,8 @@ IL3.3: Seguridad y Etica en Agentes de IA
 ==========================================
 Demuestra patrones de sanitizacion de entrada, filtro etico con multiples
 categorias, deteccion de PII (correos, telefonos), rate limiting y
-evaluacion matematica segura con ast.literal_eval.
+evaluacion matematica segura validando el AST antes de evaluar
+(lista blanca de nodos permitidos, no filtro de caracteres).
 
 Ejecutar: python 1-security_ethics.py
 """
@@ -15,7 +16,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 
-# --- Evaluacion matematica segura (sin eval) ---
+# --- Evaluacion matematica segura (AST validado antes de evaluar) ---
 
 def evaluar_matematica_segura(expresion: str) -> str:
     """Evalua expresiones matematicas simples de forma segura usando AST."""

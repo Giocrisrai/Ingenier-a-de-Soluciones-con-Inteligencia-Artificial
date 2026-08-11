@@ -57,9 +57,10 @@ La progresión natural lleva a frameworks que abstraen esta complejidad y propor
 - **Gestión automática**: Historial de mensajes, formato de herramientas, manejo de errores.
 - **Flexibilidad**: Múltiples tipos de agentes (Zero-shot, Conversational, Structured Chat).
 
-### Implementación Simplificada:
+### Implementación Simplificada (igual que `3-langchain-agent.ipynb`):
 ```python
-from langchain.agents import initialize_agent, Tool
+from langchain_classic import hub
+from langchain_classic.agents import tool, create_openai_tools_agent, AgentExecutor
 
 # Definir herramientas con decorador simple
 @tool
@@ -68,13 +69,11 @@ def get_wikipedia_summary(query: str) -> str:
     return wikipedia.summary(query, sentences=2)
 
 # Crear y ejecutar agente en pocas líneas
-agent = initialize_agent(
-    tools=[get_wikipedia_summary],
-    llm=llm,
-    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION
-)
+prompt = hub.pull("hwchase17/openai-tools-agent")
+agent = create_openai_tools_agent(llm, [get_wikipedia_summary], prompt)
+agent_executor = AgentExecutor(agent=agent, tools=[get_wikipedia_summary], verbose=True)
 
-result = agent.run("¿Quién fue Marie Curie?")
+result = agent_executor.invoke({"input": "¿Quién fue Marie Curie?", "chat_history": []})
 ```
 
 **Configuración Específica para Groq**:
@@ -139,6 +138,8 @@ llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}", te
 1. **Herramientas**: Usar `BaseTool` de `crewai.tools`, no `@tool` de LangChain.
 2. **Parámetro verbose**: `verbose=True` (boolean), no `verbose=2` (entero).
 3. **Configuración LLM**: Pasar `llm=llm` explícitamente a cada `Agent`, con el prefijo `groq/`.
+4. **Instalación**: `pip install "crewai[litellm]"`. Sin el extra, `LLM(model="groq/...")`
+   falla con `ImportError` (desde CrewAI 1.x LiteLLM ya no viene incluido).
 
 ## 5. Comparación y Criterios de Selección
 
@@ -167,6 +168,7 @@ llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}", te
 ```bash
 export GROQ_API_KEY="gsk_tu_api_key_de_groq"   # https://console.groq.com/
 export GROQ_MODEL="llama-3.3-70b-versatile"
+export GROQ_MODEL_FAST="llama-3.1-8b-instant"  # lo usa 2-agent-function-calling
 ```
 
 **Patrón por framework**:

@@ -317,6 +317,39 @@ def assign_hybrid(task, agents):
 
 ## 🚀 Mejores Prácticas
 
+### 0. Antes que nada: ¿de verdad necesitas multi-agente?
+
+**La respuesta por defecto es NO.** Un solo agente con varias herramientas bien descritas
+resuelve la gran mayoría de los casos, y es más barato, más rápido y muchísimo más fácil de
+depurar. Multi-agente es una decisión de arquitectura que **hay que justificar**.
+
+**Lo que cuesta pasar de 1 agente a N:**
+
+| | 1 agente | N agentes |
+|---|---|---|
+| **Costo** | 1 contexto | cada agente reenvía contexto → crece más que lineal |
+| **Latencia** | 1 llamada | en pipeline, las latencias **se suman** |
+| **Depuración** | una traza | hay que reconstruir quién dijo qué a quién |
+| **Modos de fallo** | alucina | alucina **y** propaga el error a los demás, y puede entrar en bucle |
+
+**Usa multi-agente solo si se cumple alguna de estas:**
+- ✓ Los subproblemas necesitan **herramientas o permisos distintos** (y quieres aislarlos:
+  que el agente que lee webs no sea el que puede borrar)
+- ✓ Hay trabajo **realmente paralelizable** (scatter-gather sobre 20 documentos)
+- ✓ Los prompts de sistema son **incompatibles** entre sí y meterlos juntos degrada la calidad
+- ✓ El contexto de un solo agente **no cabe** o se degrada por exceso de instrucciones
+
+**Señales de que sobra el multi-agente:**
+- ❌ Los agentes solo se pasan texto en línea recta sin decisiones propias → es una **función**
+  con varios pasos, no un equipo
+- ❌ Todos usan las mismas herramientas y el mismo modelo → solo estás pagando el contexto
+  varias veces
+- ❌ No sabrías decir qué agente falló cuando el resultado sale mal
+
+> **Regla práctica**: implementa primero la versión de **un agente** y mídela (calidad, tokens,
+> latencia). Solo si esa línea base falla en algo concreto, añade el segundo agente — y vuelve
+> a medir. Si no mejora, no lo dejes.
+
 ### 1. Diseño de Agentes
 
 ✅ **Hacer**:
@@ -387,6 +420,13 @@ Consideraciones:
    - Utilización de recursos
    - Balance de carga
 
+5. **Costo** (imprescindible con agentes LLM, y la que más se olvida)
+   - **Tokens por tarea completa**, no por agente — es la métrica que decide si el
+     multi-agente se justifica
+   - Costo en $ por tarea, y comparación contra la línea base de **un solo agente**
+   - Nº de turnos por conversación (si crece sin control, hay bucle)
+   - Presupuesto máximo por tarea, con corte automático al alcanzarlo
+
 ---
 
 ## 🛠️ Herramientas y Frameworks
@@ -445,6 +485,6 @@ Compara orquestación centralizada vs distribuida para un sistema de tu elecció
 ---
 
 **Autor**: Módulo IL2.3 - Ingeniería de Soluciones con IA  
-**Actualizado**: 2024  
+**Actualizado**: Agosto 2026  
 **Licencia**: Uso Educativo
 

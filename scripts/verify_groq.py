@@ -44,7 +44,10 @@ def comprobar_api_key() -> str:
         )
     if not api_key.startswith("gsk_"):
         print("AVISO  La key no empieza por 'gsk_'; revisa que la copiaste completa.")
-    print(f"OK     GROQ_API_KEY presente ({api_key[:7]}…{api_key[-4:]})")
+    # NUNCA imprimimos caracteres de la key, ni siquiera "solo el principio y el final":
+    # ese fragmento ya es parte del secreto. Confirmamos formato y longitud, nada más.
+    print("OK     API Key configurada:", "✓" if api_key.startswith("gsk_") else "✗ revisa tu key")
+    print(f"OK     Longitud de la key: {len(api_key)} caracteres")
     return api_key
 
 

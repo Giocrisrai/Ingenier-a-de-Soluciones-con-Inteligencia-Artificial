@@ -261,20 +261,28 @@ Input → Agente A (Búsqueda) → Datos intermedios → Agente B (Análisis) �
 ## Slide 9: Orquestación Avanzada con CrewAI
 **Título:** Script 2 - Equipos Especializados con Dependencias
 
-**Agentes especializados:**
+**Agentes especializados** (código de `2-crewai_orchestration.py`):
 ```python
+import os
+from crewai import Agent, Task, Crew, LLM
+
+# ⚠️ CRÍTICO: el prefijo "groq/" es obligatorio (CrewAI enruta por LiteLLM)
+llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}", temperature=0.2)
+
 # Agente especializado en investigación
 investigador = Agent(
     role="Investigador",
     goal="Buscar información sobre la capital de Francia",
-    backstory="Eres experto en encontrar datos rápidos."
+    backstory="Eres experto en encontrar datos rápidos.",
+    llm=llm          # ⚠️ hay que pasarlo a CADA Agent
 )
 
 # Agente especializado en redacción
 redactor = Agent(
     role="Redactor", 
     goal="Redactar una respuesta clara y breve",
-    backstory="Eres especialista en explicar conceptos de forma sencilla."
+    backstory="Eres especialista en explicar conceptos de forma sencilla.",
+    llm=llm
 )
 ```
 
@@ -282,11 +290,13 @@ redactor = Agent(
 ```python
 tarea_investigar = Task(
     description="Busca cuál es la capital de Francia",
+    expected_output="El nombre de la capital de Francia",  # obligatorio en CrewAI actual
     agent=investigador
 )
 
 tarea_redactar = Task(
     description="Redacta una respuesta usando la información encontrada",
+    expected_output="Una respuesta clara y breve sobre la capital de Francia",
     agent=redactor,
     context=[tarea_investigar]  # Dependencia explícita
 )
@@ -556,9 +566,10 @@ class AlertManager:
 ## Slide 15: Planificación en LangChain
 **Título:** Script 1 - Herramientas de Planificación con LangChain
 
-**Agente con herramientas de planificación:**
+**Agente con herramientas de planificación** (código de `1-basic_planning.py`):
 ```python
-from langchain.agents import initialize_agent, Tool, AgentType
+from langchain_classic import hub
+from langchain_classic.agents import create_react_agent, AgentExecutor, Tool
 
 # Herramienta de planificación simple
 def pasos_cafe(_):
@@ -570,13 +581,12 @@ herramienta_cafe = Tool(
     description="Devuelve los pasos para preparar café."
 )
 
-# Agente con capacidad de planificación
-agente = initialize_agent(
-    tools=[herramienta_cafe],
-    llm=llm,
-    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    verbose=True
-)
+# Agente con capacidad de planificación (ReAct por prompt: el prompt viene del hub)
+prompt = hub.pull("hwchase17/react")
+agent = create_react_agent(llm, tools=[herramienta_cafe], prompt=prompt)
+agente = AgentExecutor(agent=agent, tools=[herramienta_cafe], verbose=True)
+
+agente.invoke({"input": "¿Cuáles son los pasos para preparar café?"})
 ```
 
 **Ventajas de LangChain para planificación:**
@@ -739,6 +749,48 @@ class AdaptiveScheduler:
 **4. Change Management:**
 - Evolución de workflows sin interruption
 - **Solución:** Versioning, gradual rollouts
+
+**Desafíos propios de que los agentes sean LLM:**
+
+**1. El costo y la latencia se multiplican:**
+- Pasar de 1 a 5 agentes **no cuesta 5×**: cada agente reenvía contexto acumulado, y en
+  pipeline las latencias se suman
+- **Solución:** medir tokens y segundos **por tarea completa** y compararlos con la línea base
+  de **un solo agente**; paralelizar en vez de encadenar; modelo pequeño para roles simples
+
+**2. Bucles infinitos entre agentes:**
+- A pide aclaración a B, B se la pide a A. No hay deadlock (ambos generan texto), pero la
+  tarea no avanza y **cada vuelta se factura**
+- **Solución:** `max_iter`, presupuesto de tokens por tarea con corte automático, detección de
+  turnos repetidos y criterio de terminación explícito
+
+**3. Propagación de errores y alucinaciones:**
+- A inventa un dato, B lo toma como hecho, C lo repite. El error se **amplifica** y parece
+  consenso
+- **Solución:** validar **entre etapas**, no solo al final; trazar la procedencia de cada dato;
+  verificador contra la fuente original. Ojo: que N agentes coincidan **no es evidencia** —
+  con el mismo modelo y contexto se equivocan igual
+
+**4. Depurar cuando falla el equipo:**
+- ¿Falló A, o A estuvo bien y B lo malinterpretó? El LLM no es determinista: **no reproduces
+  el fallo re-ejecutando**
+- **Solución:** `trace_id` por tarea; guardar prompt de entrada y salida **de cada agente**;
+  `temperature=0` mientras se depura
+
+**5. Seguridad: un agente comprometido arrastra a los demás:**
+- Los mensajes entre agentes normalmente **no se validan**. Una inyección indirecta (dentro de
+  un documento o una web que leyó un agente) viaja por la cadena como si fuera confiable
+- **Solución:** tratar el mensaje de otro agente como entrada no confiable; **mínimo privilegio
+  por agente** (el que lee webs no es el que puede borrar); aprobación humana para acciones
+  irreversibles. Ver [OWASP Top 10 for Agentic Applications 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
+
+**6. ⚠️ Y la pregunta previa: ¿hace falta multi-agente?**
+- **Por defecto, NO.** Un agente con buenas herramientas resuelve la mayoría de los casos, más
+  barato y mucho más fácil de depurar
+- Se justifica si: los subproblemas necesitan **permisos distintos**, hay trabajo **realmente
+  paralelizable**, o los prompts de sistema son **incompatibles** entre sí
+- Si los agentes solo se pasan texto en línea recta, eso es una **función con pasos**, no un
+  equipo
 
 ---
 

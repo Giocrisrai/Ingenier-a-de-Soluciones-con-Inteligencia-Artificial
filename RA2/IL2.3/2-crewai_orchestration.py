@@ -4,7 +4,8 @@ IL2.3: Orquestación Multi-Agente con CrewAI
 Ejemplo de cómo dos agentes CrewAI colaboran para resolver una tarea.
 """
 
-# Requiere: pip install crewai crewai-tools python-dotenv
+# Requiere: pip install "crewai[litellm]" crewai-tools python-dotenv
+# (el extra [litellm] es obligatorio: sin el, LLM(model="groq/...") falla con ImportError)
 from crewai import Agent, Task, Crew, LLM
 import os
 

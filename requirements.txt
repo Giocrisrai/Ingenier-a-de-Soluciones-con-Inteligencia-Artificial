@@ -41,11 +41,16 @@ streamlit>=1.30.0
 requests>=2.31.0
 httpx>=0.25.0
 
+# --- API del artefacto desplegable (RA3 / IL3.5, carpeta deploy/) ---
+fastapi>=0.136.3
+uvicorn[standard]>=0.42.0
+slowapi>=0.1.9
+
 # --- Utilidades ---
 python-dotenv>=1.0.0
 pydantic>=2.0.0
 wikipedia>=1.4.0
-lxml>=6.0.0
+lxml>=6.0.2
 
 # --- Jupyter ---
 jupyter>=1.0.0

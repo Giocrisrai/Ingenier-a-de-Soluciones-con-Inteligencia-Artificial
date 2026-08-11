@@ -8,7 +8,15 @@
 	# Reverse proxy: la raíz va al frontend Streamlit.
 	# /api/* va al backend (quitando el prefijo /api).
 	handle_path /api/* {
-		reverse_proxy backend:8000
+		reverse_proxy backend:8000 {
+			# SOBRESCRIBIMOS X-Forwarded-For con la IP real de la conexión, en
+			# vez de añadirla a la que venga del cliente. El backend usa esta
+			# cabecera para el rate limiting por IP (uvicorn --proxy-headers),
+			# así que si dejáramos pasar el valor del cliente, cualquiera se
+			# saltaría el límite inventándose una IP distinta en cada petición.
+			# Regla: la cabecera la escribe el proxy, nunca el cliente.
+			header_up X-Forwarded-For {remote_host}
+		}
 	}
 	handle {
 		reverse_proxy frontend:8501

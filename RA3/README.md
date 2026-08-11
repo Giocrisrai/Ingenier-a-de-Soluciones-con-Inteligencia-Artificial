@@ -10,9 +10,9 @@ El enfoque práctico permite que las/los estudiantes implementen sistemas de obs
 
 ## Actividades
 
-- Act 3.1 - Herramientas de Observabilidad
-- Act 3.2 - Análisis de Trazabilidad y Logs
-- Act 3.3 - Seguridad, Ética y Escalabilidad
+- Act 3.1 - Herramientas de Observabilidad (IL3.1)
+- Act 3.2 - Análisis de Trazabilidad y Logs (IL3.2)
+- Act 3.3 - Seguridad, Ética y Escalabilidad (IL3.3 e IL3.4)
 - Act 3.4 - Ciberseguridad y Despliegue en AWS (IL3.5)
 
 ## Evaluaciones

@@ -25,14 +25,14 @@
 
 ---
 
-## Slide 3: Notebooks 1 & 2 - Fundamentos y Preparación de Datos
+## Slide 3: Archivos 1 & 2 - Fundamentos y Preparación de Datos
 **Título:** Del Documento a los Fragmentos (`Chunks`)
 
 **Notebook `1-basic-rag.ipynb`:**
 - Se introduce el concepto de RAG con un ejemplo mínimo y funcional.
 - Se muestra el flujo completo de manera simplificada para entender la interacción entre el recuperador y el generador.
 
-**Notebook `2-text-chunking.py`:**
+**App de Streamlit `2-text-chunking.py`:** (se lanza con `streamlit run RA1/IL1.3/2-text-chunking.py`, no desde Jupyter)
 - Se explora la importancia de la **división de texto** (`Text Splitting`).
 - Se analizan diferentes estrategias (ej. `RecursiveCharacterTextSplitter`) y el impacto del tamaño y solapamiento (`chunk_size`, `chunk_overlap`) en la calidad de la recuperación.
 
@@ -85,7 +85,7 @@
 - Preguntas sobre la arquitectura RAG, sus componentes (Retriever, Vector Store) y sus beneficios (reducción de alucinaciones).
 
 **Práctica dirigida:**
-- Ejecución de los 4 notebooks, desde el RAG básico hasta la implementación con base de datos vectorial.
+- Ejecución de los 3 notebooks y de la app de chunking, desde el RAG básico hasta la implementación con base de datos vectorial.
 - Experimentación con diferentes estrategias de `chunking` y su impacto en las respuestas.
 
 **Ejercicios adicionales:**
@@ -101,9 +101,9 @@
 **Recursos adicionales:**
 - [Consola de Groq (crear API key gratuita)](https://console.groq.com/)
 - [Modelos de sentence-transformers en HuggingFace](https://huggingface.co/sentence-transformers)
-- [LangChain RAG Documentation](https://python.langchain.com/docs/use_cases/question_answering/)
+- [LangChain RAG Documentation](https://docs.langchain.com/oss/python/deepagents/rag)
 - [Blog de Pinecone: ¿Qué es RAG?](https://www.pinecone.io/learn/retrieval-augmented-generation/)
-- [FAISS: A library for efficient similarity search](https://engineering.fb.com/2017/03/29/faiss-a-library-for-efficient-similarity-search/)
+- [FAISS: búsqueda de similitud eficiente](https://faiss.ai/) · [repositorio](https://github.com/facebookresearch/faiss)
 
 **Próximos módulos:**
 - **IL1.4: Evaluación y Optimización de LLMs:** Aprenderemos a medir cuantitativamente el rendimiento de nuestro sistema RAG para poder mejorarlo.

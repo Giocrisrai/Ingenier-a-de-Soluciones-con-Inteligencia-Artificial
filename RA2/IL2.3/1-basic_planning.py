@@ -4,7 +4,8 @@ IL2.3: Planificación Básica con LangChain
 Ejemplo de cómo un agente LangChain puede planificar y ejecutar pasos simples usando una herramienta.
 """
 
-# Requiere: pip install langchain langchain-groq groq python-dotenv
+# Requiere: pip install langchain langchain-classic langchain-groq groq python-dotenv
+# (langchain-classic es obligatorio: create_react_agent / AgentExecutor / hub viven ahi en LangChain 1.x)
 from langchain_groq import ChatGroq
 from langchain_classic.agents import create_react_agent, AgentExecutor, Tool
 from langchain_classic import hub

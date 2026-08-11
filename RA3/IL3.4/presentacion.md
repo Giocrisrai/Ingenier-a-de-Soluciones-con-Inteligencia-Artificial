@@ -37,20 +37,24 @@
 ## Slide 3: Principios de Escalabilidad
 **Título:** Script 1 - Fundamentos para Sistemas Escalables
 
-**Recomendaciones básicas implementadas:**
+**Lo que implementa** (`1-scalability_sustainability.py`, simulación sin llamar al modelo):
 ```python
-class ScalableAgent:
-    def process(self, data):
-        # Simula procesamiento escalable
-        return f"Procesando: {data}"
+cache = CacheLLM(tamano_maximo=50)   # hash SHA-256 del par (modelo, prompt)
+
+def seleccionar_modelo(prompt: str) -> ConfigModelo:
+    """Enruta segun complejidad: rapido / estandar / avanzado."""
+    return MODELOS_DISPONIBLES[clasificar_complejidad(prompt)]
+
+# Cada peticion: cache -> enrutamiento -> costo estimado por tokens
+resultados = procesar_lote(prompts, cache)
 ```
 
 **Principios clave del script:**
-- **Logging:** Monitorear rendimiento continuamente
-- **Microservicios:** Dividir sistema en componentes pequeños
-- **Message queues:** Colas para tareas concurrentes
-- **Automation:** Automatizar despliegues y operaciones
-- **Resource monitoring:** Monitorear y ajustar según demanda
+- **Caché:** evitar pagar dos veces por la misma respuesta
+- **Enrutamiento de modelos:** el modelo barato para lo simple (`llama-3.1-8b-instant`)
+- **Procesamiento por lotes:** agrupar peticiones en vez de una a una
+- **Medición de costo:** estimar USD por petición a partir de los tokens
+- **Resource monitoring:** monitorear y ajustar según demanda
 
 **Arquitectura escalable básica:**
 ```
@@ -87,8 +91,8 @@ class HorizontalAgent:
 
 **Implementación con containers:**
 ```dockerfile
-# Agente containerizado
-FROM python:3.9-slim
+# Agente containerizado (el artefacto real de IL3.5 usa esta misma base)
+FROM python:3.11-slim-bookworm
 COPY agent.py /app/
 WORKDIR /app
 CMD ["python", "agent.py"]
@@ -248,7 +252,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
       
       - name: Build Docker Image
         run: docker build -t agent:${{ github.sha }} .
@@ -349,6 +353,8 @@ class ScalabilityMetrics:
 ```
 ┌─────────────────────────────────────────────────┐
 │           Scalable & Sustainable System         │
+├─────────────────────────────────────────────────┤
+│ IL3.5: Ciberseguridad y Despliegue en AWS      │
 ├─────────────────────────────────────────────────┤
 │ IL3.4: Escalabilidad y Sostenibilidad          │
 ├─────────────────────────────────────────────────┤

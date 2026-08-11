@@ -61,7 +61,7 @@ class AgenteOrquestador:
 
 ---
 
-## Slide 4: Mejores Prácticas de Desarrollo
+## Slide 4: Mejores Prácticas de Desarrollo — alineado con `2-best_practices.py`
 **Título:** Script 2 - Estándares de Calidad
 
 **Principios fundamentales:**
@@ -70,6 +70,25 @@ class AgenteOrquestador:
 3. **Separación de responsabilidades:** Lógica del agente vs. herramientas
 4. **Control de versiones:** Git para tracking de cambios
 5. **Ejemplos de uso:** Código ejecutable en archivo principal
+
+**Los cuatro patrones que el script implementa (no solo enumera):**
+```python
+# 1. Configuración centralizada desde el entorno (nada hardcodeado)
+config = Configuracion.desde_entorno()   # modelo, temperatura, reintentos
+
+# 2. Validación de la entrada del usuario antes de tocar la API
+mensaje = validar_mensaje(entrada)       # tipo, vacío, largo máximo
+
+# 3. Reintento con backoff exponencial (0.1s, 0.2s, 0.4s...)
+respuesta = llamar_con_reintento(_llamada, max_reintentos=config.max_reintentos)
+
+# 4. Errores como resultado, no como excepción que se escapa
+ResultadoOperacion(exitoso=False, error="Validacion: ...")
+```
+
+> **Conexión con IL2.2:** el reintento no es teoría. Contra Groq, un agente con herramientas
+> se encuentra de verdad con `400 tool_use_failed` (el modelo genera mal la llamada) y con
+> `429 rate_limit_exceeded` (cuota agotada). Ver `RA2/IL2.2/3-herramientas-externas.ipynb`.
 
 **Estructura recomendada:**
 ```
@@ -181,12 +200,15 @@ def test_orquestador_enruta_a_calculadora():
 
 **1. Containerización:**
 ```dockerfile
-FROM python:3.9
-COPY . /app
+FROM python:3.11-slim-bookworm   # el curso requiere Python >= 3.11
 WORKDIR /app
-RUN pip install -r requirements.txt
-CMD ["python", "main.py"]
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
+*Hay un Dockerfile real de este mismo estilo (con usuario no-root y healthcheck) en
+`deploy/backend/Dockerfile`: sirve de referencia para el proyecto final.*
 
 **2. Orquestación con Kubernetes:**
 - Pods para agentes individuales

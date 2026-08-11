@@ -32,31 +32,27 @@
 ## Slide 3: Observabilidad Básica - Implementación
 **Título:** Script 1 - Logging y Métricas Simples
 
-**Implementación práctica:**
+**Implementación práctica** (`1-observability_tools.py`, simulación sin llamar al modelo):
 ```python
-import logging
-import time
+class AgenteObservable:
+    """Agente simulado que registra cada interaccion con metricas."""
 
-logging.basicConfig(level=logging.INFO)
-
-class Agent:
-    def __init__(self):
-        self.counter = 0
-
-    def act(self, message):
-        start = time.time()
-        logging.info(f"Recibido mensaje: {message}")
-        self.counter += 1
-        response = f"Respuesta #{self.counter} a: {message}"
-        duration = time.time() - start
-        logging.info(f"Duración de respuesta: {duration:.4f} segundos")
-        return response
+    def procesar(self, mensaje: str) -> str:
+        self.logger.info(f"Entrada: {mensaje!r}")
+        inicio = time.perf_counter()
+        ...
+        duracion_ms = (time.perf_counter() - inicio) * 1000
+        self.metricas.registrar(duracion_ms, tokens_in, tokens_out, exitoso=True)
+        self.logger.info(f"Salida ({duracion_ms:.1f}ms, {tokens_in}+{tokens_out} tokens)")
+        return respuesta
 ```
 
-**Métricas capturadas:**
-- **Contador de interacciones:** Volumen de uso
-- **Tiempo de respuesta:** Performance del agente
-- **Logs de entrada/salida:** Trazabilidad completa
+**Métricas capturadas por `RecolectorMetricas.resumen()`:**
+- **`total_peticiones`:** Volumen de uso
+- **`tiempo_promedio_ms` / `maximo` / `minimo`:** Performance del agente
+- **`total_tokens`:** Consumo (base para estimar costo)
+- **`tasa_errores_pct`:** Fiabilidad
+- **Logs de entrada/salida con timestamp:** Trazabilidad completa
 
 ---
 
@@ -202,10 +198,10 @@ logging.basicConfig(
 4. **Foundation** para observabilidad avanzada
 
 **Implementación práctica:**
-- Agente con logging integrado
-- Medición de tiempo de respuesta
-- Contador de interacciones
-- Logs informativos para debugging
+- Agente con logging estructurado integrado (`1-observability_tools.py`)
+- Medición de tiempo de respuesta, tokens y tasa de errores
+- Reporte agregado en JSON con `RecolectorMetricas.resumen()`
+- Notebook: dashboard con matplotlib y sistema de alertas por umbrales
 
 **Valor organizacional:**
 - Visibilidad en operaciones de agentes
@@ -218,3 +214,4 @@ logging.basicConfig(
 - IL3.2: Trazabilidad avanzada
 - IL3.3: Seguridad y ética  
 - IL3.4: Escalabilidad y sostenibilidad
+- IL3.5: Ciberseguridad y despliegue en AWS

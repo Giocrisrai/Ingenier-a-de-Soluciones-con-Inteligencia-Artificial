@@ -76,7 +76,8 @@
 **Archivos que lo usan**:
 - `1-basic_planning.py`
 - `1-langchain_planning.py`
-- Parcialmente: `2-hierarchical-planning.py`, `5-agent-orchestration.py`
+- `1-basic-planning-agent.ipynb`
+- Parcialmente: `2-hierarchical-planning.py`, `5-agent-orchestration.py`, `7-task-decomposition.py`
 
 #### CrewAI (Equipos)
 **Usar para**:
@@ -97,8 +98,9 @@
 - ✅ Simulaciones y experimentos
 - ✅ Patrones de diseño
 
-**Archivos que lo usan**:
+**Archivos que lo usan** (ninguno necesita `GROQ_API_KEY`):
 - `1-planning-strategies.py`
+- `2-multiagent_orchestration.py`
 - `3-reactive-planning.py`
 - `4-goal-oriented-planning.py`
 - `6-workflow-management.py`
@@ -122,19 +124,31 @@ GROQ_MODEL=llama-3.3-70b-versatile
 ```
 
 > La clave se obtiene gratis en [https://console.groq.com/](https://console.groq.com/).
+>
+> **Cuota gratuita:** `llama-3.3-70b-versatile` tiene 30 peticiones/min y **100K tokens/día**;
+> `llama-3.1-8b-instant`, 30 peticiones/min y **500K tokens/día**. Un error `429` significa
+> cuota agotada, no código roto: espera o pon `GROQ_MODEL=llama-3.1-8b-instant`.
 
 ### Dependencias
 
-```bash
-# Para LangChain
-pip install langchain langchain-groq groq python-dotenv
+Lo recomendado en este repo es **`uv sync`** desde la raíz: instala todo lo de abajo de una vez
+y con versiones fijadas. Si prefieres `pip` (o estás en Colab):
 
-# Para CrewAI
-pip install crewai crewai-tools python-dotenv
+```bash
+# Para LangChain — langchain-classic es obligatorio: los scripts importan
+# create_react_agent / AgentExecutor / hub desde langchain_classic (LangChain 1.x)
+pip install langchain langchain-classic langchain-groq groq python-dotenv
+
+# Para CrewAI — el extra [litellm] es obligatorio: sin el, LLM(model="groq/...")
+# falla con ImportError (desde crewai 1.x LiteLLM ya no viene incluido)
+pip install "crewai[litellm]" crewai-tools python-dotenv
 
 # Opcional para ejemplos avanzados
 pip install langsmith  # Para evaluación
 ```
+
+> Los archivos de **Python puro** (ver la tabla del `README.md`) no necesitan nada de esto
+> ni tampoco `GROQ_API_KEY`: se ejecutan con `python <archivo>.py` sin más.
 
 ---
 
@@ -229,6 +243,34 @@ Nivel 4: EXPERTO
 ❌ **Error**: Usar multi-agente cuando un agente basta
 ✅ **Correcto**: Empezar simple, complejizar solo si es necesario
 
+Es **el error más frecuente del módulo**. Multi-agente no sale gratis: cada agente reenvía
+contexto (el costo crece más que lineal), las latencias se suman, la depuración se vuelve
+"¿cuál de los cinco falló?" y aparecen fallos nuevos (bucles entre agentes, un agente
+propagando la alucinación de otro).
+
+**Justifica el multi-agente solo si** los subproblemas necesitan herramientas/permisos
+distintos, hay trabajo realmente paralelizable, o los prompts de sistema son incompatibles
+entre sí. Si los agentes solo se pasan texto en línea recta, eso es una **función con varios
+pasos**, no un equipo.
+
+👉 Criterios detallados y tabla de costos en
+[orchestration-guide.md § "¿De verdad necesitas multi-agente?"](orchestration-guide.md).
+
+### 5. No medir el costo
+❌ **Error**: Dar por buena la arquitectura multi-agente porque "funciona"
+✅ **Correcto**: Medir **tokens y segundos por tarea completa** y compararlos contra una línea
+base de **un solo agente**. Si el equipo de agentes no gana en calidad, no compensa lo que
+cuesta.
+
+### 6. Dejar que los agentes conversen sin tope
+❌ **Error**: Que el bucle termine "cuando los agentes se pongan de acuerdo"
+✅ **Correcto**: Tope duro de iteraciones (`max_iter`), presupuesto de tokens por tarea y un
+criterio de terminación explícito. Dos agentes pidiéndose aclaraciones mutuamente no están
+bloqueados: están **facturando**.
+
+👉 Estos fallos, con sus mitigaciones, en
+[coordination-strategies.md § "Problemas específicos cuando los agentes son LLM"](coordination-strategies.md).
+
 ---
 
 ## 📊 Evaluación y Métricas
@@ -269,7 +311,7 @@ Para tu proyecto final, evalúa:
 
 ---
 
-**Última actualización**: Mayo 2026
+**Última actualización**: Agosto 2026
 **Autor**: Módulo IL2.3 - Ingeniería de Soluciones con IA
 **Versión**: 1.0
 

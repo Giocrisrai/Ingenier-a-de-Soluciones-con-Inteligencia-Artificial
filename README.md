@@ -12,6 +12,14 @@ El curso cubre desde los fundamentos de la IA generativa y el prompt engineering
 - **Modalidad:** Práctica y conceptual
 - **Requisitos:** Python básico, interés en IA
 
+> ### 📘 [Guía del Estudiante](GUIA_DEL_ESTUDIANTE.md)
+>
+> **Si algo te falla, empieza por ahí.** Reúne en un solo sitio: cómo trabajar en Colab o en
+> tu computador, qué modelos usa el curso y por qué, cómo funcionan los límites de la cuota
+> gratuita, qué necesita cada módulo, y **todos los errores frecuentes con su solución**.
+>
+> Este README es para **instalar** el entorno. La Guía del Estudiante es para **usarlo**.
+
 ### Herramienta de entorno: [uv](https://docs.astral.sh/uv/) (Astral)
 
 En este curso el flujo **recomendado y el que mejor evita dolores de cabeza** es **[uv](https://docs.astral.sh/uv/)**: instala dependencias muy rápido, usa el **`uv.lock`** para que todos tengan **las mismas versiones** (Windows, macOS o Linux), y gestiona la versión de Python del proyecto sin pelearte con el Python del sistema. No es obligatorio, pero es la opción más moderna y alineada con cómo se trabaja hoy en proyectos Python serios.
@@ -108,6 +116,12 @@ source .venv/bin/activate   # macOS / Linux
 pip install -r requirements.txt
 ```
 
+Con el entorno activado, comprueba los imports igual que con uv (pero sin el prefijo `uv run`):
+
+```bash
+python scripts/verify_env.py
+```
+
 ### 3. Configurar Variables de Entorno
 
 ```bash
@@ -123,15 +137,26 @@ Edita el archivo `.env` con tus credenciales:
 GROQ_API_KEY="tu_api_key_de_groq_aqui"
 GROQ_MODEL="llama-3.3-70b-versatile"
 GROQ_MODEL_FAST="llama-3.1-8b-instant"
+GROQ_MODEL_TOOLS="openai/gpt-oss-20b"
 EMBEDDING_MODEL="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-LANGSMITH_TRACING="true"
-LANGSMITH_API_KEY="tu_langsmith_api_key_aqui"
+LANGSMITH_TRACING="false"
+LANGSMITH_API_KEY=""
 LANGSMITH_PROJECT="ingenieria_soluciones_con_ia"
 ```
 
+**La única credencial obligatoria para empezar es `GROQ_API_KEY`.** El resto puede quedarse
+tal cual.
+
 **Cómo obtener tus credenciales:**
 - **GROQ_API_KEY**: Entra a [console.groq.com](https://console.groq.com/), inicia sesión (se sugiere tu cuenta de Google asociada a Duoc UC) y ve a **API Keys > Create API Key**. Copia la key en ese momento: no se vuelve a mostrar. **No necesitas tarjeta de crédito.**
-- **LANGSMITH_API_KEY**: Crea una cuenta en [LangSmith](https://smith.langchain.com/) y genera una API key desde Settings.
+- **LANGSMITH_API_KEY** (opcional, para los módulos de observabilidad): crea una cuenta en [LangSmith](https://smith.langchain.com/) y genera una API key desde Settings.
+
+> **Deja `LANGSMITH_TRACING="false"` hasta que llegues a los módulos de observabilidad**
+> (RA1/IL1.4 y RA3) y tengas tu `LANGSMITH_API_KEY`. Si lo pones en `"true"` con la key vacía,
+> LangChain intenta enviar trazas y la consola se llena de errores rojos
+> (`LangSmithMissingAPIKeyWarning`, `401 Unauthorized`) que **no** son un fallo de tu código
+> ni impiden que el modelo responda. Cuando toque usar LangSmith: primero pega la API key,
+> después cambia la variable a `"true"`.
 
 ### Proveedor de modelos: Groq
 
@@ -142,6 +167,7 @@ hardware LPU, lo que lo hace muy rápido, y tiene una capa gratuita suficiente p
 |-----|--------|--------|
 | `GROQ_MODEL` | `llama-3.3-70b-versatile` | Por defecto. Razonamiento, agentes, function calling. |
 | `GROQ_MODEL_FAST` | `llama-3.1-8b-instant` | Tareas simples o con muchas llamadas seguidas. |
+| `GROQ_MODEL_TOOLS` | `openai/gpt-oss-20b` | Agentes que encadenan varias llamadas a herramientas seguidas (los Llama fallan ahí). Es un modelo open-weight servido por Groq, no la API de OpenAI. |
 
 **Límites de la capa gratuita** (agosto 2026 — consulta siempre [la doc oficial](https://console.groq.com/docs/rate-limits)):
 
@@ -176,7 +202,37 @@ automáticamente y la leen desde ahí.
 
 > **IMPORTANTE:** Nunca subas tu archivo `.env` al repositorio. Ya está incluido en `.gitignore`.
 
-### 4. Ejecutar Jupyter
+### 4. Verificar que Groq responde (tu primera llamada al modelo)
+
+Antes de abrir el primer notebook, comprueba que la configuración funciona de verdad:
+
+```bash
+uv run python scripts/verify_groq.py
+```
+
+(Sin uv, con el `.venv` activado: `python scripts/verify_groq.py`.)
+
+El script hace cuatro comprobaciones, de la más barata a la más cara:
+
+1. Que `GROQ_API_KEY` esté definida y tenga formato de key (`gsk_…`).
+2. Que el **SDK oficial** (`from groq import Groq`) pueda llamar al modelo.
+3. Que **`ChatGroq`** de LangChain pueda llamar al modelo.
+4. Que los **embeddings locales** de HuggingFace funcionen (sin API key).
+
+Gasta muy pocos tokens: pide respuestas de una palabra. Si algo falla, el mensaje te dice qué
+arreglar (key ausente, key rechazada o límite `429` alcanzado).
+
+> La comprobación 4 es la que tarda: la **primera vez descarga ~470 MB** del modelo de embeddings.
+> Hazlo antes de la clase, con buena conexión; después queda en caché y es instantáneo.
+
+Recuerda la diferencia entre los dos verificadores:
+
+| Script | Qué comprueba | ¿Gasta cuota de Groq? |
+|---|---|---|
+| `scripts/verify_env.py` | Que todas las librerías del curso importen | No |
+| `scripts/verify_groq.py` | Que la API key, Groq y los embeddings funcionen | Sí, muy poca |
+
+### 5. Ejecutar Jupyter
 
 Con el entorno activado:
 
@@ -196,7 +252,7 @@ Opcional: registrar el kernel de este entorno en Jupyter para elegirlo en la int
 uv run python -m ipykernel install --user --name ingenieria-soluciones-ia --display-name "Python (ingenieria-soluciones-ia)"
 ```
 
-### 5. Opcional: Docker (Jupyter Lab con uv en Linux)
+### 6. Opcional: Docker (Jupyter Lab con uv en Linux)
 
 Sirve si prefieres **no instalar Python ni uv en tu máquina** o quieres un entorno idéntico al de otros compañeros. Sigue usando **`uv.lock`** dentro del contenedor.
 
@@ -243,7 +299,14 @@ docker-compose down   # detiene el servicio (v1)
 # Comprobar imports (contenedor ya en marcha con up):
 docker compose exec jupyter uv run python scripts/verify_env.py
 docker-compose exec jupyter uv run python scripts/verify_env.py
+
+# Comprobar que Groq responde desde dentro del contenedor:
+docker compose exec jupyter uv run python scripts/verify_groq.py
 ```
+
+Las variables de `.env` (incluida `GROQ_API_KEY`) llegan al contenedor por `env_file`, así que
+dentro de Jupyter los notebooks las leen igual que en local. Si cambias el `.env`, reinicia el
+contenedor (`docker compose down && docker compose up`) para que tome los nuevos valores.
 
 #### Troubleshooting rápido
 
@@ -273,6 +336,7 @@ RA3/  # Observabilidad, Seguridad y Ética en Agentes IA
   IL3.2/  # Trazabilidad y procesamiento de logs
   IL3.3/  # Protocolos de seguridad y ética
   IL3.4/  # Escalabilidad y sostenibilidad
+  IL3.5/  # Ciberseguridad y despliegue en AWS
 ```
 
 Cada subcarpeta IL contiene:
@@ -287,11 +351,12 @@ Cada subcarpeta IL contiene:
 
 | Librería | Uso |
 |----------|-----|
-| `openai` | Cliente para APIs de modelos de lenguaje |
+| `groq` | SDK oficial de Groq (`from groq import Groq`) |
 | `langchain` | Framework para construir aplicaciones con LLMs |
-| `langchain-openai` | Integración LangChain con OpenAI |
+| `langchain-groq` | Integración LangChain con Groq (`ChatGroq`) |
+| `langchain-huggingface` / `sentence-transformers` | Embeddings locales para RAG (Groq no ofrece embeddings) |
 | `langgraph` | Grafos de estado para agentes |
-| `crewai` / `crewai_tools` | Orquestación multi-agente y herramientas CrewAI |
+| `crewai[litellm]` / `crewai_tools` | Orquestación multi-agente y herramientas CrewAI (el extra `[litellm]` es el que permite a CrewAI hablar con Groq) |
 | `faiss-cpu` | Base de datos vectorial para RAG |
 | `langsmith` | Observabilidad y evaluación de LLMs |
 | `streamlit` | Interfaces web para demos |
@@ -332,6 +397,10 @@ Los proyectos se desarrollan en parejas con presentación individual.
 
 ## Solución de Problemas Comunes
 
+> Aquí están los problemas de **instalación**. Los errores que aparecen **usando** los
+> notebooks (`429`, `tool_use_failed`, LangSmith, embeddings, celdas colgadas…) están
+> explicados uno a uno en la **[Guía del Estudiante](GUIA_DEL_ESTUDIANTE.md#6-errores-frecuentes)**.
+
 ### Error de importación de módulos o versiones distintas entre compañeros
 
 Con **uv** (recomendado): vuelve a alinear el entorno con el lock del repo:
@@ -348,10 +417,22 @@ Si usas **pip**: activa `.venv` e instala de nuevo: `pip install -r requirements
 Reinstala uv con los comandos de instalación de la sección 2, reinicia la terminal y comprueba `uv --version`. En Windows, instala también las [actualizaciones de Visual C++ Redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist) si el instalador falla.
 
 ### Error de API key
+
+Lo más rápido es dejar que el verificador te diga qué pasa:
+
 ```bash
-# Verifica que tu .env tenga las credenciales correctas
+uv run python scripts/verify_groq.py
+```
+
+Si dice que falta la key, revisa el `.env`:
+
+```bash
 cat .env  # macOS / Linux; en Windows: type .env
 ```
+
+Comprueba que la línea sea `GROQ_API_KEY="gsk_..."` (sin espacios alrededor del `=`) y que el
+archivo esté en la **raíz** del repo, no dentro de una carpeta `RA…/`. Si la key fue rechazada,
+genera una nueva en [console.groq.com](https://console.groq.com/) > API Keys.
 
 ### Problemas con Jupyter kernel
 

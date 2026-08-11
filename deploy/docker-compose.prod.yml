@@ -6,6 +6,15 @@ services:
     build: ./backend
     restart: unless-stopped
     env_file: [.env]
+    environment:
+      # Única IP cuyo X-Forwarded-For aceptamos: la de Caddy (fijada abajo).
+      # Con esto uvicorn --proxy-headers puede reconstruir la IP real del
+      # cliente y el rate limiting de slowapi pasa a ser POR IP en vez de un
+      # cubo global. Ver el comentario largo en backend/Dockerfile.
+      FORWARDED_ALLOW_IPS: "172.28.0.10"
+      # Docs de FastAPI (/docs, /redoc, /openapi.json) apagadas en el
+      # despliegue expuesto. Para trastear en local: ENABLE_DOCS=true.
+      ENABLE_DOCS: "${ENABLE_DOCS:-false}"
     expose: ["8000"]
     deploy:
       resources:
@@ -35,10 +44,20 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on: [frontend, backend]
-    networks: [interna]
+    networks:
+      interna:
+        # IP fija: el backend necesita saber a qué origen exacto le cree la
+        # cabecera X-Forwarded-For. Con IPs dinámicas habría que confiar en
+        # toda la subred, que incluiría al resto de contenedores.
+        ipv4_address: 172.28.0.10
 
 networks:
   interna:
+    # Subred declarada para poder fijar la IP de Caddy. Si choca con otra red
+    # de tu máquina o de la VPC, cámbiala aquí y en FORWARDED_ALLOW_IPS.
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
 
 volumes:
   caddy_data:

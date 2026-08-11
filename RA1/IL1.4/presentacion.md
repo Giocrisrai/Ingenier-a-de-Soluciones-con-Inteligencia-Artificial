@@ -98,7 +98,9 @@ El notebook `2-langsmith-evaluation.ipynb` nos guía a través de un proceso pr�
 ## Actividad Práctica
 
 El entregable de este módulo consiste en:
-1.  **Ejecutar el notebook `1-evaluation-rag.py`** para comprender conceptualmente las métricas.
+1.  **Ejecutar el notebook `1-evaluation-metrics.ipynb`** para implementar y comprender las métricas
+    (Faithfulness, Answer Relevancy y Context Precision) y **lanzar la app de Streamlit
+    `1-evaluation-rag.py`** (`streamlit run RA1/IL1.4/1-evaluation-rag.py`) para verlas en vivo.
 2.  **Configurar y ejecutar el notebook `2-langsmith-evaluation.ipynb`**, conectándolo con tu propia cuenta de LangSmith.
 3.  **Crear tu propio dataset de evaluación** con al menos 5 ejemplos relevantes para los documentos proporcionados.
 4.  **Ejecutar la evaluación** y analizar los resultados en el dashboard de LangSmith.

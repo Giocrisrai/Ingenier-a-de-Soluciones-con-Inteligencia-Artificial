@@ -42,6 +42,9 @@ def main() -> None:
         ("seaborn", None),
         ("requests", None),
         ("httpx", None),
+        ("fastapi", "fastapi (API de deploy/ en IL3.5)"),
+        ("uvicorn", None),
+        ("slowapi", "slowapi (rate limiting en IL3.5)"),
         ("dotenv", None),
         ("pydantic", None),
         ("jupyter", None),
@@ -57,6 +60,9 @@ def main() -> None:
         ("sentence_transformers", None),
         ("crewai", None),
         ("crewai_tools", None),
+        # Sin el extra `crewai[litellm]` este import falla y `LLM(model="groq/...")`
+        # revienta con ImportError: es el puente entre CrewAI y Groq.
+        ("litellm", "litellm (puente CrewAI ↔ Groq)"),
     ]
 
     print(f"Python {sys.version.split()[0]} — verificando imports…\n")

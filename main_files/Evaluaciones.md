@@ -126,7 +126,7 @@ Las preguntas evaluarán conocimientos teóricos sobre arquitectura de agentes L
 **Horas Trabajo Autónomo:** 2 hrs  
 
 **Descripción Evaluación Dirigida al Docente:**
-Los estudiantes deben desarrollar un proyecto integral que corresponde a la construcción de un repositorio de código en gitbug, en el cual incluyen:
+Los estudiantes deben desarrollar un proyecto integral que corresponde a la construcción de un repositorio de código en GitHub, en el cual incluyen:
 
 1. Análisis del flujo de trabajo organizacional asignado identificando tareas cognitivas complejas a automatizar
 2. Construcción de un agente funcional que integre herramientas de consulta, escritura y razonamiento usando frameworks específicos (IL2.1)

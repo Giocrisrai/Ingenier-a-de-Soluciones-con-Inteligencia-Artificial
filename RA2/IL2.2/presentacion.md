@@ -69,11 +69,28 @@ Mientras que la memoria gestiona el **historial interno**, la verdadera potencia
 
 Aunque aún no es un estándar universalmente adoptado, los principios de MCP (descripciones claras, esquemas de entrada/salida) son fundamentales para construir agentes robustos y extensibles.
 
-## 4. Implementaciones y Próximos Pasos
+## 4. Robustez: los fallos que sí van a ocurrir
+
+Un agente con herramientas no falla solo cuando falla la herramienta. Falla porque **la salida
+del LLM es entrada no confiable**. En `3-herramientas-externas.ipynb` esto no se cuenta, se
+implementa: la función que llama al modelo contempla tres casos:
+
+| Qué falla | Cómo se ve | Cómo se maneja |
+|---|---|---|
+| El modelo genera la llamada a la función mal formada | `400` `tool_use_failed` | Reintento con espera creciente |
+| Se agota la cuota por minuto de la capa gratuita | `429` `rate_limit_exceeded` | Reintento esperando unos segundos |
+| El modelo manda argumentos basura (p. ej. `{"": ""}`) | `TypeError` al invocar la función Python | Sanear los argumentos antes de ejecutar |
+
+**Por qué importa en clase:** ninguno de los tres es un bug del código del alumno. Los tres son
+comportamiento normal de un modelo probabilístico contra una API con cuota. Un agente que no los
+contempla funciona en la demo y se cae con uso real.
+
+## 5. Implementaciones y Próximos Pasos
 
 ### Implementaciones del Módulo:
 1.  **Agente con Memoria Manual**: Se muestra cómo un agente puede recordar el contexto pasando manualmente el `chat_history`.
 2.  **Agente con Memoria Automatizada**: Se refactoriza el código para usar `ConversationBufferMemory`, `ConversationBufferWindowMemory` y `ConversationSummaryMemory`, demostrando las ventajas de cada una.
+3.  **Agente con Herramientas Externas y MCP**: Tool execution loop con el SDK de Groq, registro dinámico de herramientas, herramientas con estado, orquestación multi-paso y una simulación de servidor/cliente MCP.
 
 ### Preparación para IL2.3:
 Con un agente que puede **recordar** (memoria) e **interactuar** (herramientas), el siguiente paso lógico es enseñarle a **planificar**.

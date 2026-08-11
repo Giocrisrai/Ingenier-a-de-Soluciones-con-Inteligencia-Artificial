@@ -30,30 +30,30 @@
 ---
 
 ## Slide 3: Trazabilidad Básica - Implementación
-**Título:** Script 1 - Logs Persistentes y Análisis
+**Título:** Script 1 - Trazas Estructuradas y Análisis
 
-**Implementación simple:**
+**Implementación** (`1-traceability_analysis.py`, simulación sin llamar al modelo):
 ```python
-import logging
+@dataclass
+class Traza:
+    trace_id: str          # uuid4 corto, identifica la peticion completa
+    timestamp: str
+    mensaje_entrada: str
+    eventos: List[Evento]  # una etapa: nombre, inicio, duracion, estado
 
-# Logging a archivo para persistencia
-logging.basicConfig(filename='agent.log', level=logging.INFO)
+# El agente registra una etapa por paso del procesamiento
+traza.agregar_evento("validacion_entrada", inicio, duracion, "ok", detalle)
+traza.agregar_evento("clasificacion_intencion", inicio, duracion, "ok", detalle)
+traza.agregar_evento("generacion_respuesta", inicio, duracion, "error", "Timeout")
 
-class TraceableAgent:
-    def act(self, message):
-        logging.info(f"Mensaje recibido: {message}")
-        return f"Procesado: {message}"
-
-# Análisis de logs
-with open('agent.log') as f:
-    for line in f:
-        print(line.strip())
+print(traza.a_json())                       # traza completa en JSON
+AnalizadorTrazas.resumir(historial_trazas)  # tasa de exito, etapa mas lenta
 ```
 
 **Características clave:**
-- **Persistencia:** Logs guardados en archivo
-- **Trazabilidad:** Registro de entrada y procesamiento
-- **Análisis:** Lectura y procesamiento de logs históricos
+- **Trazabilidad:** un `trace_id` correlaciona todas las etapas de una petición
+- **Estructura:** trazas serializables a JSON (no texto libre)
+- **Análisis:** `AnalizadorTrazas` calcula tasa de éxito y promedio por etapa
 
 ---
 
@@ -250,16 +250,16 @@ class SampledTracer:
 **Título:** Conceptos Clave del Módulo IL3.2
 
 **Fundamentos establecidos:**
-1. **Logging persistente** con archivos estructurados
-2. **Trazabilidad de decisiones** con context correlation
+1. **Trazas estructuradas** en JSON, no texto libre
+2. **Trazabilidad de decisiones** con `trace_id` y spans jerárquicos
 3. **Análisis automatizado** de patrones de comportamiento
 4. **Foundation para compliance** y auditoría
 
 **Implementación práctica:**
-- Agente con logging a archivo
-- Análisis básico de logs históricos
-- Estructura para tracking de decisiones
-- Base para herramientas avanzadas de análisis
+- Script: agente que emite trazas con etapas y las resume (`AnalizadorTrazas`)
+- Notebook: spans padre/hijo, vista de cascada y árbol de trazas
+- Detección de anomalías por z-score y de cuellos de botella
+- Base para herramientas avanzadas (OpenTelemetry, Jaeger, LangSmith)
 
 **Valor organizacional:**
 - Transparency en decisiones de IA

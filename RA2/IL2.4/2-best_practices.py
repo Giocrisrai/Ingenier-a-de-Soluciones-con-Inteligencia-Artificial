@@ -4,6 +4,11 @@ IL2.4: Buenas Practicas para Proyectos de Agentes de IA
 Demuestra patrones concretos: manejo de errores, configuracion con
 variables de entorno, logica de reintento y validacion de entrada.
 
+Este script NO llama a ningun LLM: la llamada a la API esta simulada (con fallos
+aleatorios) para que el patron de reintento se pueda observar sin gastar cuota de
+Groq. Por eso los nombres de variable son genericos (API_KEY, API_BASE_URL,
+MODELO_LLM); en el resto del curso el equivalente real es GROQ_API_KEY y GROQ_MODEL.
+
 Ejecutar: python 2-best_practices.py
 """
 

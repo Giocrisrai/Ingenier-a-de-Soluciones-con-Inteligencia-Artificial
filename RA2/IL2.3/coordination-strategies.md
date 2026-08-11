@@ -559,6 +559,83 @@ def detect_deadlock(agents):
 
 ---
 
+## ⚠️ Problemas específicos cuando los agentes son LLM
+
+Deadlock, livelock y starvation vienen de la teoría clásica de sistemas multi-agente (robots,
+procesos). Cuando cada "agente" es una **llamada a un LLM**, aparecen otros fallos que el resto
+de esta guía no cubre y que son los que de verdad rompen los proyectos:
+
+### 4. Bucle infinito de conversación
+
+**Problema**: A pide aclaración a B, B pide aclaración a A, y así indefinidamente. Ninguno
+está bloqueado (no es deadlock) y ambos "progresan" generando texto — pero la tarea no avanza
+y **cada vuelta cuesta tokens**.
+
+**Solución** — nunca se confía en que el sistema converja solo:
+- **Tope duro de iteraciones** (`max_iter`) y de turnos por conversación
+- **Presupuesto de tokens/costo** por tarea: al agotarlo, se corta y se devuelve lo que haya
+- **Detección de repetición**: si dos turnos consecutivos son casi idénticos, cortar
+- Un **criterio de terminación explícito**, no "hasta que estén de acuerdo"
+
+### 5. Propagación de errores y alucinaciones
+
+**Problema**: el agente A inventa un dato. B lo recibe como hecho, razona sobre él y lo pasa a
+C. El error no se detecta: se **amplifica** y, peor, gana apariencia de consenso porque tres
+agentes lo repiten. En un pipeline secuencial no hay ningún punto donde alguien verifique.
+
+**Solución**:
+- **Validar entre etapas**, no solo al final (esquemas, rangos, chequeos deterministas)
+- Marcar la **procedencia** de cada dato: qué agente lo produjo y de qué fuente
+- Un agente **verificador** con acceso a la fuente original, no al resumen del anterior
+- Que el acuerdo entre agentes **no cuente como evidencia**: N agentes con el mismo modelo y
+  el mismo contexto se equivocan de la misma forma
+
+### 6. Costo y latencia se multiplican
+
+**Problema**: pasar de 1 a 5 agentes no cuesta 5×. Cada agente reenvía contexto acumulado, y
+en un pipeline secuencial las **latencias se suman**. Es fácil terminar con un sistema 10×
+más caro y 5× más lento que un solo agente bien diseñado, para la misma calidad.
+
+**Solución**:
+- Medir **tokens y segundos por tarea completa**, no por agente
+- Comparar siempre contra la **línea base de un agente único** antes de dar por buena la
+  arquitectura multi-agente
+- Paralelizar lo que no tenga dependencias (scatter-gather) en vez de encadenar
+- Usar el modelo grande solo donde hace falta; los roles simples pueden ir en uno pequeño
+
+### 7. Observabilidad: no sabes cuál agente falló
+
+**Problema**: el resultado final es malo. ¿Falló A, o A estuvo bien y B lo malinterpretó? Sin
+trazas no hay forma de saberlo, y como el LLM no es determinista, **no puedes reproducir el
+fallo re-ejecutando**.
+
+**Solución**:
+- **`trace_id` único** por tarea, propagado a todos los agentes
+- Guardar prompt de entrada y salida **de cada agente**, no solo el resultado final
+- Registrar tokens, latencia y errores por agente (ver RA3/IL3.1 y IL3.2)
+- Fijar `temperature=0` y guardar las semillas mientras se depura
+
+### 8. Seguridad: un agente comprometido contamina al resto
+
+**Problema**: si un agente recibe contenido malicioso (una inyección indirecta dentro de un
+documento, una web o la salida de una herramienta), su respuesta pasa a los demás **como si
+fuera confiable**. Los mensajes entre agentes normalmente no se validan: la confianza mutua es
+justo lo que el atacante aprovecha. En una cadena de delegación, basta comprometer al eslabón
+más débil para mover a todo el equipo.
+
+**Solución**:
+- Tratar el mensaje de otro agente como **entrada no confiable**, igual que la de un usuario
+- **Mínimo privilegio por agente**: que el que lee webs no sea el que puede borrar o pagar
+- No propagar credenciales por la cadena de delegación
+- Aprobación humana antes de cualquier acción irreversible, sea cual sea el agente que la pida
+
+> Referencia: [OWASP Top 10 for Agentic Applications 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
+> — cubre justamente esto: secuestro de objetivo (ASI01), abuso de herramientas (ASI02), abuso
+> de identidad y privilegios en cadenas de delegación (ASI03), envenenamiento de memoria y
+> contexto (ASI06), comunicación insegura entre agentes (ASI07) y fallos en cascada (ASI08).
+
+---
+
 ## 🎓 Ejercicios Prácticos
 
 ### Ejercicio 1: Protocolo de Comunicación
@@ -589,6 +666,6 @@ Crea reglas reactivas para robots que deben recolectar objetos sin colisionar.
 ---
 
 **Autor**: Módulo IL2.3 - Ingeniería de Soluciones con IA  
-**Actualizado**: 2024  
+**Actualizado**: Agosto 2026  
 **Licencia**: Uso Educativo
 

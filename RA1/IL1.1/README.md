@@ -6,6 +6,11 @@ Esta unidad introduce los conceptos fundamentales de los Modelos de Lenguaje Gra
 
 ## Videos de cada archivo del curso:
 
+> ⚠️ **Los vídeos se grabaron con el proveedor anterior (GitHub Models).** Las explicaciones
+> conceptuales siguen siendo válidas, pero la creación de la cuenta, el nombre de las
+> variables de entorno y los nombres de los modelos **ya no coinciden**. Para la parte de
+> configuración, sigue siempre este README y los notebooks, no el vídeo.
+
 - **1-groq_model_api.ipynb**: Conexión directa a la API de Groq.
   [![Ver Video](https://img.youtube.com/vi/oYvwSROBTl0/hqdefault.jpg)](https://www.youtube.com/watch?v=oYvwSROBTl0)
 - **2-langchain_model_api.ipynb**: Abstracción de la API con LangChain.
@@ -70,7 +75,7 @@ Al completar esta unidad, serás capaz de:
 
 ## Contenido del Módulo
 
-Este módulo está compuesto por cuatro cuadernos de Jupyter que te guiarán progresivamente desde una conexión básica hasta la creación de un chatbot con memoria.
+Este módulo está compuesto por cuatro cuadernos de Jupyter que te guiarán progresivamente desde una conexión básica hasta la creación de un chatbot con memoria, más un quinto cuaderno de práctica (`practica_1.ipynb`) con ejercicios para resolver por tu cuenta.
 
 ### Notebook 1: Conexión Directa con la API de Groq (`1-groq_model_api.ipynb`)
 Este cuaderno es el punto de partida. Aprenderás a realizar llamadas directas a un modelo de lenguaje utilizando la API de Groq y su SDK oficial.
@@ -116,11 +121,17 @@ Un LLM no tiene estado. Este cuaderno enseña cómo darle "memoria" para que pue
         - `ConversationBufferMemory`: Guarda todo el historial.
         - `ConversationBufferWindowMemory`: Guarda las últimas `k` interacciones.
         - `ConversationSummaryMemory`: Usa un LLM para resumir la conversación y ahorrar tokens.
-    - Integrar la memoria en cadenas de conversación (`ConversationChain`).
+    - Integrar la memoria en la cadena de conversación con `RunnableWithMessageHistory`
+      (la API vigente de LangChain; sustituye a la antigua `ConversationChain`).
 - **Cómo usarlo**:
     1. Ejecuta los ejemplos de cada tipo de memoria para entender sus ventajas y desventajas.
     2. Analiza la comparación final para ver cómo cada tipo de memoria responde a la misma secuencia de preguntas.
     3. Experimenta con el chatbot de memoria configurable para cambiar de estrategia en tiempo real.
+
+### Práctica: Exploración de LLMs con API y LangChain (`practica_1.ipynb`)
+Cuaderno de ejercicios para consolidar lo visto en los cuatro notebooks anteriores: comparación de
+modelos de Groq, efecto de la `temperature`, mensajes de sistema, streaming con el SDK directo y un
+chatbot con memoria construido a mano. Se resuelve después de completar los notebooks 1 a 4.
 
 ## Configuración del Entorno
 

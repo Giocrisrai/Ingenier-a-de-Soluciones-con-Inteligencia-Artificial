@@ -50,9 +50,16 @@ En este módulo exploramos los fundamentos de la arquitectura de agentes intelig
 export GROQ_API_KEY="gsk_tu_api_key_de_groq"
 export GROQ_MODEL="llama-3.3-70b-versatile"
 export GROQ_MODEL_FAST="llama-3.1-8b-instant"
+export GROQ_MODEL_TOOLS="openai/gpt-oss-20b"
 ```
 
 Consigue tu API key gratuita en [console.groq.com](https://console.groq.com/).
+
+> **Cuota de la capa gratuita.** `llama-3.3-70b-versatile`: 30 peticiones/min, 1.000/día,
+> 12K tokens/min y **100K tokens/día**. `llama-3.1-8b-instant`: 30 peticiones/min, 14.400/día,
+> 6K tokens/min y **500K tokens/día**. El límite que se agota primero es el diario de tokens.
+> Si aparece un error **`429`**, no está roto el código: hay que esperar o cambiar de modelo
+> (`GROQ_MODEL=llama-3.1-8b-instant`).
 
 ### ⚠️ Qué modelo usar según el tipo de agente
 
@@ -71,10 +78,17 @@ de lo que parece:
 **El "mejor modelo para herramientas" se invierte según la vía.** No hay un ganador absoluto:
 depende del prompt del sistema y de cómo se le presenten las herramientas al modelo.
 
+Y hay un tercer caso: cuando el agente encadena **varias** llamadas a herramientas dentro de una
+misma conversación, **los dos Llama fallan**. Medido con una cadena de 2 pasos, 4 intentos:
+`llama-3.1-8b` 2/4 · `openai/gpt-oss-20b` **4/4**. Por eso existe `GROQ_MODEL_TOOLS`
+(`openai/gpt-oss-20b`, un modelo open-weight servido por Groq, no la API de OpenAI).
+
 Por eso en este curso:
 
-- **Herramientas con el SDK crudo** → `GROQ_MODEL_FAST` (`llama-3.1-8b-instant`).
-  Notebooks `2-agent-function-calling` y, en IL2.2, `3-herramientas-externas`.
+- **Herramientas con el SDK crudo, una llamada por consulta** → `GROQ_MODEL_FAST`
+  (`llama-3.1-8b-instant`). Notebook `2-agent-function-calling`.
+- **Cadenas multi-paso de herramientas** → `GROQ_MODEL_TOOLS` (`openai/gpt-oss-20b`).
+  Notebook `3-herramientas-externas` de IL2.2.
 - **Agentes de LangChain con herramientas** → `GROQ_MODEL` (`llama-3.3-70b-versatile`).
   Notebooks `3-langchain-agent` y, en IL2.2, `1-memory-agent` y `2-memory-agent-advanced`.
 - **Agentes ReAct por prompt** (`create_react_agent`) → `GROQ_MODEL`. No les afecta, porque el
@@ -105,6 +119,10 @@ import os
 from crewai import LLM
 llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}", temperature=0)
 ```
+
+> **Instalación:** el extra es obligatorio → `pip install "crewai[litellm]" crewai-tools`.
+> Desde CrewAI 1.x LiteLLM ya no viene incluido y Groq no es un proveedor nativo, así que sin
+> ese extra `LLM(model="groq/...")` falla con `ImportError`. En el repo ya está en `pyproject.toml`.
 
 ## ⚠️ Problemas Comunes y Soluciones
 
@@ -174,7 +192,7 @@ llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}", te
 ## 🔗 Recursos Adicionales
 
 ### Documentación Oficial
-- [LangChain Agents Documentation](https://python.langchain.com/docs/use_cases/autonomous_agents/)
+- [LangChain Agents Documentation](https://docs.langchain.com/oss/python/langchain/agents)
 - [CrewAI Documentation](https://docs.crewai.com/)
 - [Groq Tool Use (Function Calling)](https://console.groq.com/docs/tool-use)
 
@@ -183,7 +201,7 @@ llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}", te
 - [Groq Console](https://console.groq.com/) - API keys, modelos disponibles y límites de uso
 
 ### Troubleshooting y Soporte
-- [GitHub Issues - CrewAI](https://github.com/joaomdmoura/crewAI/issues)
+- [GitHub Issues - CrewAI](https://github.com/crewAIInc/crewAI/issues)
 - [LangChain Community](https://github.com/langchain-ai/langchain/discussions)
 
 ## 💡 Mejores Prácticas Identificadas

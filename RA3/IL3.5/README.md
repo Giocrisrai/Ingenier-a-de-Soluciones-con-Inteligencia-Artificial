@@ -30,6 +30,11 @@ El código vive en la carpeta raíz [`deploy/`](../../deploy/README.md).
 - **OWASP LLM Top 10** aplicado en el backend.
 
 ## Recursos
-- [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-llm-applications/)
+- [OWASP GenAI LLM Top 10 — edición 2026 (lista vigente, publicada en agosto de 2026)](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/)
+  — la presentación usa estos códigos y muestra la equivalencia con los de 2025 y 2023, porque
+  la numeración **cambia en cada edición**.
+- [OWASP Top 10 for Agentic Applications 2026 (ASI01–ASI10)](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
+  — lista específica para agentes: secuestro de objetivo, abuso de herramientas, envenenamiento
+  de memoria/contexto, comunicación insegura entre agentes.
 - [AWS Academy Learner Lab](https://www.awsacademy.com/)
 - [Caddy — Automatic HTTPS](https://caddyserver.com/docs/automatic-https)

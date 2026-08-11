@@ -17,7 +17,8 @@ dividirse en pasos más pequeños y manejables. Por ejemplo, "Desarrollar una ap
 se divide en: diseñar, implementar, probar, desplegar.
 """
 
-# Requiere: pip install langchain langchain-groq groq python-dotenv
+# Requiere: pip install langchain langchain-classic langchain-groq groq python-dotenv
+# (langchain-classic es obligatorio: create_react_agent / AgentExecutor / hub viven ahi en LangChain 1.x)
 from langchain_groq import ChatGroq
 from langchain_classic.agents import create_react_agent, AgentExecutor, Tool
 from langchain_classic import hub

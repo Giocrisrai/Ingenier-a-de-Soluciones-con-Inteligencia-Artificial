@@ -18,6 +18,11 @@
 - [ ] La salida del modelo se muestra escapada (sin HTML crudo).
 - [ ] PII redactada en respuestas y logs.
 - [ ] Los errores no exponen trazas internas al cliente.
+- [ ] Sé explicar **qué NO cubre** mi guardrail: es un filtro por patrones, evadible con otro
+      idioma o codificación, y **no ve la inyección indirecta** (la que llega dentro de un
+      documento, una web o la salida de una herramienta).
+- [ ] Si mi agente tiene herramientas: cada una con el **mínimo permiso** necesario, y las
+      acciones irreversibles (borrar, pagar, enviar) piden **confirmación humana**.
 - [ ] `/metrics` es público solo a propósito (demo de observabilidad); en
       producción se protege con token o IP interna.
 

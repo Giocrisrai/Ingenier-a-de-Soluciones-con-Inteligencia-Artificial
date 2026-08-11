@@ -11,7 +11,7 @@ RAG es un enfoque que mejora las respuestas de los LLMs al permitirles consultar
 Este módulo se divide en los siguientes cuadernos de Jupyter, diseñados para guiarte progresivamente a través de los conceptos de RAG:
 
 1.  **`1-basic-rag.ipynb`**: Introduce los conceptos fundamentales de RAG con un ejemplo simple y práctico.
-2.  **`2-text-chunking.py`**: Explora diferentes estrategias para dividir texto en fragmentos (chunks), un paso crucial para la eficiencia del recuperador.
+2.  **`2-text-chunking.py`**: Explora diferentes estrategias para dividir texto en fragmentos (chunks), un paso crucial para la eficiencia del recuperador. **No es un notebook, sino una app de Streamlit**: se lanza desde la terminal con `streamlit run RA1/IL1.3/2-text-chunking.py` (no necesita API key: solo divide texto).
 3.  **`3-embeddings-simple-rag.ipynb`**: Muestra cómo generar embeddings a partir de fragmentos de texto y cómo utilizarlos para construir un sistema RAG básico.
 4.  **`4-vector-rag.ipynb`**: Avanza hacia una implementación más robusta utilizando una base de datos vectorial para almacenar y consultar eficientemente los embeddings.
 
@@ -51,4 +51,4 @@ La interfaz de LangChain es idéntica en ambos casos (`embed_documents`, `embed_
 
 ## Instrucciones
 
-Para comenzar, abre y ejecuta los cuadernos en el orden listado. Asegúrate de tener las variables de entorno (`GROQ_API_KEY`, `GROQ_MODEL`, `EMBEDDING_MODEL`) configuradas como se describe en el `README.md` principal del repositorio. Puedes crear tu API key gratuita en [console.groq.com](https://console.groq.com/).
+Para comenzar, abre y ejecuta los cuadernos en el orden listado (el paso 2 se lanza desde la terminal con `streamlit run`, no desde Jupyter). Asegúrate de tener las variables de entorno (`GROQ_API_KEY`, `GROQ_MODEL`, `EMBEDDING_MODEL`) configuradas como se describe en el `README.md` principal del repositorio. Puedes crear tu API key gratuita en [console.groq.com](https://console.groq.com/).

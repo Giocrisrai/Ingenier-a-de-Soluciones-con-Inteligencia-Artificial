@@ -17,6 +17,19 @@ Este módulo profundiza en cómo analizar y aprovechar los logs generados por lo
 | `2-traceability-practice.ipynb` | Notebook práctico para implementar trazabilidad y depuración |
 | `presentacion.md` | Diapositivas de apoyo con conceptos teóricos |
 
+## Requisitos Previos
+
+| Archivo | ¿Necesita API key? | Notas |
+|---|---|---|
+| `1-traceability_analysis.py` | No | Es una **simulación pura**: no llama a ningún modelo. Se puede ejecutar sin cuota. |
+| `2-traceability-practice.ipynb` | Sí (`GROQ_API_KEY`) | Hace **13 llamadas reales** a `llama-3.1-8b-instant`, más las del ejercicio final. |
+
+- Dependencias: `uv sync` en la raíz del repo (usa `groq`, `pandas` y `matplotlib`).
+- La credencial se carga igual en Colab (*Secrets*) que en local (archivo `.env`).
+- Si aparece un error **`429`**, se alcanzó un límite de la capa gratuita: lee el mensaje
+  para saber si es por minuto (espera) o por día (cambia de modelo o continúa mañana).
+  Tabla de límites vigentes en [`RA1/IL1.1/README.md`](../../RA1/IL1.1/README.md).
+
 ## Conceptos Clave
 
 - **Trazabilidad**: Seguimiento del flujo completo de decisión del agente
