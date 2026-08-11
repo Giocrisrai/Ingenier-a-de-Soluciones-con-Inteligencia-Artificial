@@ -58,10 +58,11 @@ Esto aplica sobre todo antes de **RA1/IL1.3** (RAG), que es donde entran los emb
 - En Colab, instalar CrewAI tarda varios minutos. No lo dejes para el momento.
 
 ### RA2/IL2.3 — Planificación
-- ⚠️ **`Swarm_101.ipynb` no está validado de punta a punta.** Es el único del curso.
-  Depende de una librería archivada por OpenAI. **No lo pongas como demo en vivo.**
-  Sirve como lectura y, sobre todo, como ejemplo de lo que cuesta integrar una librería
-  con un proveedor para el que no fue escrita (los tres parches están explicados dentro).
+- ⚠️ **`Swarm_101.ipynb` es el archivo más frágil del curso.** Está ejecutado y funciona,
+  pero depende de una librería que OpenAI archivó y que se instala desde git, así que puede
+  romperse sin aviso. Adaptarla a Groq costó tres parches y un cambio de modelo, todo
+  explicado dentro: ese recorrido es su mejor material de clase. Si lo llevas en vivo,
+  ejecútalo antes; si falla, no bloquea el resto de IL2.3.
 - De los 19 archivos del módulo, **11 no necesitan API key**: son simulaciones puras.
   La tabla está en el README del módulo.
 
@@ -98,9 +99,9 @@ Todos están explicados con su solución en la
 | Qué | Estado |
 |---|---|
 | Instalación desde cero (`git clone` + `uv sync` + verificación) | ✅ Probado, ~3 min |
-| Tests del artefacto desplegable | ✅ 17/17 |
+| Tests del artefacto desplegable | ✅ 59 pasando + 6 `xfail` que documentan evasiones abiertas |
 | Scripts `.py` | ✅ Todos compilan; los de simulación, ejecutados |
-| Notebooks | ✅ Ejecutados contra Groq, **excepto `Swarm_101`** |
+| Notebooks | ✅ Los 29, ejecutados de punta a punta contra Groq |
 | CI (GitHub Actions) | ✅ Verde: tests, Docker e2e, Trivy |
 | Despliegue en EC2 real | ❌ No probado |
 | Windows y Linux | ❌ No probado (todo verificado en macOS) |
