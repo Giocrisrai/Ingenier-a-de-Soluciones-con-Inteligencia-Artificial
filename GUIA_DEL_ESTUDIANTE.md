@@ -175,6 +175,21 @@ una cuenta en [smith.langchain.com](https://smith.langchain.com/).
 
 ---
 
+### `%pip install` no instala nada en local
+
+El entorno que crea `uv sync` **no incluye `pip`**, así que una celda con `%pip install`
+falla en tu computador (en Colab sí funciona). Si necesitas instalar algo puntual, usa uv:
+
+```python
+import sys
+!uv pip install -q --python {sys.executable} nombre-del-paquete
+```
+
+Solo hay un notebook del curso que instala algo en local (`RA2/IL2.3/Swarm_101.ipynb`,
+porque su librería no está en PyPI) y ya lo hace de la forma correcta.
+
+---
+
 ### `ModuleNotFoundError: No module named 'groq'` (o `langchain_groq`, `crewai`…)
 
 Estás usando un Python distinto al del proyecto.
