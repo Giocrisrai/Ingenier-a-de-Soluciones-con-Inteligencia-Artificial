@@ -68,8 +68,14 @@ def get_wikipedia_summary(query: str) -> str:
     """Busca información en Wikipedia"""
     return wikipedia.summary(query, sentences=2)
 
-# Crear y ejecutar agente en pocas líneas
-prompt = hub.pull("hwchase17/openai-tools-agent")
+# El prompt se define aquí, no se descarga del hub: `hub.pull` necesita red y
+# deserializa un objeto de un tercero (LangChain lo bloquea por defecto).
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful assistant"),
+    MessagesPlaceholder("chat_history", optional=True),
+    ("human", "{input}"),
+    MessagesPlaceholder("agent_scratchpad"),
+])
 agent = create_openai_tools_agent(llm, [get_wikipedia_summary], prompt)
 agent_executor = AgentExecutor(agent=agent, tools=[get_wikipedia_summary], verbose=True)
 

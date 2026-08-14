@@ -19,9 +19,10 @@ se divide en: diseñar, implementar, probar, desplegar.
 
 # Requiere: pip install langchain langchain-classic langchain-groq groq python-dotenv
 # (langchain-classic es obligatorio: create_react_agent / AgentExecutor / hub viven ahi en LangChain 1.x)
+from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain_classic.agents import create_react_agent, AgentExecutor, Tool
-from langchain_classic import hub
+
 from typing import List, Dict, Any
 import os
 import json
@@ -267,7 +268,30 @@ def demo_with_agent():
     )
     
     # Crear agente
-    prompt = hub.pull("hwchase17/react")
+    # El prompt ReAct, definido aquí en vez de descargarlo del hub de LangChain.
+    # Antes era `hub.pull("hwchase17/react")`: necesitaba red y deserializaba un objeto
+    # de un tercero. Tenerlo a la vista es además mejor para entender cómo razona el agente.
+    PLANTILLA_REACT = """Answer the following questions as best you can. You have access to the following tools:
+
+    {tools}
+
+    Use the following format:
+
+    Question: the input question you must answer
+    Thought: you should always think about what to do
+    Action: the action to take, should be one of [{tool_names}]
+    Action Input: the input to the action
+    Observation: the result of the action
+    ... (this Thought/Action/Action Input/Observation can repeat N times)
+    Thought: I now know the final answer
+    Final Answer: the final answer to the original input question
+
+    Begin!
+
+    Question: {input}
+    Thought:{agent_scratchpad}"""
+
+    prompt = PromptTemplate.from_template(PLANTILLA_REACT)
     agent = create_react_agent(llm, tools=[planning_tool], prompt=prompt)
     agent_executor = AgentExecutor(agent=agent, tools=[planning_tool], verbose=True)
 

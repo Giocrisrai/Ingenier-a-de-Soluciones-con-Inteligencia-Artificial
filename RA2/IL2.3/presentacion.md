@@ -581,8 +581,10 @@ herramienta_cafe = Tool(
     description="Devuelve los pasos para preparar café."
 )
 
-# Agente con capacidad de planificación (ReAct por prompt: el prompt viene del hub)
-prompt = hub.pull("hwchase17/react")
+# Agente con capacidad de planificación (ReAct por prompt).
+# La plantilla se define en el propio archivo en vez de descargarla del hub:
+# así no depende de la red y el alumno ve cómo se le pide razonar al modelo.
+prompt = PromptTemplate.from_template(PLANTILLA_REACT)
 agent = create_react_agent(llm, tools=[herramienta_cafe], prompt=prompt)
 agente = AgentExecutor(agent=agent, tools=[herramienta_cafe], verbose=True)
 
