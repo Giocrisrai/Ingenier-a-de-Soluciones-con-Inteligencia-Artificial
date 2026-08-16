@@ -175,6 +175,32 @@ una cuenta en [smith.langchain.com](https://smith.langchain.com/).
 
 ---
 
+### `Failed to build tiktoken` / `error: failed to run custom build command for pyo3-ffi`
+
+Le pasa sobre todo en **Windows**. El mensaje clave está al final del error:
+
+```
+error: the configured Python interpreter version (3.14) is newer than
+       PyO3's maximum supported version (3.13)
+```
+
+**Qué ocurre:** tu Python es más nuevo que las versiones para las que existe una
+versión precompilada de esa librería, así que `uv` intenta compilarla desde código
+Rust y falla.
+
+**Solución:** actualiza el repo. El proyecto fija la versión de Python en el archivo
+`.python-version`, y `uv` la descarga sola si no la tienes:
+
+```bash
+git pull
+uv sync
+```
+
+No necesitas desinstalar tu Python ni instalar Rust. `uv` usa la versión del
+proyecto sin tocar la del sistema.
+
+---
+
 ### `%pip install` no instala nada en local
 
 El entorno que crea `uv sync` **no incluye `pip`**, así que una celda con `%pip install`

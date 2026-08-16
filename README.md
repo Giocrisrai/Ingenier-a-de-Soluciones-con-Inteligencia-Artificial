@@ -61,6 +61,11 @@ Tras instalar, cierra y abre la terminal (o reinicia el IDE) para que `uv` quede
 
 **2. Sincronizar el proyecto** (crea `.venv` e instala todo según el lockfile):
 
+> El archivo `.python-version` fija la versión de Python del curso (3.13) para que todo
+> el grupo use la misma. **No necesitas instalarla tú**: `uv` la descarga sola si no la
+> tienes. Esto evita el fallo típico en Windows al compilar librerías que aún no
+> publican versión precompilada para los Python más recientes.
+
 ```bash
 uv sync
 ```
