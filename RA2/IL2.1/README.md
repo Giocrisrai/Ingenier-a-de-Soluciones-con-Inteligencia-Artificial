@@ -94,6 +94,26 @@ Por eso en este curso:
 - **Agentes ReAct por prompt** (`create_react_agent`) → `GROQ_MODEL`. No les afecta, porque el
   modelo escribe texto plano en vez de una llamada estructurada.
 
+### El mismo test, en otro proveedor
+
+Repetimos exactamente la misma medición contra **Mistral**, que habla el mismo protocolo
+(lo viste en IL1.1) y también tiene capa gratuita:
+
+| Modelo | Llamadas correctas (10 intentos) | Cadenas multi-paso (4 intentos) |
+|---|---|---|
+| `llama-3.3-70b-versatile` (Groq) | 7/10 | falla |
+| `llama-3.1-8b-instant` (Groq) | 10/10 | 2/4 |
+| `mistral-small-latest` | **10/10** | **4/4** |
+
+Mistral acierta donde los Llama fallan, incluidas las cadenas de varios pasos que en este
+curso obligaron a añadir reintentos. **Eso no significa que Mistral sea "mejor"**: significa
+que el formato de llamada a herramientas se le da mejor. Otro modelo puede ganarle en
+razonamiento, en velocidad o en coste.
+
+La conclusión práctica no es "usa Mistral", sino: **cuando montes un agente, mide el
+proveedor y el modelo con TUS herramientas antes de decidir.** Es barato de medir y caro
+de descubrir en producción.
+
 Dos lecciones que se llevan a producción:
 
 1. **El modelo más grande no es automáticamente el mejor para un agente.** Cuando el agente

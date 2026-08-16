@@ -100,6 +100,55 @@ la tuya con un compañero: os quedaréis los dos sin cuota.
 
 ---
 
+## 4.b Si te quedas sin cuota: el plan B (Mistral)
+
+Groq es el proveedor del curso, pero **no estás atado a él**. Si agotas la cuota diaria y
+necesitas seguir trabajando hoy, puedes cambiar a [Mistral](https://console.mistral.ai/),
+que también es gratis y tampoco pide tarjeta.
+
+Estos números **los medimos nosotros** contra la API real (agosto 2026), no son de folleto:
+
+| | Groq `llama-3.3-70b` | Groq `llama-3.1-8b` | Mistral `mistral-small-latest` |
+|---|---|---|---|
+| Peticiones/min | 30 | 30 | **50** |
+| Tokens/min | 12.000 | 6.000 | **50.000** |
+| Tokens/día | 100.000 | 500.000 | **sin tope diario declarado** |
+| Embeddings | no ofrece | no ofrece | **sí** (`mistral-embed`) |
+
+### Cómo cambiar
+
+1. Saca tu key en [console.mistral.ai](https://console.mistral.ai/api-keys) y añádela al `.env`:
+
+   ```env
+   MISTRAL_API_KEY="tu_key_aqui"
+   ```
+
+2. En el notebook donde estés, sustituye la línea que crea el modelo:
+
+   ```python
+   # En vez de esto:
+   llm = ChatGroq(model=MODELO, temperature=0)
+
+   # Usa esto:
+   from langchain_openai import ChatOpenAI
+   llm = ChatOpenAI(
+       model="mistral-small-latest",
+       base_url="https://api.mistral.ai/v1",
+       api_key=os.environ["MISTRAL_API_KEY"],
+       temperature=0,
+   )
+   ```
+
+   El resto del notebook **no cambia**: es el mismo protocolo, como viste en IL1.1.
+   Necesitarás `uv add langchain-openai` si no lo tienes.
+
+> **Ojo:** cambiar de proveedor cambia el modelo, y **cada modelo se comporta distinto**.
+> En nuestras pruebas Mistral acertó 10/10 las llamadas a herramientas, mejor que los Llama
+> de Groq. Pero las respuestas no serán idénticas: si estás comparando resultados con un
+> compañero, aseguraos de usar el mismo proveedor.
+
+---
+
 ## 5. Qué necesita cada módulo
 
 Antes de empezar un módulo, mira aquí qué te hace falta.

@@ -108,6 +108,33 @@ Todos están explicados con su solución en la
 
 ---
 
+## 5.b Plan B verificado: Mistral
+
+Si Groq falla o agotas la cuota **en mitad de la clase**, tienes salida. Está probado, no
+es teoría: levantamos el artefacto de `deploy/` apuntado a Mistral y respondió, con los
+guardrails funcionando igual.
+
+| | Groq 70b | Groq 8b | Mistral small |
+|---|---|---|---|
+| Peticiones/min | 30 | 30 | **50** |
+| Tokens/min | 12.000 | 6.000 | **50.000** |
+| Tokens/día | 100.000 | 500.000 | **sin tope declarado** |
+| Tool calling (10 pruebas) | 7/10 | 10/10 | **10/10** |
+| Cadenas multi-paso (4 pruebas) | falla | 2/4 | **4/4** |
+| Embeddings | no | no | **sí** |
+
+- **En notebooks:** una línea, documentada en GUIA_DEL_ESTUDIANTE.md apartado 4.b.
+- **En el servicio desplegado:** dos variables de entorno (`LLM_BASE_URL`, `LLM_API_KEY`),
+  sin tocar código.
+
+Ten una key de Mistral creada **antes** de la clase, aunque no pienses usarla. Sacarla en
+caliente con 30 alumnos esperando no es plan.
+
+> Lo que no verificamos: el tope mensual de Mistral. Terceros hablan de unos 1.000 millones
+> de tokens/mes, pero no lo comprobamos.
+
+---
+
 ## 6. Si algo se rompe en clase
 
 1. `uv run python scripts/verify_groq.py` te dice en 10 segundos si el problema es la key,
