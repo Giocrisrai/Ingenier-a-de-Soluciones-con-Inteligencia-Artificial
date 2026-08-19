@@ -7,13 +7,11 @@ Este módulo se centra en dotar a los agentes de IA de **memoria**, una capacida
 - **`GROQ_API_KEY`** en el archivo `.env` (local) o en los **Secrets** de Google Colab.
   Se consigue gratis en [console.groq.com](https://console.groq.com/).
 - Modelos que usa cada notebook (están en `.env.example`, no hay que inventarlos):
-  - `1-memory-agent` y `2-memory-agent-advanced` → **`GROQ_MODEL`** (`llama-3.3-70b-versatile`).
-    Son agentes de LangChain con herramientas, y por esa vía el 70b es el más fiable (6/6 vs 4/6).
-  - `3-herramientas-externas` → **`GROQ_MODEL_TOOLS`** (`openai/gpt-oss-20b`), porque encadena
-    varias llamadas a herramientas seguidas y ahí los dos Llama fallan (8b 2/4 · gpt-oss 4/4).
+  - `1-memory-agent` y `2-memory-agent-advanced` → **`GROQ_MODEL`** (`openai/gpt-oss-120b`).
+  - `3-herramientas-externas` → **`GROQ_MODEL_TOOLS`** (`openai/gpt-oss-20b`) para cadenas multi-paso.
 - Dependencias: ya vienen en el entorno del repo (`uv sync`). En Colab, la primera celda de
   cada notebook las instala con `pip`.
-- **Cuota**: la capa gratuita de Groq limita a 30 peticiones/min y 100K tokens/día en el 70b.
+- **Cuota**: la capa gratuita de Groq limita a 30 peticiones/min y 200K tokens/día en gpt-oss.
   Si aparece un error `429`, no está roto el código: hay que esperar o cambiar de modelo.
 
 ## Contenidos del Módulo
@@ -23,9 +21,9 @@ Este módulo se centra en dotar a los agentes de IA de **memoria**, una capacida
 
 ### 2. Sistemas de Memoria Avanzados
 - **`2-memory-agent-advanced.ipynb`**: Profundiza en las soluciones de memoria automatizadas que ofrece LangChain para superar las limitaciones de la gestión manual. Se implementan y comparan tres estrategias clave:
-  - **`ConversationBufferMemory`**: Para un historial de conversación completo.
-  - **`ConversationBufferWindowMemory`**: Para mantener un historial de tamaño fijo, conservando solo las interacciones más recientes.
-  - **`ConversationSummaryMemory`**: Para gestionar conversaciones largas resumiendo el historial y ahorrando tokens.
+  - **Buffer**: historial completo del hilo.
+  - **Ventana**: solo las últimas `k` interacciones.
+  - **Resumen**: compacta el pasado con el propio LLM para ahorrar tokens.
 
 ### 3. Herramientas Externas y MCP
 - **`3-herramientas-externas.ipynb`**: Del historial interno al mundo exterior. Se define el

@@ -53,7 +53,7 @@ Antes de evaluar conviene tener claro **de dónde sale cada número**:
 
 | Pieza | Dónde se ejecuta | Modelo |
 |---|---|---|
-| Generación y LLM-como-juez | API de **Groq** | `llama-3.3-70b-versatile` / `llama-3.1-8b-instant` |
+| Generación y LLM-como-juez | API de **Groq** | `openai/gpt-oss-120b` / `openai/gpt-oss-20b` |
 | Embeddings del retriever | **Local**, en la máquina del alumno | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (384 dims) |
 
 **Groq no ofrece endpoint de embeddings** (solo chat/completions), así que los vectores se calculan localmente con `langchain-huggingface`: gratis, sin API key y sin que los documentos salgan de la máquina. La primera ejecución descarga ~470 MB del modelo.

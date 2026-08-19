@@ -40,8 +40,8 @@ except ImportError:
 # -----------------------------------------------------------------------------
 
 # Modelo para chat / evaluaciones (client.chat.completions) — servido por Groq
-MODELO_CHAT = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
-# Alternativa frecuente para tareas simples / alto volumen: "llama-3.1-8b-instant"
+MODELO_CHAT = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+# Alternativa frecuente para tareas simples / alto volumen: "openai/gpt-oss-20b"
 
 # Modelo para embeddings (HuggingFaceEmbeddings de LangChain) — corre en tu máquina
 MODELO_EMBEDDINGS = os.getenv("EMBEDDING_MODEL", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")

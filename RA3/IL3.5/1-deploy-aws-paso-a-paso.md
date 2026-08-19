@@ -67,7 +67,7 @@ Variables que debes revisar en `.env` (las define `deploy/.env.example`):
 | Variable | Para qué sirve | Valor típico |
 |---|---|---|
 | `GROQ_API_KEY` | Credencial de Groq (empieza por `gsk_`). Se obtiene en https://console.groq.com/keys | `gsk_...` |
-| `AGENT_MODEL` | Modelo que usa el agente | `llama-3.1-8b-instant` |
+| `AGENT_MODEL` | Modelo que usa el agente | `openai/gpt-oss-20b` |
 | `LANGSMITH_TRACING` | Activa el envío de trazas a LangSmith | `true` / `false` |
 | `LANGSMITH_API_KEY` | Credencial de LangSmith (opcional, solo si trazas) | `lsv2_...` |
 | `LANGSMITH_PROJECT` | Proyecto donde se agrupan las trazas | `ingenieria_soluciones_con_ia` |

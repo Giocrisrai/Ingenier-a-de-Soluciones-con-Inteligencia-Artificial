@@ -76,17 +76,17 @@ class ConfigModelo:
 # Precios y latencias REFERENCIALES de Groq (USD por 1K tokens, agosto 2026).
 # Fuente oficial y valores actualizados: https://groq.com/pricing/
 # Groq ejecuta sobre LPUs, por eso las latencias son mucho menores que en GPU
-# (~560 tokens/s en llama-3.1-8b-instant, ~280 tokens/s en llama-3.3-70b-versatile).
+# (~560 tokens/s en openai/gpt-oss-20b, ~280 tokens/s en openai/gpt-oss-120b).
 # Ventana de contexto: 131.072 tokens en ambos modelos. El limite de tokens que
 # el modelo puede *generar* en una respuesta es menor en el 70b (32.768).
 # Referencia: https://console.groq.com/docs/models
 MODELOS_DISPONIBLES = {
-    "rapido": ConfigModelo("llama-3.1-8b-instant", 0.00005, 250, 131072),
-    "estandar": ConfigModelo("llama-3.3-70b-versatile", 0.00059, 600, 131072),
+    "rapido": ConfigModelo("openai/gpt-oss-20b", 0.00005, 250, 131072),
+    "estandar": ConfigModelo("openai/gpt-oss-120b", 0.00059, 600, 131072),
     # Nivel avanzado: mismo modelo grande, pero con razonamiento extendido
     # (cadena de pensamiento larga). Se estima al precio de salida y su
     # latencia es mayor porque genera muchos mas tokens.
-    "avanzado": ConfigModelo("llama-3.3-70b-versatile", 0.00079, 1500, 131072),
+    "avanzado": ConfigModelo("openai/gpt-oss-120b", 0.00079, 1500, 131072),
 }
 
 

@@ -39,8 +39,8 @@
 **Variables de entorno requeridas (`.env`):**
 ```bash
 GROQ_API_KEY="gsk_tu_api_key_aqui"
-GROQ_MODEL="llama-3.3-70b-versatile"
-GROQ_MODEL_FAST="llama-3.1-8b-instant"
+GROQ_MODEL="openai/gpt-oss-120b"
+GROQ_MODEL_FAST="openai/gpt-oss-20b"
 ```
 En Google Colab: panel 🔑 **Secrets** con el secreto `GROQ_API_KEY`.
 
@@ -52,8 +52,8 @@ pip install groq langchain langchain-groq python-dotenv
 **Mejores prácticas de seguridad:**
 - Nunca hardcodear API keys
 - Usar variables de entorno (o Secrets de Colab)
-- Respetar el free tier: 30 req/min, 12.000 tokens/min y **100.000 tokens/día** en el modelo
-  grande (error `429` si se excede). El `llama-3.1-8b-instant` tiene 500.000 tokens/día.
+- Respetar el free tier: 30 req/min, 8.000 tokens/min y **200.000 tokens/día**
+  (error `429` si se excede). Ambos gpt-oss comparten ese tope diario.
 
 ---
 
@@ -91,7 +91,7 @@ cliente = Groq()  # lee GROQ_API_KEY del entorno
 from langchain_groq import ChatGroq
 
 llm = ChatGroq(
-    model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+    model=os.getenv("GROQ_MODEL", "openai/gpt-oss-120b"),
     temperature=0.2
 )
 ```
@@ -123,12 +123,14 @@ for chunk in llm.stream([HumanMessage(content=prompt)]):
 ---
 
 ## Slide 7: Gestión de Memoria
-**Título:** Notebook 4 - LangChain Memory
+**Título:** Notebook 4 - Memoria conversacional con LangGraph
 
-**Tipos de memoria:**
-- **ConversationBufferMemory:** Mantiene todo el historial
-- **ConversationBufferWindowMemory:** Solo N mensajes recientes
-- **ConversationSummaryMemory:** Resume conversaciones largas
+`RunnableWithMessageHistory` está deprecado. La memoria de hilo usa un **checkpointer** (`InMemorySaver`) y un **`thread_id`**.
+
+**Estrategias:**
+- **Buffer:** el modelo ve todo el historial
+- **Ventana:** solo los N intercambios más recientes
+- **Resumen:** compacta el pasado para ahorrar tokens
 
 **Cuándo usar cada tipo:**
 - Buffer: Conversaciones cortas e importantes

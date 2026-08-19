@@ -22,7 +22,7 @@ En este módulo aprenderás a agregar logs, métricas y monitoreo a tus agentes 
 | Archivo | ¿Necesita API key? | Notas |
 |---|---|---|
 | `1-observability_tools.py` | No | Es una **simulación pura**: no llama a ningún modelo. Se puede ejecutar sin cuota. |
-| `2-observability-practice.ipynb` | Sí (`GROQ_API_KEY`) | Hace **13 llamadas reales** a `llama-3.1-8b-instant`, más las del ejercicio final. |
+| `2-observability-practice.ipynb` | Sí (`GROQ_API_KEY`) | Hace **13 llamadas reales** a `openai/gpt-oss-20b`, más las del ejercicio final. |
 
 - Dependencias: `uv sync` en la raíz del repo (usa `groq`, `pandas` y `matplotlib`).
 - La credencial se carga igual en Colab (*Secrets*) que en local (archivo `.env`).

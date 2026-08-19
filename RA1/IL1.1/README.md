@@ -42,17 +42,16 @@ Los límites vigentes (agosto 2026) se consultan en *Settings → Limits* de la 
 
 | Modelo | Peticiones/min | Peticiones/día | Tokens/min | **Tokens/día** |
 |---|---|---|---|---|
-| `llama-3.3-70b-versatile` | 30 | 1.000 | 12.000 | **100.000** |
-| `llama-3.1-8b-instant` | 30 | 14.400 | 6.000 | **500.000** |
+| `openai/gpt-oss-120b` | 30 | 1.000 | 8.000 | **200.000** |
+| `openai/gpt-oss-20b` | 30 | 1.000 | 8.000 | **200.000** |
 
-> **El límite que se agota primero es el de tokens al día (TPD).** Con el modelo grande son
-> solo 100.000 tokens diarios: unas pocas horas de trabajo con notebooks de agentes bastan
-> para consumirlos. El modelo rápido tiene 5 veces más.
+> **El límite que se agota primero es el de tokens al día (TPD).** Ambos gpt-oss tienen
+> 200.000 tokens diarios. El modelo rápido (~1000 t/s) conviene para pruebas.
 
 Por eso conviene:
 - No ejecutar celdas en bucle sin necesidad.
 - Reutilizar respuestas ya obtenidas en lugar de repetir la misma llamada.
-- Usar `llama-3.1-8b-instant` mientras pruebas, y dejar `llama-3.3-70b-versatile` para la
+- Usar `openai/gpt-oss-20b` mientras pruebas, y dejar `openai/gpt-oss-120b` para la
   ejecución final o las tareas que de verdad necesiten más razonamiento.
 - Si aparece un error `429`, **leer el mensaje**: indica qué límite se alcanzó y cuánto esperar.
   Si dice `tokens per minute`, basta con esperar un minuto; si dice `tokens per day`, hay que
@@ -61,8 +60,8 @@ Por eso conviene:
 ### Modelos que usa el curso
 | Uso | Modelo |
 |---|---|
-| Principal (razonamiento, calidad) | `llama-3.3-70b-versatile` |
-| Rápido (tareas simples, alto volumen) | `llama-3.1-8b-instant` |
+| Principal (razonamiento, calidad) | `openai/gpt-oss-120b` |
+| Rápido (tareas simples, alto volumen) | `openai/gpt-oss-20b` |
 
 ## Objetivos de Aprendizaje
 
@@ -117,12 +116,12 @@ Este cuaderno se enfoca en mejorar la experiencia de usuario mostrando las respu
 Un LLM no tiene estado. Este cuaderno enseña cómo darle "memoria" para que pueda recordar interacciones pasadas.
 - **Qué aprenderás**:
     - La importancia de la memoria para conversaciones coherentes.
-    - Implementar diferentes estrategias de memoria:
-        - `ConversationBufferMemory`: Guarda todo el historial.
-        - `ConversationBufferWindowMemory`: Guarda las últimas `k` interacciones.
-        - `ConversationSummaryMemory`: Usa un LLM para resumir la conversación y ahorrar tokens.
-    - Integrar la memoria en la cadena de conversación con `RunnableWithMessageHistory`
-      (la API vigente de LangChain; sustituye a la antigua `ConversationChain`).
+    - Implementar diferentes estrategias de memoria sobre un checkpointer de LangGraph:
+        - Buffer: guarda todo el historial del `thread_id`.
+        - Ventana: el modelo solo ve los últimos `k` intercambios.
+        - Resumen: compacta mensajes viejos con el propio LLM.
+    - Integrar la memoria con `InMemorySaver` + `thread_id`
+      (sustituye a `RunnableWithMessageHistory`, deprecado en LangChain 1.x).
 - **Cómo usarlo**:
     1. Ejecuta los ejemplos de cada tipo de memoria para entender sus ventajas y desventajas.
     2. Analiza la comparación final para ver cómo cada tipo de memoria responde a la misma secuencia de preguntas.
@@ -141,8 +140,8 @@ Copia `.env.example` a `.env` en la raíz del repositorio y completa:
 
 ```bash
 GROQ_API_KEY="gsk_tu_api_key_aqui"
-GROQ_MODEL="llama-3.3-70b-versatile"
-GROQ_MODEL_FAST="llama-3.1-8b-instant"
+GROQ_MODEL="openai/gpt-oss-120b"
+GROQ_MODEL_FAST="openai/gpt-oss-20b"
 ```
 
 En Google Colab, en lugar del `.env`, crea el secreto `GROQ_API_KEY` en el panel 🔑 **Secrets**.
@@ -167,7 +166,7 @@ except ImportError:
     from dotenv import load_dotenv
     load_dotenv()
 
-MODELO = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+MODELO = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 ```
 
 ### Patrón de Conexión API

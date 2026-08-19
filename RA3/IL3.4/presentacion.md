@@ -51,7 +51,7 @@ resultados = procesar_lote(prompts, cache)
 
 **Principios clave del script:**
 - **Caché:** evitar pagar dos veces por la misma respuesta
-- **Enrutamiento de modelos:** el modelo barato para lo simple (`llama-3.1-8b-instant`)
+- **Enrutamiento de modelos:** el modelo barato para lo simple (`openai/gpt-oss-20b`)
 - **Procesamiento por lotes:** agrupar peticiones en vez de una a una
 - **Medición de costo:** estimar USD por petición a partir de los tokens
 - **Resource monitoring:** monitorear y ajustar según demanda

@@ -48,18 +48,17 @@ En este módulo exploramos los fundamentos de la arquitectura de agentes intelig
 ### Variables de Entorno Requeridas
 ```bash
 export GROQ_API_KEY="gsk_tu_api_key_de_groq"
-export GROQ_MODEL="llama-3.3-70b-versatile"
-export GROQ_MODEL_FAST="llama-3.1-8b-instant"
+export GROQ_MODEL="openai/gpt-oss-120b"
+export GROQ_MODEL_FAST="openai/gpt-oss-20b"
 export GROQ_MODEL_TOOLS="openai/gpt-oss-20b"
 ```
 
 Consigue tu API key gratuita en [console.groq.com](https://console.groq.com/).
 
-> **Cuota de la capa gratuita.** `llama-3.3-70b-versatile`: 30 peticiones/min, 1.000/día,
-> 12K tokens/min y **100K tokens/día**. `llama-3.1-8b-instant`: 30 peticiones/min, 14.400/día,
-> 6K tokens/min y **500K tokens/día**. El límite que se agota primero es el diario de tokens.
+> **Cuota de la capa gratuita.** Ambos gpt-oss: 30 peticiones/min, 1.000/día,
+> 8K tokens/min y **200K tokens/día**. El límite que se agota primero es el diario de tokens.
 > Si aparece un error **`429`**, no está roto el código: hay que esperar o cambiar de modelo
-> (`GROQ_MODEL=llama-3.1-8b-instant`).
+> (`GROQ_MODEL=openai/gpt-oss-20b`).
 
 ### ⚠️ Qué modelo usar según el tipo de agente
 
@@ -70,7 +69,7 @@ con un error `400` y el código `tool_use_failed`.
 Lo medimos con las herramientas de estos mismos notebooks, y el resultado es menos intuitivo
 de lo que parece:
 
-| Vía de código | `llama-3.3-70b-versatile` | `llama-3.1-8b-instant` |
+| Vía de código | `openai/gpt-oss-120b` | `openai/gpt-oss-20b` |
 |---|---|---|
 | SDK crudo de Groq, esquema JSON escrito a mano, prompt en español | 7/10 | **10/10** |
 | LangChain `create_openai_tools_agent` con el prompt `hwchase17/openai-tools-agent` (en inglés) | **6/6** | 4/6 |
@@ -86,10 +85,10 @@ misma conversación, **los dos Llama fallan**. Medido con una cadena de 2 pasos,
 Por eso en este curso:
 
 - **Herramientas con el SDK crudo, una llamada por consulta** → `GROQ_MODEL_FAST`
-  (`llama-3.1-8b-instant`). Notebook `2-agent-function-calling`.
+  (`openai/gpt-oss-20b`). Notebook `2-agent-function-calling`.
 - **Cadenas multi-paso de herramientas** → `GROQ_MODEL_TOOLS` (`openai/gpt-oss-20b`).
   Notebook `3-herramientas-externas` de IL2.2.
-- **Agentes de LangChain con herramientas** → `GROQ_MODEL` (`llama-3.3-70b-versatile`).
+- **Agentes de LangChain con herramientas** → `GROQ_MODEL` (`openai/gpt-oss-120b`).
   Notebooks `3-langchain-agent` y, en IL2.2, `1-memory-agent` y `2-memory-agent-advanced`.
 - **Agentes ReAct por prompt** (`create_react_agent`) → `GROQ_MODEL`. No les afecta, porque el
   modelo escribe texto plano en vez de una llamada estructurada.
@@ -101,8 +100,8 @@ Repetimos exactamente la misma medición contra **Mistral**, que habla el mismo 
 
 | Modelo | Llamadas correctas (10 intentos) | Cadenas multi-paso (4 intentos) |
 |---|---|---|
-| `llama-3.3-70b-versatile` (Groq) | 7/10 | falla |
-| `llama-3.1-8b-instant` (Groq) | 10/10 | 2/4 |
+| `openai/gpt-oss-120b` (Groq) | 7/10 | falla |
+| `openai/gpt-oss-20b` (Groq) | 10/10 | 2/4 |
 | `mistral-small-latest` | **10/10** | **4/4** |
 
 Mistral acierta donde los Llama fallan, incluidas las cadenas de varios pasos que en este
@@ -129,7 +128,7 @@ maneja con reintento, no se asume que no va a ocurrir.
 ```python
 # ChatGroq lee GROQ_API_KEY del entorno automáticamente
 from langchain_groq import ChatGroq
-llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
+llm = ChatGroq(model="openai/gpt-oss-120b", temperature=0)
 ```
 
 ### Configuración para CrewAI (CRÍTICA)
@@ -137,7 +136,7 @@ llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
 # CrewAI enruta por LiteLLM: el prefijo "groq/" es obligatorio
 import os
 from crewai import LLM
-llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}", temperature=0)
+llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b')}", temperature=0)
 ```
 
 > **Instalación:** el extra es obligatorio → `pip install "crewai[litellm]" crewai-tools`.
@@ -149,7 +148,7 @@ llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}", te
 ### 1. Error de Autenticación o de proveedor en CrewAI
 **Síntoma**: `AuthenticationError: Incorrect API key provided` / `LLM Provider NOT provided`
 **Causa**: Falta `GROQ_API_KEY` en el entorno, o el modelo no lleva el prefijo del proveedor
-**Solución**: Definir `GROQ_API_KEY` en `.env` (o en los Secrets de Colab) y usar `model="groq/llama-3.3-70b-versatile"`
+**Solución**: Definir `GROQ_API_KEY` en `.env` (o en los Secrets de Colab) y usar `model="groq/openai/gpt-oss-120b"`
 
 ### 2. Error de Herramientas en CrewAI
 **Síntoma**: `'Tool' object is not callable`

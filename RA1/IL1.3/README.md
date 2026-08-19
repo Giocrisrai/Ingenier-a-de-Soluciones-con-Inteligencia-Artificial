@@ -31,7 +31,7 @@ Un detalle importante que verás en todos los notebooks: **la generación y los 
 
 | Pieza del RAG | Dónde se ejecuta | Modelo | Coste |
 |---|---|---|---|
-| Generación (chat) | API de **Groq** | `llama-3.3-70b-versatile` | API key gratuita |
+| Generación (chat) | API de **Groq** | `openai/gpt-oss-120b` | API key gratuita |
 | Embeddings | **Tu propia máquina** (HuggingFace / sentence-transformers) | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` | gratis, sin API key |
 
 ¿Por qué? Porque **Groq no ofrece un endpoint de embeddings**: su API solo expone chat/completions. Al construir un RAG sobre Groq hay que resolver los vectores por otra vía, y la más simple es calcularlos localmente con `langchain-huggingface`.

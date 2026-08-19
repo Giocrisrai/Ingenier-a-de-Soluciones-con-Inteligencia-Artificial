@@ -21,8 +21,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-MODELO = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
-MODELO_RAPIDO = os.getenv("GROQ_MODEL_FAST", "llama-3.1-8b-instant")
+MODELO = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+MODELO_RAPIDO = os.getenv("GROQ_MODEL_FAST", "openai/gpt-oss-20b")
 MODELO_EMBEDDINGS = os.getenv("EMBEDDING_MODEL", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
 
 PREGUNTA = "Responde solo con la palabra: OK"
@@ -58,8 +58,9 @@ def comprobar_sdk() -> None:
     respuesta = cliente.chat.completions.create(
         model=MODELO_RAPIDO,
         messages=[{"role": "user", "content": PREGUNTA}],
-        max_tokens=5,
+        max_tokens=16,
         temperature=0,
+        reasoning_effort="low",
     )
     contenido = (respuesta.choices[0].message.content or "").strip()
     print(f"OK     SDK groq · modelo {MODELO_RAPIDO} · respuesta: {contenido!r}")
@@ -68,7 +69,7 @@ def comprobar_sdk() -> None:
 def comprobar_langchain() -> None:
     from langchain_groq import ChatGroq
 
-    llm = ChatGroq(model=MODELO, temperature=0, max_tokens=5)
+    llm = ChatGroq(model=MODELO, temperature=0, max_tokens=16, reasoning_effort="low")
     contenido = (llm.invoke(PREGUNTA).content or "").strip()
     print(f"OK     ChatGroq   · modelo {MODELO} · respuesta: {contenido!r}")
 
@@ -100,7 +101,7 @@ def main() -> None:
             _fallo(
                 f"Alcanzaste el límite de la capa gratuita ({nombre}).\n"
                 "       Lee el mensaje del error: dice si fue por minuto (TPM, espera y reintenta)\n"
-                "       o por día (TPD: 100K en llama-3.3-70b, 500K en llama-3.1-8b)."
+                "       o por día (TPD: 200K en gpt-oss-120b y gpt-oss-20b)."
             )
         _fallo(f"Fallo al llamar a Groq ({nombre}): {e}")
     comprobar_embeddings()

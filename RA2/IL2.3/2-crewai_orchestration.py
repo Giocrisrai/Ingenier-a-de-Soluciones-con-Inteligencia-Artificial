@@ -25,7 +25,7 @@ if not os.getenv("GROQ_API_KEY"):
 
 # LLM de CrewAI apuntando a Groq (el prefijo "groq/" es obligatorio: CrewAI usa LiteLLM)
 llm = LLM(
-    model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}",
+    model=f"groq/{os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b')}",
     temperature=0.2,
 )
 

@@ -17,7 +17,7 @@ uv run python scripts/verify_groq.py
 Si eso termina en verde, el entorno está listo. `verify_groq.py` comprueba la API key, el SDK
 de Groq, `ChatGroq` y los embeddings locales.
 
-**Revisa tu cuota antes de empezar.** El modelo grande tiene solo **100.000 tokens al día** y
+**Revisa tu cuota antes de empezar.** Cada gpt-oss tiene **200.000 tokens al día** y
 es el límite que se agota primero. Si estuviste preparando la clase ejecutando notebooks, es
 muy posible que ya la hayas consumido. Compruébalo en
 [console.groq.com](https://console.groq.com/) → Usage.
@@ -42,7 +42,7 @@ Esto aplica sobre todo antes de **RA1/IL1.3** (RAG), que es donde entran los emb
 - La **descarga de 470 MB** ocurre aquí si no la hicieron antes.
 - La app Streamlit de IL1.4 (`1-evaluation-rag.py`) gasta bastante cuota en la pestaña de
   evaluación completa (≈5 llamadas por caso × 3 casos). Si la vas a demostrar, ponte antes
-  `GROQ_MODEL=llama-3.1-8b-instant`.
+  `GROQ_MODEL=openai/gpt-oss-20b`.
 
 ### RA1/IL1.2 — Prompt engineering
 - `4-advanced-techniques.ipynb` es de los que más queman cuota (self-consistency y
@@ -69,7 +69,7 @@ Esto aplica sobre todo antes de **RA1/IL1.3** (RAG), que es donde entran los emb
 ### RA3/IL3.3 — Seguridad y ética
 - Es el notebook que **más cuota consume** de todo RA3 (más de 30 llamadas al modelo grande).
   Si ya usaste la key ese día, hay riesgo real de `429` en clase. Ten preparado
-  `GROQ_MODEL=llama-3.1-8b-instant`.
+  `GROQ_MODEL=openai/gpt-oss-20b`.
 
 ### RA3/IL3.5 — Despliegue en AWS
 - El paso a paso está revisado comando a comando, pero **no se ha probado en una EC2 real**.
@@ -86,7 +86,7 @@ Todos están explicados con su solución en la
 
 | Error | Qué decir |
 |---|---|
-| `429 tokens per day` | Se acabó la cuota diaria de ese modelo. Cambiar a `llama-3.1-8b-instant`, que tiene 5× más. |
+| `429 tokens per day` | Se acabó la cuota diaria de ese modelo. Cambiar a `openai/gpt-oss-20b`, que tiene 5× más. |
 | `400 tool_use_failed` | El modelo generó mal la llamada a la herramienta. No es su código. Reintentar. |
 | `401` de LangSmith | LangSmith es opcional. Dejar `LANGSMITH_TRACING="false"`. |
 
@@ -114,13 +114,11 @@ Si Groq falla o agotas la cuota **en mitad de la clase**, tienes salida. Está p
 es teoría: levantamos el artefacto de `deploy/` apuntado a Mistral y respondió, con los
 guardrails funcionando igual.
 
-| | Groq 70b | Groq 8b | Mistral small |
+| | Groq gpt-oss-120b | Groq gpt-oss-20b | Mistral small |
 |---|---|---|---|
 | Peticiones/min | 30 | 30 | **50** |
-| Tokens/min | 12.000 | 6.000 | **50.000** |
-| Tokens/día | 100.000 | 500.000 | **sin tope declarado** |
-| Tool calling (10 pruebas) | 7/10 | 10/10 | **10/10** |
-| Cadenas multi-paso (4 pruebas) | falla | 2/4 | **4/4** |
+| Tokens/min | 8.000 | 8.000 | **50.000** |
+| Tokens/día | 200.000 | 200.000 | **sin tope declarado** |
 | Embeddings | no | no | **sí** |
 
 - **En notebooks:** una línea, documentada en GUIA_DEL_ESTUDIANTE.md apartado 4.b.
@@ -139,6 +137,6 @@ caliente con 30 alumnos esperando no es plan.
 
 1. `uv run python scripts/verify_groq.py` te dice en 10 segundos si el problema es la key,
    la red o el entorno.
-2. Si es cuota, cambia `GROQ_MODEL` a `llama-3.1-8b-instant` en tu `.env` y reinicia el kernel.
+2. Si es cuota, cambia `GROQ_MODEL` a `openai/gpt-oss-20b` en tu `.env` y reinicia el kernel.
 3. Los módulos de RA2/IL2.3 y RA3 tienen scripts `.py` que **no necesitan API key**: son un
    buen plan B para seguir la clase sin conexión al modelo.

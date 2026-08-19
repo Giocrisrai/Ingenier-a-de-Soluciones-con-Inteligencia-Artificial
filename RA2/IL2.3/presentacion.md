@@ -267,7 +267,7 @@ import os
 from crewai import Agent, Task, Crew, LLM
 
 # ⚠️ CRÍTICO: el prefijo "groq/" es obligatorio (CrewAI enruta por LiteLLM)
-llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}", temperature=0.2)
+llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b')}", temperature=0.2)
 
 # Agente especializado en investigación
 investigador = Agent(

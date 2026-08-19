@@ -123,14 +123,13 @@ Todos los archivos que usan LLM requieren:
 ```bash
 # En tu archivo .env
 GROQ_API_KEY=gsk_tu_clave_aqui
-GROQ_MODEL=llama-3.3-70b-versatile
+GROQ_MODEL=openai/gpt-oss-120b
 ```
 
 > La clave se obtiene gratis en [https://console.groq.com/](https://console.groq.com/).
 >
-> **Cuota gratuita:** `llama-3.3-70b-versatile` tiene 30 peticiones/min y **100K tokens/día**;
-> `llama-3.1-8b-instant`, 30 peticiones/min y **500K tokens/día**. Un error `429` significa
-> cuota agotada, no código roto: espera o pon `GROQ_MODEL=llama-3.1-8b-instant`.
+> **Cuota gratuita:** ambos gpt-oss tienen 30 peticiones/min y **200K tokens/día**.
+> Un error `429` significa cuota agotada, no código roto: espera o pon `GROQ_MODEL=openai/gpt-oss-20b`.
 
 ### Dependencias
 

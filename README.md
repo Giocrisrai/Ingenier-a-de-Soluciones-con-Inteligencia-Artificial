@@ -140,8 +140,8 @@ Edita el archivo `.env` con tus credenciales:
 
 ```env
 GROQ_API_KEY="tu_api_key_de_groq_aqui"
-GROQ_MODEL="llama-3.3-70b-versatile"
-GROQ_MODEL_FAST="llama-3.1-8b-instant"
+GROQ_MODEL="openai/gpt-oss-120b"
+GROQ_MODEL_FAST="openai/gpt-oss-20b"
 GROQ_MODEL_TOOLS="openai/gpt-oss-20b"
 EMBEDDING_MODEL="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 LANGSMITH_TRACING="false"
@@ -170,27 +170,27 @@ hardware LPU, lo que lo hace muy rápido, y tiene una capa gratuita suficiente p
 
 | Uso | Modelo | Cuándo |
 |-----|--------|--------|
-| `GROQ_MODEL` | `llama-3.3-70b-versatile` | Por defecto. Razonamiento, agentes, function calling. |
-| `GROQ_MODEL_FAST` | `llama-3.1-8b-instant` | Tareas simples o con muchas llamadas seguidas. |
-| `GROQ_MODEL_TOOLS` | `openai/gpt-oss-20b` | Agentes que encadenan varias llamadas a herramientas seguidas (los Llama fallan ahí). Es un modelo open-weight servido por Groq, no la API de OpenAI. |
+| `GROQ_MODEL` | `openai/gpt-oss-120b` | Por defecto. Razonamiento, agentes, function calling. |
+| `GROQ_MODEL_FAST` | `openai/gpt-oss-20b` | Tareas simples o con muchas llamadas seguidas (~2× más rápido). |
+| `GROQ_MODEL_TOOLS` | `openai/gpt-oss-20b` | Cadenas multi-paso de herramientas. Open-weight servido por Groq, no la API de OpenAI. |
 
 **Límites de la capa gratuita** (agosto 2026 — consulta siempre [la doc oficial](https://console.groq.com/docs/rate-limits)):
 
 | Modelo | Peticiones/min | Peticiones/día | Tokens/min | **Tokens/día** |
 |---|---|---|---|---|
-| `llama-3.3-70b-versatile` | 30 | 1.000 | 12.000 | **100.000** |
-| `llama-3.1-8b-instant` | 30 | 14.400 | 6.000 | **500.000** |
+| `openai/gpt-oss-120b` | 30 | 1.000 | 8.000 | **200.000** |
+| `openai/gpt-oss-20b` | 30 | 1.000 | 8.000 | **200.000** |
 
 > **El límite que de verdad molesta es el de tokens al día (TPD), no el de peticiones.**
-> Con el modelo grande son solo 100.000 tokens diarios: se agotan tras unas cuantas horas
-> de trabajar con notebooks de agentes. El modelo rápido tiene **5 veces más** cuota diaria.
+> Ambos gpt-oss tienen 200.000 tokens diarios. El modelo rápido (~1000 t/s) conviene para
+> pruebas; reserva el 120B para la ejecución que necesite más razonamiento.
 
 Si recibes un error `429`, lee el mensaje: te dice **qué** límite alcanzaste y cuánto esperar.
 - `tokens per minute (TPM)` → espera un minuto y sigue.
 - `tokens per day (TPD)` → por hoy se acabó con ese modelo; cambia a `GROQ_MODEL_FAST`.
 
 Consejo práctico para la clase: haz las pruebas y las iteraciones con `GROQ_MODEL_FAST`
-(`llama-3.1-8b-instant`) y reserva `GROQ_MODEL` (`llama-3.3-70b-versatile`) para la ejecución
+(`openai/gpt-oss-20b`) y reserva `GROQ_MODEL` (`openai/gpt-oss-120b`) para la ejecución
 final o para las tareas que de verdad necesiten más razonamiento. Los límites son **por
 organización**, así que cada alumno con su propia cuenta tiene su propia cuota.
 

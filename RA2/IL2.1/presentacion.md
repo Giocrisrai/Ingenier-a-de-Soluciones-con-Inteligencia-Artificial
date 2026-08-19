@@ -137,7 +137,7 @@ crew = Crew(
 # SOLUCIÓN: prefijar el modelo con "groq/" (la key se lee de GROQ_API_KEY)
 from crewai import LLM
 
-llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}", temperature=0)
+llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b')}", temperature=0)
 ```
 
 **Errores comunes corregidos**:
@@ -173,19 +173,19 @@ llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}", te
 **Variables de entorno requeridas**:
 ```bash
 export GROQ_API_KEY="gsk_tu_api_key_de_groq"   # https://console.groq.com/
-export GROQ_MODEL="llama-3.3-70b-versatile"
-export GROQ_MODEL_FAST="llama-3.1-8b-instant"  # lo usa 2-agent-function-calling
+export GROQ_MODEL="openai/gpt-oss-120b"
+export GROQ_MODEL_FAST="openai/gpt-oss-20b"  # lo usa 2-agent-function-calling
 ```
 
 **Patrón por framework**:
 ```python
 # Para LangChain directo
 from langchain_groq import ChatGroq
-llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
+llm = ChatGroq(model="openai/gpt-oss-120b", temperature=0)
 
 # Para CrewAI (requiere el prefijo del proveedor)
 from crewai import LLM
-llm = LLM(model="groq/llama-3.3-70b-versatile", temperature=0)
+llm = LLM(model="groq/openai/gpt-oss-120b", temperature=0)
 ```
 
 ## 6. Actividad Práctica y Próximos Pasos

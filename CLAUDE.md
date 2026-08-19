@@ -47,8 +47,8 @@ was dropped when its free tier ended — there must be **no** references to `GIT
 
 ### Required Environment Variables
 - `GROQ_API_KEY`: Groq API key (starts with `gsk_`), from console.groq.com > API Keys
-- `GROQ_MODEL`: default chat model — `llama-3.3-70b-versatile`
-- `GROQ_MODEL_FAST`: cheap/fast model for high-volume loops — `llama-3.1-8b-instant`
+- `GROQ_MODEL`: default chat model — `openai/gpt-oss-120b`
+- `GROQ_MODEL_FAST`: cheap/fast model for high-volume loops — `openai/gpt-oss-20b`
 - `EMBEDDING_MODEL`: local embeddings — `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`
 - `LANGSMITH_TRACING` / `LANGSMITH_API_KEY` / `LANGSMITH_PROJECT`: observability (RA3)
 
@@ -65,7 +65,7 @@ Based on notebook imports and course materials:
 ```python
 # LangChain chat (default)
 from langchain_groq import ChatGroq
-llm = ChatGroq(model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"), temperature=0.2)
+llm = ChatGroq(model=os.getenv("GROQ_MODEL", "openai/gpt-oss-120b"), temperature=0.2, reasoning_effort="low")
 
 # Raw SDK (only where the notebook teaches the bare API)
 from groq import Groq
@@ -80,35 +80,23 @@ embeddings = HuggingFaceEmbeddings(
 
 # CrewAI (LiteLLM needs the groq/ prefix)
 from crewai import LLM
-llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')}", temperature=0.2)
+llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b')}", temperature=0.2)
 ```
 
 Notebooks load credentials in a way that works both in Google Colab (Secrets) and locally (`.env`);
-keep that dual pattern when editing them. Free-tier limits (Aug 2026): both models 30 req/min;
-`llama-3.3-70b-versatile` 12K tokens/min and **100K tokens/day**; `llama-3.1-8b-instant`
-6K tokens/min and **500K tokens/day**. The daily token cap is what actually runs out — a few
-hours of running agent notebooks exhausts the 70B. Avoid tight LLM call loops in notebooks,
-and prefer `GROQ_MODEL_FAST` for anything high-volume.
+keep that dual pattern when editing them. Free-tier limits (Aug 2026): both gpt-oss models
+30 req/min, 8K tokens/min and **200K tokens/day**. Prefer `GROQ_MODEL_FAST` (`openai/gpt-oss-20b`)
+for high-volume loops; it is ~2× faster. Add `reasoning_effort="low"` on `ChatGroq` so gpt-oss
+puts the answer in `content` instead of only in the reasoning field.
 
-### Tool calling on Groq is model-dependent — and the winner flips by code path
-Both Llama models sometimes emit a malformed function call, which Groq rejects with HTTP 400
-`tool_use_failed`. Measured on this repo's own tools:
+### Tool calling on Groq
+Groq retired `llama-3.3-70b-versatile` and `llama-3.1-8b-instant` on 16 Aug 2026.
+Replacements: `openai/gpt-oss-120b` (`GROQ_MODEL`) and `openai/gpt-oss-20b`
+(`GROQ_MODEL_FAST` / `GROQ_MODEL_TOOLS`). For multi-step tool chains keep `GROQ_MODEL_TOOLS`.
 
-| Code path | `llama-3.3-70b-versatile` | `llama-3.1-8b-instant` |
-|---|---|---|
-| Raw `groq` SDK, hand-written JSON schema, Spanish prompt | 7/10 | **10/10** |
-| LangChain `create_openai_tools_agent` + `hwchase17/openai-tools-agent` (English prompt) | **6/6** | 4/6 |
-
-So there is no single "best tool-calling model" here — it depends on the prompt and the path:
-- **Raw SDK tool calling** → `GROQ_MODEL_FAST` (`llama-3.1-8b-instant`).
-  Used by `RA2/IL2.1/2-agent-function-calling.ipynb`, `RA2/IL2.2/3-herramientas-externas.ipynb`.
-- **LangChain tools agents** → `GROQ_MODEL` (`llama-3.3-70b-versatile`).
-  Used by `RA2/IL2.1/3-langchain-agent.ipynb`, `RA2/IL2.2/1-memory-agent.ipynb`,
-  `RA2/IL2.2/2-memory-agent-advanced.ipynb`.
-- **Prompt-based ReAct** (`create_react_agent`) is unaffected; keeps `GROQ_MODEL`.
-
-Don't "unify" these onto one model without re-measuring — each notebook's comment records why.
-Streaming was ruled out as a factor (identical pass rates with `disable_streaming` on and off).
+- **Raw SDK tool calling** → `GROQ_MODEL_TOOLS` / `GROQ_MODEL_FAST` (`openai/gpt-oss-20b`).
+- **LangChain tools agents** → `GROQ_MODEL` (`openai/gpt-oss-120b`).
+- **Prompt-based ReAct** (`create_react_agent`) → `GROQ_MODEL`.
 
 ### Development Workflow
 - **Recommended:** [uv](https://docs.astral.sh/uv/) (`uv sync`, `uv run …`) with `uv.lock` for reproducible installs across Windows, macOS, and Linux (see root `README.md`).

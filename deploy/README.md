@@ -15,7 +15,7 @@ docker compose -f deploy/docker-compose.prod.yml up --build
 
 Sin `GROQ_API_KEY` el backend responde en **modo demo** (sin llamar al modelo), útil para probar la infraestructura.
 La clave se obtiene gratis en https://console.groq.com/ (formato `gsk_...`). El modelo por defecto es
-`llama-3.1-8b-instant` (variable `AGENT_MODEL`).
+`openai/gpt-oss-20b` (variable `AGENT_MODEL`).
 
 ## Despliegue en AWS
 

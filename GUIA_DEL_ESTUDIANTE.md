@@ -47,17 +47,15 @@ El curso usa **Groq** como proveedor. No usamos un solo modelo: cada uno sirve p
 
 | Variable | Modelo | Para qué se usa |
 |---|---|---|
-| `GROQ_MODEL` | `llama-3.3-70b-versatile` | Por defecto. Razonamiento, agentes de LangChain. |
-| `GROQ_MODEL_FAST` | `llama-3.1-8b-instant` | Tareas simples y todo lo que haga muchas llamadas. |
+| `GROQ_MODEL` | `openai/gpt-oss-120b` | Por defecto. Razonamiento, agentes de LangChain. |
+| `GROQ_MODEL_FAST` | `openai/gpt-oss-20b` | Tareas simples y todo lo que haga muchas llamadas. |
 | `GROQ_MODEL_TOOLS` | `openai/gpt-oss-20b` | Agentes que encadenan varias herramientas seguidas. |
 | `EMBEDDING_MODEL` | `paraphrase-multilingual-MiniLM-L12-v2` | Embeddings, **en tu propio computador**. |
 
 Ya vienen configurados en `.env.example`: no tienes que tocarlos.
 
-> **¿Por qué tres modelos y no uno?** Porque lo medimos. El modelo más grande no siempre es
-> el mejor: en las llamadas a herramientas, el pequeño acierta el formato más veces que el
-> grande, y en cadenas de varios pasos ninguno de los dos es fiable. Cada notebook lleva un
-> comentario explicando por qué usa el que usa. Lo verás en detalle en **RA2/IL2.1**.
+> Groq retiró los Llama el 16-ago-2026. Los reemplazos oficiales son gpt-oss-120b (principal)
+> y gpt-oss-20b (rápido / herramientas). Cada notebook indica qué variable usar.
 
 ### Los embeddings no salen de tu computador
 
@@ -81,8 +79,8 @@ sino el de **tokens al día**:
 
 | Modelo | Peticiones/min | Peticiones/día | Tokens/min | **Tokens/día** |
 |---|---|---|---|---|
-| `llama-3.3-70b-versatile` | 30 | 1.000 | 12.000 | **100.000** |
-| `llama-3.1-8b-instant` | 30 | 14.400 | 6.000 | **500.000** |
+| `openai/gpt-oss-120b` | 30 | 1.000 | 8.000 | **200.000** |
+| `openai/gpt-oss-20b` | 30 | 1.000 | 8.000 | **200.000** |
 
 *Valores de agosto 2026. Los vigentes están siempre en
 [la documentación de Groq](https://console.groq.com/docs/rate-limits) y en tu consola.*
@@ -92,7 +90,7 @@ Deja el grande para la ejecución final.
 
 ```bash
 # en tu .env, mientras experimentas
-GROQ_MODEL="llama-3.1-8b-instant"
+GROQ_MODEL="openai/gpt-oss-20b"
 ```
 
 Los límites son **por cuenta**, así que cada uno debe usar su propia API key. No compartas
@@ -108,11 +106,11 @@ que también es gratis y tampoco pide tarjeta.
 
 Estos números **los medimos nosotros** contra la API real (agosto 2026), no son de folleto:
 
-| | Groq `llama-3.3-70b` | Groq `llama-3.1-8b` | Mistral `mistral-small-latest` |
+| | Groq `gpt-oss-120b` | Groq `gpt-oss-20b` | Mistral `mistral-small-latest` |
 |---|---|---|---|
 | Peticiones/min | 30 | 30 | **50** |
-| Tokens/min | 12.000 | 6.000 | **50.000** |
-| Tokens/día | 100.000 | 500.000 | **sin tope diario declarado** |
+| Tokens/min | 8.000 | 8.000 | **50.000** |
+| Tokens/día | 200.000 | 200.000 | **sin tope diario declarado** |
 | Embeddings | no ofrece | no ofrece | **sí** (`mistral-embed`) |
 
 ### Cómo cambiar
@@ -196,7 +194,7 @@ Agotaste un límite. **Lee el mensaje del error**, porque te dice cuál y cuánt
 
 - Si dice **`tokens per minute (TPM)`** → espera un minuto y vuelve a ejecutar. No es grave.
 - Si dice **`tokens per day (TPD)`** → agotaste la cuota diaria de ese modelo. Cambia a
-  `GROQ_MODEL="llama-3.1-8b-instant"` en tu `.env` (tiene 5 veces más) o continúa mañana.
+  `GROQ_MODEL="openai/gpt-oss-20b"` en tu `.env` (tiene 5 veces más) o continúa mañana.
 
 No es un fallo de tu código.
 

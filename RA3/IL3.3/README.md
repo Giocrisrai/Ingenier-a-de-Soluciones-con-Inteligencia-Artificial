@@ -22,14 +22,14 @@ Este módulo cubre las mejores prácticas para proteger tus agentes de IA contra
 | Archivo | ¿Necesita API key? | Notas |
 |---|---|---|
 | `1-security_ethics.py` | No | Es una **simulación pura**: no llama a ningún modelo. Se puede ejecutar sin cuota. |
-| `2-security-ethics-practice.ipynb` | Sí (`GROQ_API_KEY`) | Hace más de **30 llamadas reales** a `llama-3.3-70b-versatile` (el modelo se usa además como clasificador de seguridad, verificador de alucinaciones y evaluador de confianza). |
+| `2-security-ethics-practice.ipynb` | Sí (`GROQ_API_KEY`) | Hace más de **30 llamadas reales** a `openai/gpt-oss-120b` (el modelo se usa además como clasificador de seguridad, verificador de alucinaciones y evaluador de confianza). |
 
 - Dependencias: `uv sync` en la raíz del repo (usa `groq`).
 - La credencial se carga igual en Colab (*Secrets*) que en local (archivo `.env`).
-- ⚠️ Este es el notebook más caro de RA3 en cuota: usa el modelo grande, que solo tiene
-  **100.000 tokens al día** en la capa gratuita. Si aparece un error **`429`**, lee el
+- ⚠️ Este es el notebook más caro de RA3 en cuota: gpt-oss tiene
+  **200.000 tokens al día** en la capa gratuita. Si aparece un error **`429`**, lee el
   mensaje: si dice `tokens per minute` basta esperar; si dice `tokens per day` hay que
-  continuar al día siguiente o cambiar `GROQ_MODEL` a `llama-3.1-8b-instant`.
+  continuar al día siguiente o cambiar `GROQ_MODEL` a `openai/gpt-oss-20b`.
   Tabla de límites vigentes en [`RA1/IL1.1/README.md`](../../RA1/IL1.1/README.md).
 
 ## Gestión de la API key: el caso real de este repositorio

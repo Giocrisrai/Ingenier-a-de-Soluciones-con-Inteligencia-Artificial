@@ -22,7 +22,7 @@ Este módulo presenta estrategias y recomendaciones para diseñar agentes de IA 
 | Archivo | ¿Necesita API key? | Notas |
 |---|---|---|
 | `1-scalability_sustainability.py` | No | Es una **simulación pura**: no llama a ningún modelo. Se puede ejecutar sin cuota. |
-| `2-scalability-practice.ipynb` | Sí (`GROQ_API_KEY`) | Hace unas **35 llamadas reales**, la mayoría a `llama-3.1-8b-instant` (el caché reduce el número exacto). |
+| `2-scalability-practice.ipynb` | Sí (`GROQ_API_KEY`) | Hace unas **35 llamadas reales**, la mayoría a `openai/gpt-oss-20b` (el caché reduce el número exacto). |
 
 - Dependencias: `uv sync` en la raíz del repo (usa `groq`, `pandas` y `matplotlib`).
 - La credencial se carga igual en Colab (*Secrets*) que en local (archivo `.env`).

@@ -43,7 +43,7 @@ Este módulo se centra en un aspecto crítico del desarrollo de sistemas de IA: 
 
 | Pieza | Dónde se ejecuta | Modelo |
 |---|---|---|
-| Chat / LLM-como-juez | API de **Groq** | `llama-3.3-70b-versatile` (y `llama-3.1-8b-instant` para las métricas, que hacen muchas llamadas cortas) |
+| Chat / LLM-como-juez | API de **Groq** | `openai/gpt-oss-120b` (y `openai/gpt-oss-20b` para las métricas, que hacen muchas llamadas cortas) |
 | Embeddings (`1-evaluation-rag.py`) | **Tu propia máquina** (HuggingFace) | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` |
 | Trazabilidad y experimentos | LangSmith (nube) | — |
 

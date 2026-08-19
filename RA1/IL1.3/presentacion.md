@@ -55,7 +55,7 @@
 **Título:** Un RAG con dos proveedores
 
 **El problema:**
-- Usamos **Groq** (`llama-3.3-70b-versatile`) para la generación, pero **Groq no expone un endpoint de embeddings**: su API solo ofrece chat/completions.
+- Usamos **Groq** (`openai/gpt-oss-120b`) para la generación, pero **Groq no expone un endpoint de embeddings**: su API solo ofrece chat/completions.
 - Un RAG necesita vectores sí o sí, así que hay que resolverlos por otra vía.
 
 **La solución del curso: embeddings locales**
@@ -91,7 +91,7 @@
 **Ejercicios adicionales:**
 - Aplicar el sistema RAG a un nuevo documento PDF o de texto.
 - Intercambiar el modelo de embeddings (por ejemplo `all-mpnet-base-v2`, de 768 dimensiones) y observar los cambios en la calidad de la recuperación y en el tiempo de indexación.
-- Comparar la latencia de generación entre `llama-3.3-70b-versatile` y `llama-3.1-8b-instant` en Groq.
+- Comparar la latencia de generación entre `openai/gpt-oss-120b` y `openai/gpt-oss-20b` en Groq.
 
 ---
 

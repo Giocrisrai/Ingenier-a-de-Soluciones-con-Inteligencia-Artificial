@@ -46,8 +46,9 @@ herramienta_suma = Tool(
 
 # Inicializa el LLM y el agente (ChatGroq lee GROQ_API_KEY del entorno automáticamente)
 llm = ChatGroq(
-    model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
-    temperature=0
+    model=os.getenv("GROQ_MODEL", "openai/gpt-oss-120b"),
+    temperature=0,
+    reasoning_effort="low",
 )
 
 print("✅ LLM configurado correctamente")

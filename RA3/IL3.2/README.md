@@ -22,7 +22,7 @@ Este módulo profundiza en cómo analizar y aprovechar los logs generados por lo
 | Archivo | ¿Necesita API key? | Notas |
 |---|---|---|
 | `1-traceability_analysis.py` | No | Es una **simulación pura**: no llama a ningún modelo. Se puede ejecutar sin cuota. |
-| `2-traceability-practice.ipynb` | Sí (`GROQ_API_KEY`) | Hace **13 llamadas reales** a `llama-3.1-8b-instant`, más las del ejercicio final. |
+| `2-traceability-practice.ipynb` | Sí (`GROQ_API_KEY`) | Hace **13 llamadas reales** a `openai/gpt-oss-20b`, más las del ejercicio final. |
 
 - Dependencias: `uv sync` en la raíz del repo (usa `groq`, `pandas` y `matplotlib`).
 - La credencial se carga igual en Colab (*Secrets*) que en local (archivo `.env`).

@@ -26,7 +26,7 @@ SYSTEM_PROMPT = (
 
 # Valores por defecto: Groq, que es el proveedor del curso.
 BASE_URL_POR_DEFECTO = "https://api.groq.com/openai/v1"
-MODELO_POR_DEFECTO = "llama-3.1-8b-instant"
+MODELO_POR_DEFECTO = "openai/gpt-oss-20b"
 
 
 class AgentClient:
@@ -59,7 +59,14 @@ class AgentClient:
         if historial:
             mensajes.extend(historial)
         mensajes.append({"role": "user", "content": mensaje})
-        resp = self._get_cliente().chat.completions.create(
-            model=self.modelo, messages=mensajes, temperature=0.3, max_tokens=500,
-        )
+        kwargs = {
+            "model": self.modelo,
+            "messages": mensajes,
+            "temperature": 0.3,
+            "max_tokens": 500,
+        }
+        # gpt-oss en Groq razona por defecto; sin esto la respuesta puede ir vacía.
+        if "groq.com" in self.base_url and "gpt-oss" in self.modelo:
+            kwargs["extra_body"] = {"reasoning_effort": "low"}
+        resp = self._get_cliente().chat.completions.create(**kwargs)
         return resp.choices[0].message.content or ""
