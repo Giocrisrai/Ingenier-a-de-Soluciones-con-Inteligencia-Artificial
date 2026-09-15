@@ -157,19 +157,19 @@ Antes de empezar un módulo, mira aquí qué te hace falta.
 | **RA1/IL1.2** Prompt engineering | 5 | 0 | No |
 | **RA1/IL1.3** RAG | 3 | 1 | **Sí (470 MB)** |
 | **RA1/IL1.4** Evaluación | 3 | 0 | **Sí (470 MB)** |
-| **RA2/IL2.1** Agentes | 4 | 0 | No |
+| **RA2/IL2.1** Agentes | 5 | 0 | No |
 | **RA2/IL2.2** Memoria y herramientas | 3 | 0 | No |
-| **RA2/IL2.3** Planificación | 8 | **11** | No |
-| **RA2/IL2.4** Documentación | 1 | 1 | No |
-| **RA3/IL3.1** Observabilidad | 1 | 1 | No |
+| **RA2/IL2.3** Planificación | 11 | **13** | No |
+| **RA2/IL2.4** Documentación | 0 | **2** | No |
+| **RA3/IL3.1** Observabilidad | **2** | 1 | No |
 | **RA3/IL3.2** Trazabilidad | 1 | 1 | No |
 | **RA3/IL3.3** Seguridad y ética | 1 | 1 | No |
 | **RA3/IL3.4** Escalabilidad | 1 | 1 | No |
 | **RA3/IL3.5** Despliegue en AWS | 0 | 1 | No |
 
-En **RA2/IL2.3** y en todo **RA3**, los archivos `.py` numerados son en su mayoría
-**simulaciones que no llaman al modelo**: puedes ejecutarlos sin gastar nada de cuota.
-Los `.ipynb` sí llaman al modelo. Cada README de módulo lo detalla archivo por archivo.
+En **RA2/IL2.3**, **RA2/IL2.4** y en todo **RA3**, los archivos `.py` numerados son en su
+mayoría **simulaciones que no llaman al modelo**: puedes ejecutarlos sin gastar nada de
+cuota. Los `.ipynb` sí llaman al modelo. Cada README de módulo lo detalla archivo por archivo.
 
 ---
 

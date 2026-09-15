@@ -2,6 +2,10 @@
 
 Este módulo presenta estrategias y recomendaciones para diseñar agentes de IA que sean escalables, eficientes y sostenibles en entornos de producción.
 
+**Puente RA2:** el tope de Groq free es **200K tokens/día**. Un supervisor + 2
+especialistas gasta 3–5× un `create_agent`. Mide *una* consulta representativa (IL2.4)
+antes de añadir nodos. En loops usa `GROQ_MODEL_FAST` (`openai/gpt-oss-20b`).
+
 ## Objetivos de Aprendizaje
 
 - Diseñar arquitecturas modulares para agentes escalables
@@ -51,5 +55,5 @@ uv run jupyter lab RA3/IL3.4/2-scalability-practice.ipynb
 ## Recursos
 
 - [System Design for AI](https://github.com/microsoft/ai-system)
-- [LangServe Deployment](https://docs.langchain.com/oss/python/langgraph/overview)
+- [LangGraph — desplegar un grafo](https://docs.langchain.com/oss/python/langgraph/overview)
 - [Docker Compose for ML](https://docs.docker.com/compose/)

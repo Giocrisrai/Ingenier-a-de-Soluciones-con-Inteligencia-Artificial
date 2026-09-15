@@ -6,9 +6,9 @@
 
 **Objetivos:**
 - Implementar logging básico en agentes
-- Medir métricas de rendimiento clave
+- Medir métricas de rendimiento clave (ms, tokens, errores)
 - Registrar eventos importantes para debugging
-- Establecer bases para monitoreo continuo
+- Mapear `trace_id` ↔ `thread_id` del grafo de RA2
 
 ---
 
@@ -95,7 +95,7 @@ class AgenteObservable:
 **Distributed Tracing:**
 - **OpenTelemetry:** Standard para tracing
 - **Jaeger:** Distributed tracing system
-- **LangSmith:** Específico para LLM/Agentes
+- **LangSmith:** Trazas de LangGraph / `create_agent` (nodos, tools, `thread_id`)
 
 **Alerting:**
 - **Prometheus AlertManager:** Alertas automáticas
@@ -126,9 +126,12 @@ logger.info("agent_interaction",
 - Documentar significado de cada métrica
 
 **Correlación de eventos:**
-- Usar trace_id para seguir requests
+- `trace_id` = una petición; `thread_id` (IL2.2) = la conversación
+- En LangSmith verás ambos: spans por nodo (`model`, `tools`, supervisor)
 - Correlacionar logs con métricas
 - Mantener contexto entre llamadas
+
+**Cierre opcional de clase:** `3-observar-grafo.py` (1–2 llamadas Groq).
 
 ---
 

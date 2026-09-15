@@ -17,13 +17,14 @@ Este módulo se centra en dotar a los agentes de IA de **memoria**, una capacida
 ## Contenidos del Módulo
 
 ### 1. Agentes con Memoria Conversacional
-- **`1-memory-agent.ipynb`**: Introduce el concepto de memoria en los agentes de LangChain. Se implementa un agente que utiliza un historial de chat gestionado manualmente para responder preguntas de seguimiento, demostrando la importancia del contexto en una conversación.
+- **`1-memory-agent.ipynb`**: El mismo puente de RA1 (`InMemorySaver` + `thread_id`) ahora vive en un **agente con herramientas** (`create_agent`). No re-ejecuta `AgentExecutor`: esa API quedó como contraste en IL2.1.
 
 ### 2. Sistemas de Memoria Avanzados
-- **`2-memory-agent-advanced.ipynb`**: Profundiza en las soluciones de memoria automatizadas que ofrece LangChain para superar las limitaciones de la gestión manual. Se implementan y comparan tres estrategias clave:
-  - **Buffer**: historial completo del hilo.
-  - **Ventana**: solo las últimas `k` interacciones.
-  - **Resumen**: compacta el pasado con el propio LLM para ahorrar tokens.
+- **`2-memory-agent-advanced.ipynb`**: Las tres estrategias de RA1, aplicadas al agente:
+  - **Buffer**: el checkpointer guarda todo el hilo.
+  - **Ventana**: middleware que recorta a los últimos `k` intercambios.
+  - **Resumen**: `SummarizationMiddleware` (recambio de `ConversationSummaryMemory`).
+  - `ConversationBufferMemory` / `AgentExecutor` no se usan: están deprecados.
 
 ### 3. Herramientas Externas y MCP
 - **`3-herramientas-externas.ipynb`**: Del historial interno al mundo exterior. Se define el
@@ -53,4 +54,4 @@ Este módulo se centra en dotar a los agentes de IA de **memoria**, una capacida
 
 ## Próximos Pasos
 
-Una vez que un agente puede recordar conversaciones y usar herramientas, el siguiente paso es enseñarle a planificar. El **Módulo IL2.3** se centrará en la **planificación y orquestación**, permitiendo a los agentes descomponer objetivos complejos en una serie de pasos ejecutables.
+Una vez que un agente puede recordar conversaciones y usar herramientas, el siguiente paso es enseñarle a planificar. El **Módulo IL2.3** se centra en la **planificación y orquestación**. El contrato de memoria (`thread_id`) y de tools/MCP se documenta en **IL2.4** (`0-arquitectura-ra2.md`).

@@ -7,11 +7,11 @@
 
 1. **`README.md`** - Leer primero para contexto general
 2. **`planning-patterns.md`** - Entender patrones de planificación
-3. **`1-basic_planning.py`** - Primer agente simple con LangChain
-4. **`1-langchain_planning.py`** - Agente con herramientas personalizadas
+3. **`3-langgraph-planning.py`** - Camino actual: `create_agent` (café + calculadora)
+4. **`1-basic_planning.py`** / **`1-langchain_planning.py`** - El mismo problema, modo clásico
 5. **`1-planning-strategies.py`** - Comparación de estrategias (Python puro)
 
-**Práctica**: Modificar `1-basic_planning.py` para usar tu propia herramienta
+**Práctica**: Añade tu propia herramienta en `3-langgraph-planning.py` y vuelve a correr el clásico. Anota qué cambió (líneas, visibilidad del ciclo, tokens).
 
 ---
 
@@ -30,10 +30,12 @@
 **Objetivo**: Coordinar múltiples agentes
 
 9. **`orchestration-guide.md`** - Leer guía de orquestación
-10. **`2-crewai_orchestration.py`** - Primer ejemplo con CrewAI
-11. **`5-agent-orchestration.py`** - Orquestación con LangChain
-12. **`2-multiagent_orchestration.py`** - Ejemplo básico Python
-13. **`6-workflow-management.py`** - Gestión de workflows con DAG
+10. **`3-langgraph-orquestacion.py`** - Supervisor + especialistas en un grafo
+11. **`4-langgraph-multiagente.ipynb`** + **`4-tendencias-multiagente.md`** — supervisor, handoff, `Send` (lo actual)
+12. **`2-crewai_orchestration.py`** - El mismo tipo de equipo, con CrewAI
+13. **`5-agent-orchestration.py`** - Orquestación a mano con `ChatGroq`
+14. **`2-multiagent_orchestration.py`** - Coordinación en Python puro
+15. **`6-workflow-management.py`** - Gestión de workflows con DAG
 
 **Práctica**: Crear equipo de 3 agentes que colaboren
 
@@ -42,10 +44,10 @@
 ### Nivel 4: Gestión de Recursos (Semana 4)
 **Objetivo**: Optimizar asignación y resolución de conflictos
 
-14. **`7-task-decomposition.py`** - Descomposición inteligente con LLM
-15. **`8-resource-allocation.py`** - Asignación optimizada
-16. **`10-conflict-resolution.py`** - Resolución de conflictos
-17. **`11-negotiation-strategies.py`** - Negociación entre agentes
+16. **`7-task-decomposition.py`** - Descomposición inteligente con LLM
+17. **`8-resource-allocation.py`** - Asignación optimizada
+18. **`10-conflict-resolution.py`** - Resolución de conflictos
+19. **`11-negotiation-strategies.py`** - Negociación entre agentes
 
 **Práctica**: Sistema de asignación de recursos para tu dominio
 
@@ -54,11 +56,20 @@
 ### Nivel 5: Coordinación Avanzada (Semana 5)
 **Objetivo**: Técnicas avanzadas de coordinación
 
-18. **`coordination-strategies.md`** - Leer estrategias de coordinación
-19. **`9-multi-agent-coordination.py`** - Comunicación y consenso
-20. **`12-emergence-behaviors.py`** - Comportamientos emergentes
+20. **`coordination-strategies.md`** - Leer estrategias de coordinación
+21. **`9-multi-agent-coordination.py`** - Comunicación y consenso
+22. **`12-emergence-behaviors.py`** - Comportamientos emergentes
 
 **Práctica**: Implementar sistema con comportamiento emergente
+
+---
+
+### Cierre de RA2: IL2.4
+**Objetivo**: documentar el grafo que ya corriste (ADR + capas + contratos)
+
+23. **[`../IL2.4/0-arquitectura-ra2.md`](../IL2.4/0-arquitectura-ra2.md)** — plantilla del entregable
+24. **`1-architecture_example.py`** — supervisor sin LLM (mismas capas)
+25. **`2-best_practices.py`** — config, validación, backoff
 
 ---
 
@@ -66,12 +77,21 @@
 
 ### Cuándo usar cada herramienta:
 
-#### LangChain (Agentes)
+#### LangGraph (camino actual)
 **Usar para**:
-- ✅ Agentes individuales con herramientas
-- ✅ Cadenas de razonamiento (ReAct)
-- ✅ Workflows simples lineales
-- ✅ Integración con herramientas externas
+- ✅ Agentes individuales con herramientas (`create_agent`)
+- ✅ Grafos con rutas (supervisor, HITL, plan-and-execute)
+- ✅ Memoria de hilo (`checkpointer` + `thread_id`)
+
+**Archivos que lo usan**:
+- `3-langgraph-planning.py`
+- `3-langgraph-orquestacion.py`
+- `4-langgraph-multiagente.ipynb`
+
+#### LangChain clásico (`AgentExecutor`)
+**Usar para**:
+- ✅ Leer código de 2023-2025
+- ✅ Comparar con el grafo (mismo problema, otra API)
 
 **Archivos que lo usan**:
 - `1-basic_planning.py`
@@ -183,7 +203,8 @@ Nivel 4: EXPERTO
 
 ### Fundamentos
 - [ ] Entiendo qué es un agente LLM
-- [ ] Puedo crear un agente básico con LangChain
+- [ ] Puedo crear un agente básico con `create_agent` (LangGraph)
+- [ ] Sé leer un `AgentExecutor` clásico sin copiarlo en un repo nuevo
 - [ ] Sé crear herramientas personalizadas
 - [ ] Entiendo los patrones de planificación
 
@@ -195,8 +216,9 @@ Nivel 4: EXPERTO
 
 ### Orquestación
 - [ ] Puedo coordinar múltiples agentes
+- [ ] Distingo supervisor, handoff (`Command`) y fan-out (`Send`)
 - [ ] Entiendo workflows con dependencias
-- [ ] Sé usar tanto LangChain como CrewAI
+- [ ] Sé cuándo usar LangGraph, CrewAI o Python puro (y cuándo el clásico es solo lectura)
 - [ ] Puedo gestionar recursos entre agentes
 
 ### Coordinación
@@ -297,7 +319,8 @@ Para tu proyecto final, evalúa:
 ## 🔗 Recursos Adicionales
 
 ### Documentación Oficial
-- [LangChain Docs](https://python.langchain.com/)
+- [LangChain Agents (`create_agent`)](https://docs.langchain.com/oss/python/langchain/agents)
+- [LangGraph](https://docs.langchain.com/oss/python/langgraph/overview)
 - [CrewAI Docs](https://docs.crewai.com/)
 - [Groq — consola y documentación de la API](https://console.groq.com/)
 

@@ -49,6 +49,9 @@ Esto aplica sobre todo antes de **RA1/IL1.3** (RAG), que es donde entran los emb
   árbol de pensamientos hacen muchas llamadas).
 
 ### RA2/IL2.1 e IL2.2 — Agentes
+- El camino actual es **LangGraph** (`3-langgraph-agent.ipynb`, memoria con `thread_id`).
+  `3-langchain-agent.ipynb` es contraste clásico (`AgentExecutor`): no lo saltes, es para
+  criterio. Cierra la sesión con `5-criterio-frameworks.md`.
 - Los notebooks con herramientas usan **modelos distintos a propósito**, y está medido:
   por SDK crudo el 8B es más fiable que el 70B, por LangChain es al revés, y en cadenas
   multi-paso ninguno de los dos, por eso se usa `openai/gpt-oss-20b`. Si un alumno pregunta
@@ -63,8 +66,24 @@ Esto aplica sobre todo antes de **RA1/IL1.3** (RAG), que es donde entran los emb
   romperse sin aviso. Adaptarla a Groq costó tres parches y un cambio de modelo, todo
   explicado dentro: ese recorrido es su mejor material de clase. Si lo llevas en vivo,
   ejecútalo antes; si falla, no bloquea el resto de IL2.3.
-- De los 19 archivos del módulo, **11 no necesitan API key**: son simulaciones puras.
+- Empieza por `3-langgraph-planning.py`, `3-langgraph-orquestacion.py` y
+  `4-langgraph-multiagente.ipynb` (supervisor, handoff, `Send`). Cierra con
+  `4-tendencias-multiagente.md`. Los `1-basic_planning.py` son el contraste clásico.
+-   De los 24 archivos del módulo, **13 no necesitan API key**: son simulaciones puras.
   La tabla está en el README del módulo.
+
+### RA2/IL2.4 — Documentación y arquitectura
+- No gasta Groq. Empieza por `0-arquitectura-ra2.md` (plantilla del entregable)
+  y corre los dos `.py`. El orquestador del script 1 es un supervisor **sin LLM**:
+  es el mismo patrón que IL2.3, para que documenten el grafo que ya corrieron.
+- El ADR debe elegir LangGraph (`create_agent` / `StateGraph`) o justificar CrewAI.
+  `AgentExecutor` y Swarm no van como arquitectura nueva.
+
+### RA3/IL3.1 — Observabilidad (puente)
+- Lo que se observa es el **grafo** de RA2 (nodos, tools, `thread_id`), no un
+  `AgentExecutor`. LangSmith entra en IL1.4 y se retoma aquí.
+- El notebook usa SDK crudo (13+ llamadas). Cierra con `3-observar-grafo.py`
+  (1–2 llamadas) si queda cuota. Mapa: `RA3/0-puente-ra2.md`.
 
 ### RA3/IL3.3 — Seguridad y ética
 - Es el notebook que **más cuota consume** de todo RA3 (más de 30 llamadas al modelo grande).

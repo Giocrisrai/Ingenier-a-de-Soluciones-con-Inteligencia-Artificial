@@ -2,6 +2,12 @@
 
 Este módulo cubre las mejores prácticas para proteger tus agentes de IA contra usos malintencionados y garantizar un comportamiento ético y responsable.
 
+**Puente RA2:** el riesgo no es solo el prompt. Un grafo tiene **tools**, **handoff**
+(`Command`) y **memoria** (`thread_id`). Injection indirecta entra por Wikipedia/MCP;
+un supervisor confundido enruta al especialista equivocado; un hilo envenenado
+condiciona la siguiente consulta. El mínimo privilegio de las tools (IL2.2) pesa más
+que un filtro de regex.
+
 ## Objetivos de Aprendizaje
 
 - Validar entradas de usuario para prevenir injection de prompts

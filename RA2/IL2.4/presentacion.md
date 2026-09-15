@@ -5,11 +5,10 @@
 **Subtítulo:** Mejores Prácticas para Sistemas de Agentes Escalables
 
 **Objetivos:**
-- Comprender patrones de arquitectura para sistemas de agentes
-- Crear documentación técnica efectiva
-- Diseñar arquitecturas escalables y mantenibles
-- Implementar patrones de diseño para agentes
-- Gestionar la evolución y mantenimiento de sistemas
+- Documentar el grafo LangGraph que ya corriste (no un agente genérico)
+- Escribir un ADR de runtime (`create_agent` / supervisor / CrewAI)
+- Mapear capas a tools, `thread_id` y checkpointer
+- Dejar contratos que RA3 (LangSmith) pueda observar
 
 ---
 
@@ -54,10 +53,15 @@ class AgenteOrquestador:
 - **Herramientas de dominio:** Por ejemplo `calculadora` (expresiones restringidas vía AST, no `eval()` directo sobre texto arbitrario)
 - **Flujo:** Usuario → capa presentación → `AgenteOrquestador` → herramienta → `Respuesta`
 
+**Puente a IL2.3:** `AgenteOrquestador` es un **supervisor sin LLM**. Las
+`REGLAS_ENRUTAMIENTO` son el system prompt en código. En el proyecto real esa
+clasificación la hace `ChatGroq` dentro de un nodo LangGraph.
+
 **Elementos clave:**
 - Capas explícitas (dominio / infraestructura / aplicación / presentación)
 - Contratos claros entre orquestador y herramientas
-- Código ejecutable completo en `RA2/IL2.4/1-architecture_example.py`
+- Código ejecutable + autotest en `RA2/IL2.4/1-architecture_example.py`
+- Plantilla de entregable: `0-arquitectura-ra2.md`
 
 ---
 
@@ -90,15 +94,15 @@ ResultadoOperacion(exitoso=False, error="Validacion: ...")
 > se encuentra de verdad con `400 tool_use_failed` (el modelo genera mal la llamada) y con
 > `429 rate_limit_exceeded` (cuota agotada). Ver `RA2/IL2.2/3-herramientas-externas.ipynb`.
 
-**Estructura recomendada:**
+**Estructura recomendada (alineada al stack del curso):**
 ```
 proyecto_agentes/
-├── agents/           # Lógica de agentes
-├── tools/           # Herramientas y utilidades
-├── config/          # Configuraciones
-├── docs/            # Documentación
-├── tests/           # Pruebas automatizadas
-└── README.md        # Documentación principal
+├── graphs/          # StateGraph / create_agent
+├── tools/           # @tool, wrappers MCP
+├── config/          # GROQ_MODEL, temperatura, reintentos
+├── docs/            # ADR + 0-arquitectura-ra2.md
+├── tests/           # pytest (orquestador y tools)
+└── README.md        # setup: uv sync + GROQ_API_KEY
 ```
 
 ---
@@ -123,6 +127,33 @@ proyecto_agentes/
 - Desacoplamiento temporal
 - Escalabilidad asíncrona
 - Resilencia ante fallos
+
+**4. Grafo LangGraph (el default de este curso):**
+- Un agente + tools (`create_agent`)
+- Supervisor → especialistas (ruta explícita)
+- Handoff (`Command(goto=...)`) cuando el siguiente experto necesita el hilo
+- Fan-out (`Send`) solo si hay trabajo paralelizable de verdad
+
+Si los “agentes” se pasan un string en línea recta, eso es una función con pasos.
+Mide tokens antes de añadir nodos (IL2.3 `4-tendencias-multiagente.md`).
+
+---
+
+## Slide 5b: De las capas al grafo que ya corriste
+**Título:** El mismo corte, con LLM de verdad
+
+| Capa IL2.4 | En RA2 (IL2.1–IL2.3) |
+|---|---|
+| Presentación | notebook / chat / FastAPI |
+| Aplicación (`AgenteOrquestador`) | `create_agent` o nodo supervisor |
+| Dominio (tools) | `@tool`, Wikipedia, calculadora, MCP |
+| Infraestructura | Groq, `InMemorySaver`, `thread_id` |
+
+**Documentar sí o sí:** estado del grafo, contrato de cada tool, qué hace
+otro `thread_id`, tope de iteraciones, llamadas/tokens de *una* consulta.
+
+`AgentExecutor` y Swarm archivado **no** van en el ADR como arquitectura
+nueva: son contraste e historia.
 
 ---
 
@@ -257,20 +288,19 @@ CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
 4. **Operations preparadas:** Deployment y monitoring
 
 **Integración en proyecto RA2:**
-- **IL2.1:** Agentes documentados con APIs claras
-- **IL2.2:** Memoria y herramientas con arquitectura definida
-- **IL2.3:** Planificación con documentación de workflows
-- **IL2.4:** Sistema completo con documentación técnica
+- **IL2.1:** ADR de runtime (LangGraph / clásico / CrewAI) + `create_agent`
+- **IL2.2:** `thread_id`, checkpointer, contrato MCP/tools
+- **IL2.3:** Diagrama supervisor / handoff / `Send` y medición de tokens
+- **IL2.4:** `0-arquitectura-ra2.md` rellenado + scripts de capas y prácticas
 
 **Deliverables finales:**
 - Código limpio y documentado
-- README completo con setup
-- Diagramas de arquitectura
-- Guía de deployment
-- Testing automatizado
+- README con `uv sync` y `GROQ_API_KEY`
+- Diagrama de nodos/aristas (no hace falta `grandalf`)
+- Checklist de `0-arquitectura-ra2.md`
+- Testing del orquestador y de las tools
 
 **Preparación para RA3:**
-- Base sólida para observabilidad
-- Fundamentos de seguridad
-- Patrones de escalabilidad
-- Documentación para auditoría
+- LangSmith observa **este** grafo (mismo `thread_id`)
+- Logs y métricas de IL3.1 se enganchan a nodos, no a un `AgentExecutor`
+- Seguridad (IL3.3) y cuota Groq (200K tokens/día) ya son parte del ADR

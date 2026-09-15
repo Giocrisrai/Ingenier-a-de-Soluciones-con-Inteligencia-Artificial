@@ -8,6 +8,8 @@ A lo largo de la experiencia, se analizan métricas de desempeño, técnicas de 
 
 El enfoque práctico permite que las/los estudiantes implementen sistemas de observabilidad completos, fortaleciendo su capacidad para garantizar escalabilidad, seguridad y sostenibilidad en sistemas de agentes de IA en producción.
 
+**Puente desde RA2:** se observa el grafo LangGraph del proyecto (`create_agent` / `StateGraph`, `thread_id`, tools), no un `AgentExecutor`. Empieza por [`0-puente-ra2.md`](0-puente-ra2.md).
+
 ## Actividades
 
 - Act 3.1 - Herramientas de Observabilidad (IL3.1)

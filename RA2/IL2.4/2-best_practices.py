@@ -39,7 +39,12 @@ class Configuracion:
         return cls(
             api_base_url=os.getenv("API_BASE_URL", "https://api.example.com/v1"),
             api_key=api_key,
-            modelo=os.getenv("MODELO_LLM", "openai/gpt-oss-20b"),
+            # En el resto del curso: GROQ_MODEL / GROQ_MODEL_FAST. MODELO_LLM es el alias didactico.
+            modelo=(
+                os.getenv("MODELO_LLM")
+                or os.getenv("GROQ_MODEL_FAST")
+                or os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
+            ),
             temperatura=float(os.getenv("TEMPERATURA", "0.7")),
             max_reintentos=int(os.getenv("MAX_REINTENTOS", "3")),
         )

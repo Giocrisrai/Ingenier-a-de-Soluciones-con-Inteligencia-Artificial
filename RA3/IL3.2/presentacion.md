@@ -139,7 +139,7 @@ def analyze_logs(log_file):
 - **Zipkin:** Distributed tracing system
 
 **AI-Specific Tools:**
-- **LangSmith:** Tracing específico para LangChain
+- **LangSmith:** Trazas de LangGraph / `create_agent` (nodos, tools, `thread_id`). No es “solo LangChain clásico”.
 - **Weights & Biases:** Experiment tracking
 - **MLflow:** ML lifecycle management
 
@@ -165,7 +165,8 @@ class AgentAnalytics:
 **Título:** Trazabilidad para Regulaciones y Governance
 
 **Requisitos de compliance:**
-- **GDPR:** Right to explanation en decisiones automatizadas
+- **Chile — Ley 19.628 / 21.719:** datos personales; el `thread_id` guarda conversación
+- **GDPR:** Right to explanation en decisiones automatizadas (si operas en UE)
 - **AI Act:** Transparencia en sistemas de alto riesgo
 - **SOX:** Trazabilidad financiera
 - **HIPAA:** Auditoría en sistemas médicos

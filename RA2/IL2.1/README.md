@@ -2,13 +2,13 @@
 
 ## 📋 Descripción General
 
-En este módulo exploramos los fundamentos de la arquitectura de agentes inteligentes basados en LLM, progresando desde implementaciones básicas hasta frameworks avanzados como LangChain y CrewAI. Incluye configuraciones específicas para integración con la API de Groq y soluciones a problemas comunes de compatibilidad.
+En este módulo exploramos los fundamentos de la arquitectura de agentes inteligentes basados en LLM, progresando desde implementaciones básicas hasta **varios runtimes en paralelo**: grafo LangGraph (camino actual), `AgentExecutor` clásico y CrewAI. El objetivo no es memorizar una API: es **armar criterio** midiendo el mismo problema en cada una. Incluye configuraciones específicas para Groq.
 
 ## 🎯 Objetivos de Aprendizaje
 
 - Comprender qué es un agente inteligente y sus componentes fundamentales (cerebro, memoria, herramientas, planificación)
 - Dominar el ciclo de razonamiento ReAct (Reason + Act) y el Function Calling (tool calling) nativo de Groq
-- Implementar agentes desde cero y usando frameworks LangChain y CrewAI
+- Implementar agentes desde cero y comparar LangGraph, LangChain clásico (`AgentExecutor`) y CrewAI
 - Configurar correctamente frameworks con la API de Groq
 - Diseñar equipos de agentes colaborativos para tareas complejas
 - Entender criterios de selección entre diferentes frameworks
@@ -29,12 +29,19 @@ En este módulo exploramos los fundamentos de la arquitectura de agentes intelig
   - Flujo de llamadas estructuradas
   - Integración con Wikipedia API
 
-### 3. Framework LangChain
-- **[3-langchain-agent.ipynb](3-langchain-agent.ipynb)** - Agentes individuales potentes
-  - Abstracciones de alto nivel: AgentExecutor, Tool
-  - Configuración simplificada con decoradores
-  - Gestión automática de historial y errores
-  - Tipos de agentes: Zero-shot, Conversational, Structured
+### 3. LangGraph (camino actual)
+- **[3-langgraph-agent.ipynb](3-langgraph-agent.ipynb)** - El runtime de agentes de LangChain 1.x
+  - Puente con RA1: `StateGraph`, `MessagesState`, `InMemorySaver`
+  - ReAct como grafo visible (`ToolNode` + `tools_condition`)
+  - `create_agent` (no uses `create_react_agent` de LangGraph: está deprecado)
+  - Grafo agentico con ruta condicional (no todo es un loop de herramientas)
+  - Memoria de hilo con `thread_id`
+
+### 3b. LangChain clásico (contraste)
+- **[3-langchain-agent.ipynb](3-langchain-agent.ipynb)** - El mismo Marie Curie con `AgentExecutor`
+  - `create_openai_tools_agent` + `AgentExecutor` (vive en `langchain_classic`)
+  - Sigue apareciendo en tutoriales y repos de 2023-2025: hay que saber leerlo
+  - No es el default para código nuevo
 
 ### 4. Framework CrewAI
 - **[4-crewai-agent.ipynb](4-crewai-agent.ipynb)** - Equipos colaborativos de agentes
@@ -42,6 +49,9 @@ En este módulo exploramos los fundamentos de la arquitectura de agentes intelig
   - Especialización por roles: Investigador, Escritor
   - Coordinación secuencial con dependencias
   - **🔧 CONFIGURACIÓN CRÍTICA**: Prefijo `groq/` en el modelo (CrewAI usa LiteLLM)
+
+### 5. Criterio
+- **[5-criterio-frameworks.md](5-criterio-frameworks.md)** - Tabla para decidir con evidencia después de correr 3, 3b y 4
 
 ## 🔧 Configuraciones Técnicas Importantes
 
@@ -88,10 +98,12 @@ Por eso en este curso:
   (`openai/gpt-oss-20b`). Notebook `2-agent-function-calling`.
 - **Cadenas multi-paso de herramientas** → `GROQ_MODEL_TOOLS` (`openai/gpt-oss-20b`).
   Notebook `3-herramientas-externas` de IL2.2.
-- **Agentes de LangChain con herramientas** → `GROQ_MODEL` (`openai/gpt-oss-120b`).
-  Notebooks `3-langchain-agent` y, en IL2.2, `1-memory-agent` y `2-memory-agent-advanced`.
-- **Agentes ReAct por prompt** (`create_react_agent`) → `GROQ_MODEL`. No les afecta, porque el
-  modelo escribe texto plano en vez de una llamada estructurada.
+- **Agentes LangGraph / `create_agent`** → `GROQ_MODEL` (`openai/gpt-oss-120b`).
+  Notebooks `3-langgraph-agent` y, en IL2.2, `1-memory-agent` y `2-memory-agent-advanced`.
+- **Agentes LangChain clásicos (`AgentExecutor`)** → `GROQ_MODEL`.
+  Notebook `3-langchain-agent` (contraste).
+- **Agentes ReAct por prompt** (`langchain_classic.agents.create_react_agent`) → `GROQ_MODEL`.
+  No les afecta el formato de tool calling: el modelo escribe texto plano. IL2.3 modo clásico.
 
 ### El mismo test, en otro proveedor
 
@@ -166,27 +178,31 @@ llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b')}", temper
 |------------|--------------|-------------------|
 | **Monolítico** | 1-agent-fundamentals | Toda la lógica en una función, parsing manual |
 | **Estructurado** | 2-agent-function-calling | JSON Schema, llamadas nativas |
-| **Modular** | 3-langchain-agent | Separación de componentes, abstracciones |
+| **Grafo (actual)** | 3-langgraph-agent | Estado, nodos, aristas, checkpointer |
+| **Caja clásica** | 3-langchain-agent | `AgentExecutor` oculta el ciclo |
 | **Colaborativo** | 4-crewai-agent | Múltiples agentes especializados |
 
 ## 🔄 Comparación de Frameworks
 
-| **Criterio** | **LangChain** | **CrewAI** |
-|-------------|--------------|------------|
-| **Especialización** | Agentes individuales complejos | Equipos colaborativos |
-| **Complejidad** | Simple a moderada | Compleja, multi-paso |
-| **Flexibilidad** | Muy alta, experimental | Estructurada, workflow-oriented |
-| **Configuración** | Directa con `GROQ_API_KEY` | Requiere el prefijo `groq/` en el modelo |
-| **Curva de aprendizaje** | Moderada | Baja para equipos |
-| **Casos de uso** | Experimentación, prototipado | Workflows de producción |
+La tabla larga y la pauta de clase están en [5-criterio-frameworks.md](5-criterio-frameworks.md).
+
+| **Criterio** | **LangGraph / `create_agent`** | **AgentExecutor (clásico)** | **CrewAI** |
+|-------------|--------------|------------|------------|
+| **Especialización** | Agente individual o grafo con rutas | Agente individual | Equipos por roles |
+| **Qué ves al depurar** | Nodos, estado, `thread_id` | Cadena opaca del executor | Roles, tasks, handoff |
+| **Código nuevo en 2026** | **Sí, default** | No: solo lectura | Sí, si hay equipo real |
+| **Configuración Groq** | `ChatGroq` + `GROQ_API_KEY` | Igual | Prefijo `groq/` (LiteLLM) |
+| **Memoria** | Checkpointer | Lista `chat_history` | Depende del Crew |
 
 ## 📝 Actividades Prácticas
 
 ### Ejercicios Implementados
 1. **Agente Básico**: Implementación desde cero con ReAct manual
 2. **Function Calling**: Agente con Wikipedia usando JSON Schema
-3. **LangChain Individual**: Agente con herramientas integradas
-4. **Equipo CrewAI**: Investigador + Escritor colaborativo
+3. **LangGraph**: Grafo ReAct + `create_agent` + ruta condicional
+4. **Clásico**: El mismo problema con `AgentExecutor` (contraste)
+5. **Equipo CrewAI**: Investigador + Escritor colaborativo
+6. **Criterio**: Tabla en `5-criterio-frameworks.md`
 
 ### Casos de Uso Desarrollados
 - **Investigación Automatizada**: Búsqueda y síntesis de información
@@ -211,7 +227,8 @@ llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b')}", temper
 ## 🔗 Recursos Adicionales
 
 ### Documentación Oficial
-- [LangChain Agents Documentation](https://docs.langchain.com/oss/python/langchain/agents)
+- [LangChain Agents (`create_agent`)](https://docs.langchain.com/oss/python/langchain/agents)
+- [LangGraph](https://docs.langchain.com/oss/python/langgraph/overview)
 - [CrewAI Documentation](https://docs.crewai.com/)
 - [Groq Tool Use (Function Calling)](https://console.groq.com/docs/tool-use)
 

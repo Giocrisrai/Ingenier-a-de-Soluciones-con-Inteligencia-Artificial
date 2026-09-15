@@ -57,7 +57,7 @@ Based on notebook imports and course materials:
 - `langchain-groq` (`ChatGroq`): the default way to call an LLM in this repo
 - `groq`: official SDK, used only where a notebook teaches the raw API
 - `langchain-huggingface` + `sentence-transformers`: local embeddings for RAG
-- Agent frameworks: LangChain, CrewAI (LiteLLM — model ids need the `groq/` prefix)
+- Agent frameworks: LangGraph (`create_agent` / `StateGraph`), LangChain classic (`AgentExecutor` as contrast), CrewAI (LiteLLM — model ids need the `groq/` prefix)
 - Observability tools: LangSmith, Langfuse, Arize for monitoring
 - Standard Python libraries: `os`, `pandas`, `requests`
 
@@ -95,8 +95,9 @@ Replacements: `openai/gpt-oss-120b` (`GROQ_MODEL`) and `openai/gpt-oss-20b`
 (`GROQ_MODEL_FAST` / `GROQ_MODEL_TOOLS`). For multi-step tool chains keep `GROQ_MODEL_TOOLS`.
 
 - **Raw SDK tool calling** → `GROQ_MODEL_TOOLS` / `GROQ_MODEL_FAST` (`openai/gpt-oss-20b`).
-- **LangChain tools agents** → `GROQ_MODEL` (`openai/gpt-oss-120b`).
-- **Prompt-based ReAct** (`create_react_agent`) → `GROQ_MODEL`.
+- **LangGraph / `create_agent`** → `GROQ_MODEL` (`openai/gpt-oss-120b`).
+- **LangChain classic (`AgentExecutor`)** → `GROQ_MODEL` (contrast only).
+- **Prompt-based ReAct** (`langchain_classic.agents.create_react_agent`) → `GROQ_MODEL`.
 
 ### Development Workflow
 - Environment setup with Python and Jupyter Notebook

@@ -2,6 +2,10 @@
 
 Este módulo profundiza en cómo analizar y aprovechar los logs generados por los agentes para entender su comportamiento, depurar errores y realizar auditorías.
 
+**Puente RA2:** cada etapa del script (`clasificacion_intencion`, `generacion_respuesta`)
+es el análogo de un **nodo** LangGraph. El `trace_id` identifica *una* petición; el
+`thread_id` identifica el hilo. LangSmith dibuja ese árbol si `LANGSMITH_TRACING=true`.
+
 ## Objetivos de Aprendizaje
 
 - Implementar sistemas de trazabilidad en agentes de IA

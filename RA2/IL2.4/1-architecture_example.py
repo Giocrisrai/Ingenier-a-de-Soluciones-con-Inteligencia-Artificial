@@ -6,6 +6,11 @@ infraestructura) con un agente que enruta herramientas de forma segura,
 evitando evaluar cadenas arbitrarias sin validacion (se valida el AST y
 luego se evalua solo el arbol compilado permitido).
 
+AgenteOrquestador es el mismo patron que el supervisor de IL2.3, pero sin LLM:
+clasifica intencion -> elige herramienta -> ejecuta. En produccion esa
+clasificacion la hace create_agent / un nodo supervisor de LangGraph
+(ver 0-arquitectura-ra2.md).
+
 Ejecutar: python 1-architecture_example.py
 """
 
@@ -52,6 +57,8 @@ def buscador(consulta: str) -> str:
         "ia": "La inteligencia artificial busca simular capacidades cognitivas.",
         "llm": "Los LLM son modelos de lenguaje entrenados con grandes corpus de texto.",
         "langchain": "LangChain es un framework para construir aplicaciones con LLMs.",
+        "langgraph": "LangGraph es el runtime de grafos (nodos, aristas, checkpointer).",
+        "create_agent": "create_agent fabrica un agente ReAct vigente sobre LangGraph.",
     }
     consulta_lower = consulta.lower()
     for clave, valor in conocimiento.items():
@@ -99,7 +106,11 @@ class RegistroHerramientas:
 # =====================================================
 
 class AgenteOrquestador:
-    """Orquesta la logica del agente: clasifica intencion y enruta a herramientas."""
+    """Orquesta la logica del agente: clasifica intencion y enruta a herramientas.
+
+    Equivale a un nodo supervisor de LangGraph sin llamar al LLM: las reglas
+    de REGLAS_ENRUTAMIENTO son el 'system prompt' en codigo.
+    """
 
     # Mapeo de palabras clave a herramientas
     REGLAS_ENRUTAMIENTO = {
@@ -198,6 +209,7 @@ if __name__ == "__main__":
     mensajes = [
         "Calcula cuanto es 15 * 7 + 3",
         "Que es un LLM",
+        "Que es LangGraph",
         "Traduce inteligencia artificial en ingles",
         "Cual es el clima hoy",  # sin herramienta disponible
         "Busca informacion sobre Python",
@@ -206,3 +218,12 @@ if __name__ == "__main__":
     for msg in mensajes:
         respuesta = agente.procesar(msg)
         mostrar_respuesta(msg, respuesta)
+
+    # Autotest: el mismo contrato que el slide de testing de presentacion.md
+    r_calc = agente.procesar("Calcula cuanto es 2 + 2")
+    assert r_calc.exitoso and "4" in r_calc.contenido, r_calc
+    r_wiki = agente.procesar("Que es LangGraph")
+    assert r_wiki.exitoso and "grafo" in r_wiki.contenido.lower(), r_wiki
+    r_vacio = agente.procesar("Cual es el clima hoy")
+    assert not r_vacio.exitoso
+    print("Autotest: OK (calculadora, LangGraph, sin-herramienta)")

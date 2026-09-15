@@ -3,7 +3,7 @@
 ## Objetivos de la Sesión
 - Comprender qué es un agente inteligente y sus componentes fundamentales.
 - Dominar el ciclo de razonamiento ReAct (Reason + Act) y el Function Calling nativo.
-- Aprender a construir agentes usando frameworks LangChain y CrewAI.
+- Construir el mismo agente en LangGraph (actual), `AgentExecutor` (clásico) y CrewAI, y decidir con evidencia.
 - Implementar equipos de agentes colaborativos para tareas complejas.
 - Entender las configuraciones específicas para integrar frameworks con la API de Groq.
 
@@ -47,19 +47,37 @@ La **analogía del becario inteligente** ilustra perfectamente el concepto: le d
 
 La progresión natural lleva a frameworks que abstraen esta complejidad y proporcionan abstracciones de alto nivel.
 
-## 3. LangChain: Framework para Agentes Individuales
+## 3. LangGraph: el runtime actual de un agente
 
-**LangChain** actúa como una capa de abstracción que simplifica enormemente la construcción de aplicaciones con LLMs, especializándose en **agentes individuales potentes**.
+En RA1 ya compilaste un `StateGraph` de un nodo para memoria. Un agente es el **mismo objeto** con un ciclo y herramientas.
 
-### Ventajas Clave:
-- **Abstracciones de alto nivel**: `AgentExecutor` maneja automáticamente el ciclo ReAct.
-- **Ecosistema maduro**: Cientos de integraciones con APIs, bases de datos y servicios.
-- **Gestión automática**: Historial de mensajes, formato de herramientas, manejo de errores.
-- **Flexibilidad**: Múltiples tipos de agentes (Zero-shot, Conversational, Structured Chat).
+**Camino actual** (`3-langgraph-agent.ipynb`):
 
-### Implementación Simplificada (igual que `3-langchain-agent.ipynb`):
 ```python
-from langchain_classic import hub
+from langchain.agents import create_agent
+from langgraph.checkpoint.memory import InMemorySaver
+
+agente = create_agent(
+    model=llm,
+    tools=[get_wikipedia_summary],
+    system_prompt="Usa Wikipedia cuando necesites un dato.",
+    checkpointer=InMemorySaver(),
+)
+agente.invoke(
+    {"messages": [{"role": "user", "content": "¿Quién fue Marie Curie?"}]},
+    {"configurable": {"thread_id": "demo"}},
+)
+```
+
+`create_agent` devuelve un `CompiledStateGraph`. `langgraph.prebuilt.create_react_agent` está **deprecado**.
+
+Cuando la topología no es un loop ReAct (clasificar → especialista → sintetizar), se arma el grafo a mano: nodos, aristas condicionales, estado tipado. Eso es el **grafo agentico** de la sección 5 del notebook.
+
+## 3b. Contraste clásico: `AgentExecutor`
+
+Sigue en `3-langchain-agent.ipynb` para que sepas leer repos de 2023-2025. No es el default de código nuevo.
+
+```python
 from langchain_classic.agents import tool, create_openai_tools_agent, AgentExecutor
 
 # Definir herramientas con decorador simple
@@ -149,24 +167,21 @@ llm = LLM(model=f"groq/{os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b')}", temper
 
 ## 5. Comparación y Criterios de Selección
 
-### LangChain vs CrewAI: Cuándo Usar Cada Framework
+Pauta para llenar en clase: [5-criterio-frameworks.md](5-criterio-frameworks.md).
 
-| **Criterio** | **LangChain** | **CrewAI** |
-|-------------|--------------|------------|
-| **Especialización** | Agentes individuales complejos | Equipos colaborativos |
-| **Complejidad de tarea** | Simple a moderada | Compleja, multi-paso |
-| **Número de agentes** | Uno, máximo dos | Múltiples especializados |
-| **Flexibilidad** | Muy alta, experimental | Estructurada, workflow-oriented |
-| **Curva de aprendizaje** | Moderada | Baja para equipos |
-| **Ecosistema** | Extenso, maduro | Enfocado, especializado |
+| **Criterio** | **LangGraph / `create_agent`** | **AgentExecutor** | **CrewAI** |
+|---|---|---|---|
+| **Qué es** | Grafo con estado | Caja que corre ReAct | Equipo por roles |
+| **Código nuevo** | Sí | No (lectura) | Sí, si hay equipo real |
+| **Memoria** | `thread_id` + checkpointer | `chat_history` | Depende del Crew |
+| **Cuándo NO** | Si solo quieres un script de 10 líneas | Si partes un repo hoy | Si un agente basta |
 
 ### Criterios de Decisión:
-- **Experimentación y prototipado** → LangChain
-- **Tareas que requieren especialización** → CrewAI  
-- **Integración con múltiples LLMs** → LangChain
-- **Workflows estructurados con roles claros** → CrewAI
-- **Máxima flexibilidad arquitectural** → LangChain
-- **Colaboración automática entre agentes** → CrewAI
+- **Agente individual con herramientas, 2026** → `create_agent`
+- **Ruta que no es ReAct** (supervisor, HITL) → grafo a mano
+- **Leer un tutorial viejo** → `AgentExecutor`
+- **Roles con prompts incompatibles** → CrewAI
+- **Algoritmo / DAG / negociación** → Python puro (IL2.3)
 
 ### Configuraciones Técnicas Críticas:
 
@@ -193,8 +208,10 @@ llm = LLM(model="groq/openai/gpt-oss-120b", temperature=0)
 ### Implementaciones del Módulo:
 1. **Fundamentos**: Agente básico desde cero con ciclo ReAct manual.
 2. **Function Calling**: Agente usando el tool calling nativo de Groq con JSON Schema.
-3. **LangChain**: Agente individual con herramientas de Wikipedia, configuración simplificada.
-4. **CrewAI**: Equipo investigador-escritor con configuración corregida para Groq.
+3. **LangGraph**: Grafo ReAct, `create_agent` y ruta condicional (Marie Curie).
+4. **Clásico**: El mismo problema con `AgentExecutor`.
+5. **CrewAI**: Equipo investigador-escritor con configuración corregida para Groq.
+6. **Criterio**: tabla de evidencia en `5-criterio-frameworks.md`.
 
 ### Patrones Arquitectónicos Implementados:
 - **Monolítico**: Agente básico con toda la lógica en una función.

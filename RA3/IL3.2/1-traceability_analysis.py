@@ -4,6 +4,9 @@ IL3.2: Analisis de Trazabilidad y Logs
 Demuestra generacion de trace IDs unicos, logging estructurado en JSON,
 seguimiento de linea temporal de ejecucion, y un analizador de trazas.
 
+Las etapas (validacion, clasificacion, generacion) son el análogo de nodos
+de un StateGraph. En produccion LangSmith las dibuja automaticamente.
+
 Ejecutar: python 1-traceability_analysis.py
 """
 

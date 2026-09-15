@@ -5,6 +5,9 @@ Demuestra logging estructurado con timestamps, recoleccion de metricas
 (tiempos de respuesta, uso de tokens, tasa de errores) y un wrapper
 de agente que registra todas las interacciones.
 
+Simulacion: no llama a Groq. El mismo contrato (latencia, tokens, errores)
+aplicado a create_agent + thread_id esta en 3-observar-grafo.py.
+
 Ejecutar: python 1-observability_tools.py
 """
 

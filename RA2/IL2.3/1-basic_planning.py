@@ -1,7 +1,10 @@
 """
-IL2.3: Planificación Básica con LangChain
-========================================
-Ejemplo de cómo un agente LangChain puede planificar y ejecutar pasos simples usando una herramienta.
+IL2.3: Planificación Básica con LangChain (MODO CLÁSICO)
+=======================================================
+AgentExecutor + ReAct por prompt. Sigue siendo útil para leer código viejo.
+
+El camino actual del mismo ejercicio está en 3-langgraph-planning.py
+(`create_agent` sobre LangGraph).
 """
 
 # Requiere: pip install langchain langchain-classic langchain-groq groq python-dotenv

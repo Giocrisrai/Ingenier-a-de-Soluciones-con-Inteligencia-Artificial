@@ -2,7 +2,7 @@
 
 ## Objetivos de la Sesión
 - Comprender la importancia de la memoria para la persistencia en agentes conversacionales.
-- Implementar y comparar diferentes estrategias de memoria en LangChain.
+- Implementar buffer, ventana y resumen con LangGraph (`create_agent` + checkpointer + middleware) y saber leer el contraste clásico.
 - Automatizar la gestión del historial de chat para crear agentes robustos.
 - Explorar el protocolo de contexto de modelo (MCP) para la integración avanzada de herramientas.
 - Preparar la transición hacia la planificación y orquestación de tareas complejas.
@@ -17,34 +17,37 @@ Hasta ahora, nuestros agentes han sido **sin estado (stateless)**. Cada interacc
 
 La **memoria** es el componente que transforma un agente reactivo en un asistente conversacional coherente.
 
-## 2. Gestión de Memoria en LangChain
+## 2. Gestión de Memoria con LangGraph
 
-LangChain ofrece un potente conjunto de abstracciones para gestionar la memoria, evitando la gestión manual y los problemas de escalabilidad.
+En RA1 el checkpointer ya era la memoria de un chat. En IL2.2 es la memoria de un **agente**.
 
-### Del Historial Manual a los Sistemas Automatizados
+### Camino actual (`create_agent` + `InMemorySaver`)
 
-- **Gestión Manual**:
-  - **Implementación**: Se mantiene una lista de `HumanMessage` y `AIMessage` que se pasa explícitamente en cada llamada al `AgentExecutor`.
-  - **Ventajas**: Simple de entender y bueno para depuración.
-  - **Limitaciones**: Propenso a errores, repetitivo y no gestiona el tamaño del contexto.
+- **Implementación**: `checkpointer=InMemorySaver()` y un `thread_id` por sesión.
+- **Ventaja**: no actualizas listas a mano; el grafo persiste el estado (incluido el scratchpad de tools).
+- **Estrategias**:
+  - Buffer: default del checkpointer.
+  - Ventana: middleware `before_model` que recorta.
+  - Resumen: `SummarizationMiddleware` (oficial; reemplaza `ConversationSummaryMemory`).
 
-- **Sistemas de Memoria de LangChain**:
-  - **Abstracción Clave**: Clases de memoria que se conectan al agente y gestionan el historial automáticamente.
-  - **Ventajas**: Código más limpio, robusto y estrategias integradas para gestionar la longitud del contexto.
+### Qué ya no se enseña aquí
+
+- `AgentExecutor` + lista `chat_history`: contraste único en `IL2.1/3-langchain-agent.ipynb`.
+- `ConversationBufferMemory` / `Window` / `Summary`: deprecadas. El recambio es checkpointer + middleware.
 
 ### Estrategias de Memoria Implementadas:
 
-1.  **`ConversationBufferMemory`**:
-    - **Descripción**: Almacena la conversación completa en un búfer. Es el equivalente automatizado de la gestión manual.
+1.  **Buffer (checkpointer)**:
+    - **Descripción**: Almacena la conversación completa del `thread_id`.
     - **Caso de Uso**: Ideal para conversaciones cortas donde cada detalle es crucial.
 
-2.  **`ConversationBufferWindowMemory`**:
-    - **Descripción**: Mantiene una "ventana" de las últimas `k` interacciones. Descarta los mensajes más antiguos para mantener el contexto relevante y dentro de los límites.
-    - **Caso de Uso**: Chatbots de servicio al cliente, donde el contexto reciente es lo más importante.
+2.  **Ventana (middleware)**:
+    - **Descripción**: Recorta a las últimas `k` interacciones antes de llamar al modelo.
+    - **Caso de Uso**: Chatbots de mostrador, donde el contexto reciente es lo más importante.
 
-3.  **`ConversationSummaryMemory`**:
-    - **Descripción**: Utiliza un LLM para crear y actualizar un resumen de la conversación. En lugar de pasar el historial completo, solo se pasa el resumen.
-    - **Caso de Uso**: Conversaciones muy largas, asistentes de investigación o cualquier escenario donde el contexto general es más importante que los detalles literales.
+3.  **Resumen (`SummarizationMiddleware`)**:
+    - **Descripción**: El LLM compacta el pasado cuando se dispara un umbral. Recambio oficial de `ConversationSummaryMemory`.
+    - **Caso de Uso**: Conversaciones largas, tutoría, tickets.
 
 ### Comparativa de Estrategias:
 
@@ -88,9 +91,9 @@ contempla funciona en la demo y se cae con uso real.
 ## 5. Implementaciones y Próximos Pasos
 
 ### Implementaciones del Módulo:
-1.  **Agente con Memoria Manual**: Se muestra cómo un agente puede recordar el contexto pasando manualmente el `chat_history`.
-2.  **Agente con Memoria Automatizada**: Se refactoriza el código para usar `ConversationBufferMemory`, `ConversationBufferWindowMemory` y `ConversationSummaryMemory`, demostrando las ventajas de cada una.
-3.  **Agente con Herramientas Externas y MCP**: Tool execution loop con el SDK de Groq, registro dinámico de herramientas, herramientas con estado, orquestación multi-paso y una simulación de servidor/cliente MCP.
+1.  **Agente con checkpointer**: `create_agent` + `thread_id`.
+2.  **Estrategias**: buffer, ventana (middleware) y resumen (`SummarizationMiddleware`).
+3.  **Herramientas externas y MCP** (sin LangGraph a propósito): loop con el SDK de Groq, registro dinámico, estado, multi-paso y simulación MCP.
 
 ### Preparación para IL2.3:
 Con un agente que puede **recordar** (memoria) e **interactuar** (herramientas), el siguiente paso lógico es enseñarle a **planificar**.

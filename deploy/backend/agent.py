@@ -15,6 +15,9 @@ dos variables de entorno.
 
 Sin clave entra en modo demo (no llama al modelo), para que la infraestructura y
 los tests funcionen sin credenciales.
+
+Este cliente es deliberadamente fino: una llamada chat + guardrails (IL3.5).
+El grafo LangGraph del proyecto (`create_agent`) se enchufa aquí si el ADR lo pide.
 """
 import os
 

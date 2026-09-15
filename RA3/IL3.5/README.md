@@ -4,6 +4,11 @@ Este módulo lleva la app del curso a un despliegue real y seguro en AWS Academy
 cerrando RA3: de la observabilidad (IL3.1/3.2) y la seguridad del agente (IL3.3)
 a la **ciberseguridad de la aplicación/infraestructura** y el **despliegue correcto**.
 
+El artefacto de `deploy/` es un **chat + guardrails** (FastAPI): enseña HTTPS, secretos
+y OWASP sin montar un grafo en EC2. El proyecto del curso sí puede sustituir
+`AgentClient` por `create_agent`. Mismo `.env`: `GROQ_*` y, si trazas, `LANGSMITH_*`.
+El ADR de IL2.4 dice *qué* se despliega.
+
 ## Objetivos de Aprendizaje
 - Empaquetar una solución de IA (frontend + API) en contenedores.
 - Aplicar esenciales de ciberseguridad: secretos, mínimo privilegio, HTTPS,

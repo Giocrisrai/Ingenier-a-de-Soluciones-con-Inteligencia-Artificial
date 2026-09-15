@@ -51,10 +51,11 @@ resultados = procesar_lote(prompts, cache)
 
 **Principios clave del script:**
 - **Caché:** evitar pagar dos veces por la misma respuesta
-- **Enrutamiento de modelos:** el modelo barato para lo simple (`openai/gpt-oss-20b`)
+- **Enrutamiento de modelos:** el modelo barato para lo simple (`GROQ_MODEL_FAST` = `openai/gpt-oss-20b`)
 - **Procesamiento por lotes:** agrupar peticiones en vez de una a una
 - **Medición de costo:** estimar USD por petición a partir de los tokens
-- **Resource monitoring:** monitorear y ajustar según demanda
+- **Grafo medido:** un supervisor (IL2.3) cuesta 3–5× un `create_agent`; no añadas nodos sin esa cifra
+- **Resource monitoring:** monitorear y ajustar según demanda. Tope Groq free: 200K tokens/día
 
 **Arquitectura escalable básica:**
 ```

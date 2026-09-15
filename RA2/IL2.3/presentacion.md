@@ -563,12 +563,25 @@ class AlertManager:
 
 ---
 
-## Slide 15: Planificación en LangChain
-**Título:** Script 1 - Herramientas de Planificación con LangChain
+## Slide 15: Planificación en LangGraph (y el clásico)
+**Título:** Script 1 - El mismo café, dos APIs
 
-**Agente con herramientas de planificación** (código de `1-basic_planning.py`):
+**Camino actual** (`3-langgraph-planning.py`):
 ```python
-from langchain_classic import hub
+from langchain.agents import create_agent
+from langchain_core.tools import tool
+
+@tool
+def pasos_cafe(_consulta: str = "") -> str:
+    """Devuelve los pasos para preparar café."""
+    return "1. Calentar agua\n2. Añadir café al filtro\n3. Verter agua caliente\n4. Servir"
+
+agente = create_agent(model=llm, tools=[pasos_cafe, calculadora])
+agente.invoke({"messages": [{"role": "user", "content": "¿Pasos para el café?"}]})
+```
+
+**Contraste clásico** (`1-basic_planning.py`):
+```python
 from langchain_classic.agents import create_react_agent, AgentExecutor, Tool
 
 # Herramienta de planificación simple
@@ -591,16 +604,24 @@ agente = AgentExecutor(agent=agent, tools=[herramienta_cafe], verbose=True)
 agente.invoke({"input": "¿Cuáles son los pasos para preparar café?"})
 ```
 
-**Ventajas de LangChain para planificación:**
-- Integración nativa con herramientas
-- Manejo automático de context y memoria
-- Soporte para múltiples tipos de agentes
-- Ecosystem maduro de herramientas
+**Qué comparar en clase:** el clásico esconde el ciclo; LangGraph lo dibuja (nodos `model` / `tools`). Si la topología no es ReAct, pasa a `4-langgraph-multiagente.ipynb` (supervisor, handoff, `Send`) o a CrewAI (roles). El Python puro de este módulo no se toca: ahí se aprende el algoritmo.
 
-**Limitaciones:**
-- Planificación principalmente reactiva
-- Menos control sobre algoritmos de planificación
-- Optimizado para agentes individuales
+---
+
+## Slide 15b: Multi-agente que se contrata en 2026
+**Título:** Tres topologías, un criterio
+
+| Patrón | API | Cuándo |
+|---|---|---|
+| Un agente + tools | `create_agent` | Default. FAQ, RAG, 2–3 tools |
+| Supervisor | arista condicional | Prompts incompatibles; un jefe elige |
+| Handoff | `Command(goto=...)` | El siguiente experto necesita el hilo. Recambio de Swarm (archivada) |
+| Fan-out | `Send` | El mismo trabajo en paralelo (3 cláusulas, 3 CV) |
+| CrewAI | `Agent` / `Task` / `Crew` | El enunciado pide roles y un `Process` |
+
+**Regla de pauta:** mide tokens de un agente contra el equipo. Si el equipo no gana en calidad, no se entrega.
+
+Detalle y preguntas de entrevista: `4-tendencias-multiagente.md`.
 
 ---
 

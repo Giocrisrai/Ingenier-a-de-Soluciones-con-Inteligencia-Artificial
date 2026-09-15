@@ -1,6 +1,7 @@
 """
-IL2.3: Planificación Jerárquica con LangChain
-============================================
+IL2.3: Planificación Jerárquica con LangChain (MODO CLÁSICO)
+===========================================================
+Usa AgentExecutor. Compáralo con 3-langgraph-orquestacion.py (grafo supervisor).
 
 Este módulo demuestra cómo implementar planificación jerárquica, donde un objetivo 
 complejo se descompone en sub-objetivos manejables organizados en niveles de abstracción.
