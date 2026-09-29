@@ -23,10 +23,23 @@ if not os.getenv("GROQ_API_KEY"):
     print("💡 Tu archivo .env debe contener: GROQ_API_KEY=gsk_tu_clave_aqui")
     exit(1)
 
+class LLMGroq(LLM):
+    """crewai.LLM que no envía a Groq el marcador interno `cache_breakpoint` de CrewAI.
+
+    CrewAI 1.15 marca el mensaje de sistema para el prompt caching de Anthropic y, en la
+    ruta de LiteLLM, no lo borra antes de enviar; Groq rechaza el campo con un 400.
+    """
+
+    def _format_messages_for_provider(self, messages):
+        limpios = [{k: v for k, v in m.items() if k != "cache_breakpoint"} for m in messages]
+        return super()._format_messages_for_provider(limpios)
+
+
 # LLM de CrewAI apuntando a Groq (el prefijo "groq/" es obligatorio: CrewAI usa LiteLLM)
-llm = LLM(
+llm = LLMGroq(
     model=f"groq/{os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b')}",
     temperature=0.2,
+    reasoning_effort="low",
 )
 
 print("✅ LLM de Groq configurado para CrewAI")

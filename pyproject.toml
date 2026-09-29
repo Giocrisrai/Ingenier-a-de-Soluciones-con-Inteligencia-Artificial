@@ -26,8 +26,8 @@ dependencies = [
     # CrewAI habla con Groq a través de LiteLLM (prefijo "groq/"): desde crewai 1.x
     # LiteLLM ya no viene incluido y Groq no es un proveedor nativo, así que el extra
     # [litellm] es obligatorio o `LLM(model="groq/...")` falla con ImportError.
-    "crewai[litellm]>=0.100.0",
-    "crewai-tools>=0.38.0",
+    "crewai[litellm]>=1.15.0",
+    "crewai-tools>=1.15.0",
     "faiss-cpu>=1.7.0",
     "tiktoken>=0.5.0",
     "pandas>=2.0.0",
