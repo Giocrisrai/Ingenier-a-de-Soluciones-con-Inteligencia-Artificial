@@ -20,6 +20,14 @@ jobs:
           MPLCONFIGDIR: /tmp/matplotlib
         run: uv run python scripts/verify_env.py
 
+      # Notebooks con esquema válido, sin referencias a GitHub Models, requirements.txt
+      # alineado con pyproject.toml y todos los .py compilan. No llama a ningún LLM.
+      - name: Validar repositorio
+        run: uv run python scripts/validate_repo.py
+
+      - name: Tests
+        run: uv run pytest tests/ -q
+
   docker:
     runs-on: ubuntu-latest
     steps:

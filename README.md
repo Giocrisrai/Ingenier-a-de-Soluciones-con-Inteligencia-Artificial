@@ -236,6 +236,8 @@ Recuerda la diferencia entre los dos verificadores:
 |---|---|---|
 | `scripts/verify_env.py` | Que todas las librerías del curso importen | No |
 | `scripts/verify_groq.py` | Que la API key, Groq y los embeddings funcionen | Sí, muy poca |
+| `scripts/validate_repo.py` | Notebooks con formato válido, sin referencias a GitHub Models, `requirements.txt` alineado con `pyproject.toml` y scripts que compilan (lo corre la CI; `--fix` repara el formato de los notebooks) | No |
+| `scripts/e2e.py` | Ejecuta de punta a punta todos los notebooks y scripts (o una carpeta: `scripts/e2e.py RA2/IL2.1`) y marca también los errores que un notebook captura e imprime | Sí, bastante: pensado para el docente |
 
 ### 5. Ejecutar Jupyter
 
