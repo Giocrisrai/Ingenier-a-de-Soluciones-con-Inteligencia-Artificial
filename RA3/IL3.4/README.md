@@ -18,7 +18,7 @@ antes de añadir nodos. En loops usa `GROQ_MODEL_FAST` (`openai/gpt-oss-20b`).
 | Archivo | Descripción |
 |---------|-------------|
 | `1-scalability_sustainability.py` | Script principal con ejemplos de arquitectura modular, caching y monitoreo de recursos |
-| `2-scalability-practice.ipynb` | Notebook práctico para implementar escalabilidad en un agente |
+| `2-scalability-practice.ipynb` | Notebook práctico para implementar escalabilidad en un agente. La celda de fallback guarda el cambio al modelo rápido; el JSON crudo del `429` (traía el id de la organización) se reemplazó por una frase. Para ver el error real, reejecuta con cuota |
 | `presentacion.md` | Diapositivas de apoyo con conceptos teóricos |
 
 ## Requisitos Previos

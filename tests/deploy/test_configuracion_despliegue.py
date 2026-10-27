@@ -51,6 +51,17 @@ def test_caddy_reescribe_x_forwarded_for():
     assert re.search(r"header_up\s+X-Forwarded-For\s+\{remote_host\}", CADDYFILE)
 
 
+def test_caddy_publica_cabeceras_de_seguridad():
+    for cabecera in (
+        "Strict-Transport-Security",
+        'X-Content-Type-Options "nosniff"',
+        'X-Frame-Options "SAMEORIGIN"',
+        "Referrer-Policy",
+        "-Server",
+    ):
+        assert cabecera in CADDYFILE
+
+
 def test_solo_caddy_publica_puertos_al_host():
     # backend y frontend viven solo en la red interna.
     puertos = re.findall(r'ports:\s*\[([^\]]*)\]', COMPOSE)

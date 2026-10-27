@@ -84,6 +84,9 @@ Esto aplica sobre todo antes de **RA1/IL1.3** (RAG), que es donde entran los emb
   `AgentExecutor`. LangSmith entra en IL1.4 y se retoma aquí.
 - El notebook usa SDK crudo (13+ llamadas). Cierra con `3-observar-grafo.py`
   (1–2 llamadas) si queda cuota. Mapa: `RA3/0-puente-ra2.md`.
+- Para mostrarlo **sin cuota**: `uv run python RA3/IL3.1/1-observability_tools.py`
+  y `uv run pytest tests/ra3/test_observabilidad.py -q`. El recorrido completo
+  está en [RA3/README.md](RA3/README.md#demostrarlo-en-casa).
 
 ### RA3/IL3.3 — Seguridad y ética
 - Es el notebook que **más cuota consume** de todo RA3 (más de 30 llamadas al modelo grande).
@@ -113,17 +116,21 @@ Todos están explicados con su solución en la
 
 ## 5. Estado de verificación del material
 
-Última verificación completa: **agosto 2026**, tras la migración a Groq.
+Última pasada local de observabilidad y ciberseguridad: **27 de octubre de 2026**
+(`uv run pytest tests/ -q` y `uv run python scripts/validate_repo.py`).
+Cómo repetirla en casa: [RA3/README.md](RA3/README.md#demostrarlo-en-casa).
 
 | Qué | Estado |
 |---|---|
-| Instalación desde cero (`git clone` + `uv sync` + verificación) | ✅ Probado, ~3 min |
-| Tests del artefacto desplegable | ✅ 59 pasando + 6 `xfail` que documentan evasiones abiertas |
-| Scripts `.py` | ✅ Todos compilan; los de simulación, ejecutados |
-| Notebooks | ✅ Los 29, ejecutados de punta a punta contra Groq |
-| CI (GitHub Actions) | ✅ Verde: tests, Docker e2e, Trivy |
-| Despliegue en EC2 real | ❌ No probado |
-| Windows y Linux | ❌ No probado (todo verificado en macOS) |
+| Instalación desde cero (`git clone` + `uv sync` + verificación) | ✅ Probado en agosto 2026, ~3 min. No se repitió el 27 oct. |
+| Tests (despliegue + observabilidad IL3.1/IL3.2 + calculadora y rate limit de IL3.3) | ✅ 73 pasando + 6 `xfailed` (evasiones abiertas a propósito) |
+| `scripts/validate_repo.py` | ✅ El 27 oct. Antes fallaba por salidas guardadas |
+| Scripts `.py` | ✅ Todos compilan; los de simulación de RA3, ejecutables sin key |
+| Notebooks contra Groq | ✅ Corrida de agosto 2026. El 27 oct **no** se reejecutaron (cuota) |
+| Salidas de notebook con `429`, key inválida o id de organización | ✅ Limpiadas el 27 oct en IL1.4 (LangSmith) e IL3.4 (el fallback sigue, sin el JSON de Groq) |
+| CI (GitHub Actions) | ✅ Verde en la pasada de agosto: tests, Docker, Trivy. Esta pasada no relanzó la CI |
+| Despliegue en EC2 real | ❌ No probado. En casa se muestra la API local |
+| Windows y Linux | ❌ No probado (esta pasada, en macOS) |
 
 ---
 

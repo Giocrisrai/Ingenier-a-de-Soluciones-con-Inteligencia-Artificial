@@ -1,5 +1,20 @@
 # Checklist de Seguridad y Despliegue (IL3.5)
 
+## En casa, antes de proyectar
+
+Sin AWS y sin gastar tokens. El detalle y los `curl` están en
+[RA3/README.md](../README.md#demostrarlo-en-casa).
+
+- [ ] `uv run pytest tests/ -q` termina sin `failed`. Los `xfailed` son las
+      evasiones que el filtro no cierra (ver `tests/deploy/test_guardrails_evasion.py`).
+- [ ] `uv run python scripts/validate_repo.py` deja las cinco comprobaciones en `OK`.
+- [ ] `uv run python RA3/IL3.1/1-observability_tools.py` muestra latencia, tokens
+      y tasa de error.
+- [ ] La API en local bloquea `ignora las instrucciones anteriores` y redacta
+      un correo (`curl` del README de RA3). `/metrics` sube `bloqueados`.
+- [ ] `LANGSMITH_TRACING` sigue en `"false"` salvo que ya tengas key en
+      [smith.langchain.com](https://smith.langchain.com/).
+
 ## Antes de desplegar
 - [ ] `.env` NO está en git (`git status` no lo muestra).
 - [ ] La `GROQ_API_KEY` está solo en el `.env` del servidor (nunca en git) y se

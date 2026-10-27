@@ -171,6 +171,10 @@ En **RA2/IL2.3**, **RA2/IL2.4** y en todo **RA3**, los archivos `.py` numerados 
 mayoría **simulaciones que no llaman al modelo**: puedes ejecutarlos sin gastar nada de
 cuota. Los `.ipynb` sí llaman al modelo. Cada README de módulo lo detalla archivo por archivo.
 
+Para comprobar observabilidad y ciberseguridad en casa, sin AWS y sin cuota, sigue
+[RA3/README.md — Demostrarlo en casa](RA3/README.md#demostrarlo-en-casa): `pytest`,
+`validate_repo.py`, los tres scripts de IL3.1–IL3.3 y la API en `localhost:8000`.
+
 ---
 
 ## 6. Errores frecuentes
@@ -197,6 +201,11 @@ Agotaste un límite. **Lee el mensaje del error**, porque te dice cuál y cuánt
   `GROQ_MODEL="openai/gpt-oss-20b"` en tu `.env` (tiene 5 veces más) o continúa mañana.
 
 No es un fallo de tu código.
+
+El mensaje del `429` incluye el id de tu organización en Groq. Si la celda se
+guardó, ese texto queda dentro del `.ipynb` y se sube a git. Borra la salida de
+esa celda antes de hacer commit. Lo mismo vale para cualquier impresión de la
+API key: revócala en [console.groq.com/keys](https://console.groq.com/keys).
 
 ---
 

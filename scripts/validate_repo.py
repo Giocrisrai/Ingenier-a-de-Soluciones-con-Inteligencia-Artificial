@@ -2,7 +2,8 @@
 """Validaciones estáticas del repositorio (usar con: uv run python scripts/validate_repo.py [--fix]).
 
 Comprueba, sin llamar a ningún LLM:
-  1. Que todos los notebooks cumplan el esquema nbformat (si no, nbconvert y Colab fallan).
+  1. Que todos los notebooks cumplan el esquema nbformat (si no, nbconvert y Colab fallan),
+     y que sus salidas guardadas no lleven errores de ejecución ni API keys.
   2. Que no queden referencias al proveedor retirado (GitHub Models), ver CLAUDE.md.
   3. Que requirements.txt pida exactamente lo mismo que pyproject.toml.
   4. Que todos los scripts .py compilen.
@@ -15,6 +16,7 @@ display_data/execute_result).
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import subprocess
 import sys
@@ -39,6 +41,11 @@ EXCEPCIONES = {
     "scripts/validate_repo.py",
     "docs/superpowers/plans/2026-06-02-il3.5-ciberseguridad-despliegue-aws.md",
 }
+
+
+ERRORES_EN_SALIDAS = re.compile(
+    r"gsk_[A-Za-z0-9]{20,}|Rate limit reached|Error code: [45]\d\d|invalid_api_key|Traceback \(most recent call last\)"
+)
 
 
 def archivos_versionados(*patrones: str) -> list[Path]:
@@ -86,6 +93,25 @@ def validar_notebooks(corregir: bool) -> list[str]:
                 continue
         nbformat.write(nb, ruta)
         print(f"         normalizado: {ruta.relative_to(RAIZ)}")
+    return errores
+
+
+def revisar_salidas_guardadas() -> list[str]:
+    """Las salidas se entregan a los estudiantes: no deben llevar errores ni credenciales."""
+    errores = []
+    for ruta in archivos_versionados("*.ipynb"):
+        nb = json.loads(ruta.read_text(encoding="utf-8"))
+        for i, celda in enumerate(nb["cells"]):
+            for salida in celda.get("outputs", []):
+                if salida.get("output_type") == "error":
+                    hallazgo = f"excepción {salida.get('ename', '')}"
+                else:
+                    texto = "".join(salida.get("text", "")) + "".join(salida.get("data", {}).get("text/plain", ""))
+                    m = ERRORES_EN_SALIDAS.search(texto)
+                    hallazgo = m.group(0)[:40] if m else None
+                if hallazgo:
+                    errores.append(f"{ruta.relative_to(RAIZ)} celda {i}: {hallazgo}")
+                    break
     return errores
 
 
@@ -141,6 +167,7 @@ def main() -> int:
 
     comprobaciones = [
         ("Notebooks (esquema nbformat)", validar_notebooks(args.fix)),
+        ("Salidas guardadas sin errores ni API keys", revisar_salidas_guardadas()),
         ("Referencias a GitHub Models", buscar_referencias_prohibidas()),
         ("requirements.txt alineado con pyproject.toml", comparar_requirements()),
         ("Scripts .py compilan", compilar_scripts()),
@@ -153,7 +180,11 @@ def main() -> int:
         fallos += len(errores)
 
     if fallos:
-        print(f"\n{fallos} problema(s). Para el formato de notebooks: uv run python scripts/validate_repo.py --fix")
+        print(
+            f"\n{fallos} problema(s)."
+            "\n  Formato de notebooks:  uv run python scripts/validate_repo.py --fix"
+            "\n  Salidas con errores:   vuelve a ejecutar el notebook con una key válida y cuota disponible"
+        )
         return 1
     print("\nListo: repositorio validado.")
     return 0

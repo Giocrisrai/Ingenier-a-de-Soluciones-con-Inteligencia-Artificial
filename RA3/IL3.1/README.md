@@ -44,8 +44,11 @@ En este módulo aprenderás a agregar logs, métricas y monitoreo a tus agentes 
 ## Cómo Empezar
 
 ```bash
-# Ejecutar el script principal
+# Ejecutar el script principal (no gasta cuota)
 uv run python RA3/IL3.1/1-observability_tools.py
+
+# La misma aritmética de métricas, fija, sin el azar del demo
+uv run pytest tests/ra3/test_observabilidad.py -q
 
 # Abrir el notebook práctico
 uv run jupyter lab RA3/IL3.1/2-observability-practice.ipynb

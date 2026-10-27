@@ -29,7 +29,7 @@ Este módulo se centra en un aspecto crítico del desarrollo de sistemas de IA: 
     - **Uso**: Ejecuta este script para obtener una comprensión práctica de cómo las métricas de RAG se comportan en un entorno dinámico.
 
 3.  **`2-langsmith-evaluation.ipynb`**
-    - **Descripción**: Un Jupyter Notebook que te guía paso a paso en el uso de **LangSmith** para una evaluación más formal y sistemática.
+    - **Descripción**: Un Jupyter Notebook que te guía paso a paso en el uso de **LangSmith** para una evaluación más formal y sistemática. Las salidas de las celdas de evaluación se vaciaron: una corrida anterior se quedó sin cuota y el error traía el id de la organización. Vuelve a ejecutarlas en casa cuando tengas tokens ([límites](https://console.groq.com/docs/rate-limits)) y, si quieres trazas, una key en [LangSmith](https://smith.langchain.com/).
     - **Actividades**:
         - Configurar la trazabilidad con LangSmith.
         - Crear un dataset de evaluación con preguntas y respuestas de referencia (`ground truth`).

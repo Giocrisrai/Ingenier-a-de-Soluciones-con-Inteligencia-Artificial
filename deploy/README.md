@@ -13,6 +13,16 @@ docker compose -f deploy/docker-compose.prod.yml up --build
 - Frontend: https://localhost (Caddy, certificado self-signed → acepta el aviso)
 - Backend health: `curl -k https://localhost/api/health`
 
+Sin Docker, desde la raíz del repo (modo demo: no llama a Groq):
+
+```bash
+env -u GROQ_API_KEY -u LLM_API_KEY uv run --directory deploy/backend --project . \
+  uvicorn app:app --host 127.0.0.1 --port 8000
+```
+
+Health en `http://127.0.0.1:8000/health`. Los `curl` para mostrar un bloqueo y
+una redacción de PII están en [RA3/README.md](../RA3/README.md#demostrarlo-en-casa).
+
 Sin `GROQ_API_KEY` el backend responde en **modo demo** (sin llamar al modelo), útil para probar la infraestructura.
 La clave se obtiene gratis en https://console.groq.com/ (formato `gsk_...`). El modelo por defecto es
 `openai/gpt-oss-20b` (variable `AGENT_MODEL`).
